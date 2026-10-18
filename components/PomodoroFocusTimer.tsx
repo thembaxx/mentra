@@ -86,6 +86,25 @@ export function PomodoroFocusTimer({
 
   const { wakeLockActive, toggleFocusWakeLock, triggerHaptic } = useNativeCapabilities();
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const syncPomodoroDefault = () => {
+      const saved = localStorage.getItem('learnflow-pomodoro-default-mins');
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 5 && parsed <= 90) {
+          setCustomMinutes((prev) => ({ ...prev, focus: parsed }));
+          setSecondsLeft((prevSecs) => {
+            return !isRunning && phase === 'focus' ? parsed * 60 : prevSecs;
+          });
+        }
+      }
+    };
+    syncPomodoroDefault();
+    window.addEventListener('learnflow-pomodoro-updated', syncPomodoroDefault);
+    return () => window.removeEventListener('learnflow-pomodoro-updated', syncPomodoroDefault);
+  }, [isRunning, phase]);
+
   const totalPhaseSeconds = customMinutes[phase] * 60;
   const elapsedSeconds = Math.max(0, totalPhaseSeconds - secondsLeft);
   const progressPct =

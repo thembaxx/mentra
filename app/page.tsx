@@ -7,15 +7,12 @@ import {
   PenTool,
   Compass,
   Sparkles,
-  Sun,
-  Moon,
   Clock,
   Play,
-  Layers,
   Share2,
-  Volume2,
-  VolumeX,
   BarChart3,
+  SlidersHorizontal,
+  Crown,
 } from 'lucide-react';
 import { TrackId } from '@/lib/study-data';
 import { useSoundSettings } from '@/lib/sound-effects';
@@ -41,7 +38,6 @@ import {
 } from '@/components/CatalogAndHomework';
 import { PlansSectionView, PaywallModal } from '@/components/PlansAndPaywall';
 import {
-  PWAInstallButton,
   OfflineIndicator,
   BrandAndNativeStudioModal,
   ThemeMode,
@@ -359,7 +355,6 @@ export default function LearnFlowApp() {
                 { id: 'practice', label: 'AI Practice' },
                 { id: 'catalog', label: 'Curriculum' },
                 { id: 'activity', label: 'Activity Report' },
-                { id: 'plans', label: 'Plans' },
               ] as const
             ).map((item) => {
               const active = activeView === item.id;
@@ -387,15 +382,52 @@ export default function LearnFlowApp() {
             })}
           </nav>
 
-          {/* Zone 3: 1 Primary Action */}
-          <div className="hidden sm:flex items-center shrink-0">
-            <SpringButton
-              size="sm"
-              variant={isPro ? 'yellow' : 'pink'}
-              onClick={() => navigateView(isPro ? 'practice' : 'plans')}
+          {/* Zone 3: Plans & Settings Actions (Moved out of Bottom Navbar) */}
+          <div className="flex items-center gap-2 shrink-0">
+            <motion.button
+              type="button"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.94 }}
+              transition={SPRING_SNAPPY}
+              onClick={() => navigateView('plans')}
+              className="px-3 sm:px-3.5 py-2 rounded-full text-xs font-extrabold flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              style={{
+                backgroundColor:
+                  activeView === 'plans'
+                    ? 'var(--pk)'
+                    : isPro
+                    ? 'var(--gr)'
+                    : 'var(--yl)',
+                color: '#2D2D2B',
+                outline: activeView === 'plans' ? '2px solid #2D2D2B' : 'none',
+              }}
+              aria-label="Open Pro Plans & Membership"
             >
-              {isPro ? 'Pro Active' : 'Start Free Practice'}
-            </SpringButton>
+              <Crown className="w-3.5 h-3.5 shrink-0" />
+              <span>{isPro ? 'Pro Active' : 'Plans'}</span>
+            </motion.button>
+
+            <motion.button
+              type="button"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.94 }}
+              transition={SPRING_SNAPPY}
+              onClick={() => {
+                playSound('tap');
+                setBrandStudioOpen(true);
+              }}
+              className="px-3 sm:px-3.5 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              style={{
+                backgroundColor: 'var(--card)',
+                color: 'var(--ink)',
+                border: '1px solid var(--line)',
+              }}
+              aria-label="Open Settings & Study Preferences"
+              title="Settings, Theme, Brand Icons, Audio & Study Goals"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Settings</span>
+            </motion.button>
           </div>
         </header>
 
@@ -453,67 +485,15 @@ export default function LearnFlowApp() {
                   {/* Interactive Three.js WebGL 3D Sculptures */}
                   <HeroThreeScene activeTrack={activeTrack} pulseTrigger={heroPulse} />
 
-                  {/* Top Hero Controls Row: In-App PWA Install + Brand & Settings Studio + Audio + Theme Switcher */}
-                  <div className="relative z-10 flex flex-wrap items-center justify-between gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playSound('tap');
-                        setBrandStudioOpen(true);
-                      }}
-                      className="px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer transition-transform active:scale-95"
+                  {/* Clean Hero Top Status Badge (Settings, Audio, Theme & PWA moved to Settings Modal) */}
+                  <div className="relative z-10 flex items-center justify-between gap-2">
+                    <span
+                      className="px-3.5 py-1.5 rounded-full text-xs font-extrabold inline-flex items-center gap-1.5"
                       style={{ backgroundColor: 'rgba(255, 252, 245, 0.88)', color: '#2D2D2B' }}
                     >
-                      <Layers className="w-3.5 h-3.5" />
-                      <span>Settings & Brand Studio</span>
-                    </button>
-
-                    <div className="flex items-center gap-2">
-                      {/* Mandatory In-App PWA Install Button */}
-                      <PWAInstallButton
-                        brandVariant={brandVariant}
-                        brandName={currentBrand.name}
-                        onOpenBrandStudio={() => setBrandStudioOpen(true)}
-                        onNotify={showToast}
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          triggerHaptic(10);
-                          const nowMuted = toggleAudioMute();
-                          showToast(
-                            nowMuted
-                              ? 'Interaction audio cues muted'
-                              : 'Interaction audio cues enabled'
-                          );
-                        }}
-                        aria-label={audioMuted ? 'Unmute audio cues' : 'Mute audio cues'}
-                        className="px-3.5 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
-                        style={{ backgroundColor: 'rgba(255, 252, 245, 0.88)', color: '#2D2D2B' }}
-                      >
-                        {audioMuted ? (
-                          <VolumeX className="w-3.5 h-3.5" />
-                        ) : (
-                          <Volume2 className="w-3.5 h-3.5" />
-                        )}
-                        <span>{audioMuted ? 'Muted' : 'Sound'}</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={toggleQuickTheme}
-                        className="px-3.5 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
-                        style={{ backgroundColor: 'rgba(255, 252, 245, 0.88)', color: '#2D2D2B' }}
-                      >
-                        {resolvedDark ? (
-                          <Sun className="w-3.5 h-3.5" />
-                        ) : (
-                          <Moon className="w-3.5 h-3.5" />
-                        )}
-                        <span>{resolvedDark ? 'Light' : 'Dark'}</span>
-                      </button>
-                    </div>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Adaptive AI Studio · {currentBrand.tagline}</span>
+                    </span>
                   </div>
 
                   {/* Giant Hero Display Wordmark */}
@@ -819,60 +799,6 @@ export default function LearnFlowApp() {
                   onLaunchTopic={(track, topic) => navigateToPractice(track, topic)}
                   onNotify={showToast}
                 />
-
-                {/* Tactile App Icon & Brand Identity Dock (Direct inspiration from IMG_5047.jpeg) */}
-                <div
-                  className="rounded-3xl p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4"
-                  style={{
-                    backgroundColor: '#21211F',
-                    color: '#F8F3E7',
-                    border: '1px solid var(--line)',
-                  }}
-                >
-                  <div className="space-y-1 max-w-md">
-                    <div className="text-xs font-bold" style={{ color: 'var(--yl)' }}>
-                      Interactive Brand & PWA Icon Switcher
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-display font-extrabold">
-                      {currentBrand.name} — {currentBrand.tagline}
-                    </h3>
-                    <p className="text-xs" style={{ color: '#A9A79B' }}>
-                      Tap any tactile squircle icon to switch the live brand identity, or install as a standalone native app.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3">
-                    {BRAND_IDENTITY_PRESETS.map((preset) => {
-                      const active = preset.id === brandVariant;
-                      return (
-                        <motion.button
-                          key={preset.id}
-                          type="button"
-                          whileHover={{ y: -5, scale: 1.06 }}
-                          whileTap={{ scale: 0.92 }}
-                          transition={SPRING_BOUNCY}
-                          onClick={() => {
-                            triggerHaptic(12);
-                            handleSelectBrandVariant(preset.id);
-                            showToast(`Switched brand identity to ${preset.name}`);
-                          }}
-                          className="flex flex-col items-center gap-1.5 p-2 rounded-2xl cursor-pointer"
-                          style={{
-                            backgroundColor: active
-                              ? 'rgba(255, 252, 245, 0.12)'
-                              : 'transparent',
-                            outline: active ? '2px solid var(--pk)' : 'none',
-                          }}
-                        >
-                          <BrandSquircleLogo variant={preset.id} size="lg" />
-                          <span className="text-[11px] font-bold tracking-tight">
-                            {preset.name}
-                          </span>
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                </div>
               </motion.section>
             )}
 
@@ -953,10 +879,10 @@ export default function LearnFlowApp() {
         </main>
       </div>
 
-      {/* Floating Bottom Navigation Dock with Safe-Area Inset & Physics Layout Indicator */}
+      {/* Compact 4-Item Floating Bottom Navigation Dock with Safe-Area Inset */}
       <nav
         aria-label="Bottom Dock Navigation"
-        className="fixed left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 p-1.5 rounded-full shadow-xl"
+        className="fixed left-1/2 -translate-x-1/2 z-40 flex items-center gap-0.5 sm:gap-1 p-1.5 rounded-full shadow-xl max-w-fit"
         style={{
           bottom: 'calc(14px + env(safe-area-inset-bottom, 0px))',
           backgroundColor: 'var(--card)',
@@ -969,7 +895,6 @@ export default function LearnFlowApp() {
             { id: 'practice', label: 'Practice', icon: PenTool },
             { id: 'catalog', label: 'Catalog', icon: Compass },
             { id: 'activity', label: 'Activity', icon: BarChart3 },
-            { id: 'plans', label: 'Plans', icon: Sparkles },
           ] as const
         ).map((item) => {
           const Icon = item.icon;
@@ -982,7 +907,7 @@ export default function LearnFlowApp() {
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.92 }}
               transition={SPRING_SNAPPY}
-              className="relative px-4 sm:px-5 py-2 rounded-full flex flex-col items-center gap-0.5 text-[11px] font-semibold cursor-pointer whitespace-nowrap"
+              className="relative px-3.5 sm:px-4 py-1.5 rounded-full flex flex-col items-center gap-0.5 text-[11px] font-semibold cursor-pointer whitespace-nowrap"
               style={{
                 color: active ? '#2D2D2B' : 'var(--mute)',
               }}
@@ -995,30 +920,14 @@ export default function LearnFlowApp() {
                   style={{ backgroundColor: 'var(--pk)' }}
                 />
               )}
-              <Icon className="w-5 h-5 relative z-10" strokeWidth={2} />
+              <Icon className="w-4 h-4 sm:w-5 sm:h-5 relative z-10" strokeWidth={2} />
               <span className="relative z-10">{item.label}</span>
             </motion.button>
           );
         })}
-
-        <motion.button
-          type="button"
-          onClick={() => {
-            playSound('tap');
-            setBrandStudioOpen(true);
-          }}
-          whileTap={{ scale: 0.9 }}
-          transition={SPRING_SNAPPY}
-          aria-label="Open Brand, Audio & Native PWA Settings"
-          className="px-3.5 py-2 rounded-full flex flex-col items-center gap-0.5 text-[11px] font-semibold cursor-pointer"
-          style={{ color: 'var(--mute)' }}
-        >
-          <Layers className="w-5 h-5" />
-          <span>Settings</span>
-        </motion.button>
       </nav>
 
-      {/* Brand, App Icon & Native PWA Studio Modal */}
+      {/* Unified Settings, Study Goals, Membership, Brand & Native PWA Modal */}
       <BrandAndNativeStudioModal
         open={brandStudioOpen}
         onClose={() => setBrandStudioOpen(false)}
@@ -1026,6 +935,14 @@ export default function LearnFlowApp() {
         onSelectBrandVariant={handleSelectBrandVariant}
         themeMode={themeMode}
         onSelectThemeMode={handleSelectThemeMode}
+        dailyTarget={dailyTarget}
+        dailyCompleted={dailyCompleted}
+        onUpdateDailyTarget={handleUpdateDailyTarget}
+        onResetTodayProgress={handleResetTodayProgress}
+        isPro={isPro}
+        freeQuestionsLeft={freeQuestionsLeft}
+        onUpgradeToPro={handleUpgradeToPro}
+        onOpenPlansView={() => navigateView('plans')}
         onNotify={showToast}
       />
 

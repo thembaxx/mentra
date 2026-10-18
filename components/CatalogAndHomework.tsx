@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence, Reorder, PanInfo } from 'motion/react';
 import {
   Plus,
   Check,
@@ -14,10 +14,18 @@ import {
   Award,
   X,
   BookOpen,
+  GripVertical,
+  ArrowUp,
+  ArrowDown,
+  RotateCcw,
+  LayoutGrid,
+  ListOrdered,
+  Flame,
 } from 'lucide-react';
 import {
   TrackId,
   PRACTICE_SETS,
+  PracticeSetItem,
   INITIAL_STUDY_NOTES,
   StudyNoteItem,
   CATALOG_PROGRAMS,
@@ -38,6 +46,9 @@ import {
   SPRING_SNAPPY,
   SPRING_BOUNCY,
 } from './PhysicsUI';
+import { playSoundCue } from '@/lib/sound-effects';
+
+export const HOMEWORK_ORDER_STORAGE_KEY = 'learnflow-homework-order';
 
 export function HomeworkAndNotesSection({
   onLaunchTopic,
@@ -47,12 +58,144 @@ export function HomeworkAndNotesSection({
   onNotify: (msg: string) => void;
 }) {
   const [subTab, setSubTab] = useState<'quests' | 'notes'>('quests');
+  const [homeworkLayout, setHomeworkLayout] = useState<'grid' | 'stack'>('grid');
+  const [homeworkItems, setHomeworkItems] = useState<PracticeSetItem[]>(PRACTICE_SETS);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const isDraggingRef = useRef(false);
+
   const [notes, setNotes] = useState<StudyNoteItem[]>(INITIAL_STUDY_NOTES);
   const [selectedNote, setSelectedNote] = useState<StudyNoteItem | null>(null);
   const [isCreatingNote, setIsCreatingNote] = useState(false);
   const [newNoteTitle, setNewNoteTitle] = useState('');
   const [newNoteContent, setNewNoteContent] = useState('');
   const [noteShakeKey, setNoteShakeKey] = useState(0);
+
+  // Hydrate saved homework priority order from localStorage & listen for Settings resets
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const loadOrder = () => {
+      try {
+        const raw = localStorage.getItem(HOMEWORK_ORDER_STORAGE_KEY);
+        if (!raw) {
+          setHomeworkItems(PRACTICE_SETS);
+          return;
+        }
+        const savedIds: string[] = JSON.parse(raw);
+        if (Array.isArray(savedIds) && savedIds.length > 0) {
+          const map = new Map(PRACTICE_SETS.map((item) => [item.id, item]));
+          const ordered: PracticeSetItem[] = [];
+          savedIds.forEach((id) => {
+            const found = map.get(id);
+            if (found) {
+              ordered.push(found);
+              map.delete(id);
+            }
+          });
+          map.forEach((remaining) => ordered.push(remaining));
+          setHomeworkItems(ordered);
+        }
+      } catch {
+        setHomeworkItems(PRACTICE_SETS);
+      }
+    };
+
+    loadOrder();
+    window.addEventListener('learnflow-homework-order-updated', loadOrder);
+    return () => window.removeEventListener('learnflow-homework-order-updated', loadOrder);
+  }, []);
+
+  const persistHomeworkOrder = useCallback((nextItems: PracticeSetItem[]) => {
+    setHomeworkItems(nextItems);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(
+          HOMEWORK_ORDER_STORAGE_KEY,
+          JSON.stringify(nextItems.map((i) => i.id))
+        );
+      } catch {
+        // Ignore storage quota errors
+      }
+    }
+  }, []);
+
+  const moveHomeworkItem = useCallback(
+    (fromIndex: number, toIndex: number, announce = true) => {
+      if (
+        fromIndex === toIndex ||
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= homeworkItems.length ||
+        toIndex >= homeworkItems.length
+      ) {
+        return;
+      }
+      const updated = [...homeworkItems];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
+      persistHomeworkOrder(updated);
+      playSoundCue('option');
+      if (announce) {
+        onNotify(`Moved "${moved.title}" to Priority #${toIndex + 1}`);
+      }
+    },
+    [homeworkItems, onNotify, persistHomeworkOrder]
+  );
+
+  const handleResetHomeworkOrder = useCallback(() => {
+    persistHomeworkOrder(PRACTICE_SETS);
+    playSoundCue('tap');
+    onNotify('Homework priority order reset to default');
+  }, [onNotify, persistHomeworkOrder]);
+
+  // 2D Grid Drag-and-Drop handlers using pointer hit-testing + motion/react layout spring physics
+  const handleGridDragStart = useCallback((id: string) => {
+    isDraggingRef.current = true;
+    setDraggingId(id);
+    setDragOverId(null);
+    playSoundCue('tap');
+  }, []);
+
+  const handleGridDrag = useCallback(
+    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      if (typeof document === 'undefined' || !draggingId) return;
+      const elements = document.elementsFromPoint(info.point.x, info.point.y);
+      let foundTargetId: string | null = null;
+      for (const el of elements) {
+        const cardEl = (el as HTMLElement).closest?.('[data-homework-id]') as HTMLElement | null;
+        if (cardEl) {
+          const candidateId = cardEl.getAttribute('data-homework-id');
+          if (candidateId && candidateId !== draggingId) {
+            foundTargetId = candidateId;
+            break;
+          }
+        }
+      }
+      if (foundTargetId !== dragOverId) {
+        setDragOverId(foundTargetId);
+      }
+    },
+    [draggingId, dragOverId]
+  );
+
+  const handleGridDragEnd = useCallback(
+    (draggedId: string) => {
+      if (dragOverId && dragOverId !== draggedId) {
+        const fromIdx = homeworkItems.findIndex((i) => i.id === draggedId);
+        const toIdx = homeworkItems.findIndex((i) => i.id === dragOverId);
+        if (fromIdx !== -1 && toIdx !== -1) {
+          moveHomeworkItem(fromIdx, toIdx, true);
+        }
+      }
+      setDraggingId(null);
+      setDragOverId(null);
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 140);
+    },
+    [dragOverId, homeworkItems, moveHomeworkItem]
+  );
 
   const handleSaveNote = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,112 +225,406 @@ export function HomeworkAndNotesSection({
     onNotify('Study note saved to your notebook');
   };
 
+  const isCustomOrder = homeworkItems.some(
+    (item, idx) => item.id !== PRACTICE_SETS[idx]?.id
+  );
+
   return (
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-2xl sm:text-3xl font-display font-extrabold">
-            Practice sets & study notes
-          </h3>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-2xl sm:text-3xl font-display font-extrabold">
+              Homework & study notes
+            </h3>
+            <span
+              className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold inline-flex items-center gap-1"
+              style={{ backgroundColor: 'var(--yl)', color: '#2D2D2B' }}
+            >
+              <GripVertical className="w-3 h-3" />
+              <span>Drag to prioritize</span>
+            </span>
+          </div>
           <p className="text-sm mt-0.5" style={{ color: 'var(--mute)' }}>
-            Click any practice set to launch adaptive AI drills, or review your study lifehacks
+            Drag and drop homework cards to reorder your priority queue, or click any task to launch AI drills
           </p>
         </div>
 
-        {/* Segmented Control inspired by IMG_5787.jpeg (Задания / Заметки) */}
-        <div
-          className="inline-flex items-center p-1 rounded-full"
-          style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
-        >
-          {(['quests', 'notes'] as const).map((tab) => {
-            const active = subTab === tab;
-            return (
-              <motion.button
-                key={tab}
-                type="button"
-                onClick={() => setSubTab(tab)}
-                whileTap={{ scale: 0.94 }}
-                transition={SPRING_SNAPPY}
-                className="relative px-4 py-2 rounded-full text-xs sm:text-sm font-semibold cursor-pointer whitespace-nowrap"
-                style={{ color: active ? '#2D2D2B' : 'var(--ink)' }}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Layout & Reset Controls when viewing Homework Quests */}
+          {subTab === 'quests' && (
+            <div className="flex items-center gap-1.5">
+              {isCustomOrder && (
+                <motion.button
+                  type="button"
+                  whileTap={{ scale: 0.93 }}
+                  transition={SPRING_SNAPPY}
+                  onClick={handleResetHomeworkOrder}
+                  className="px-3 py-2 rounded-full text-xs font-bold flex items-center gap-1 cursor-pointer"
+                  style={{
+                    backgroundColor: 'var(--card)',
+                    color: 'var(--ink)',
+                    border: '1px solid var(--line)',
+                  }}
+                  title="Reset homework priority order"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Reset order</span>
+                </motion.button>
+              )}
+
+              <div
+                className="inline-flex items-center p-1 rounded-full"
+                style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                role="group"
+                aria-label="Homework layout mode"
               >
-                {active && (
-                  <motion.span
-                    layoutId="homeworkNotesToggle"
-                    transition={SPRING_BOUNCY}
-                    className="absolute inset-0 rounded-full"
-                    style={{ backgroundColor: 'var(--pk)' }}
-                  />
-                )}
-                <span className="relative z-10">
-                  {tab === 'quests' ? 'Practice quests (6)' : `Study notes (${notes.length})`}
-                </span>
-              </motion.button>
-            );
-          })}
+                <button
+                  type="button"
+                  onClick={() => {
+                    playSoundCue('option');
+                    setHomeworkLayout('grid');
+                  }}
+                  className="px-2.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                  style={{
+                    backgroundColor: homeworkLayout === 'grid' ? '#2D2D2B' : 'transparent',
+                    color: homeworkLayout === 'grid' ? '#FFFCF5' : 'var(--mute)',
+                  }}
+                  title="Bento Grid (2D Drag & Swap)"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Cards</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    playSoundCue('option');
+                    setHomeworkLayout('stack');
+                  }}
+                  className="px-2.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                  style={{
+                    backgroundColor: homeworkLayout === 'stack' ? '#2D2D2B' : 'transparent',
+                    color: homeworkLayout === 'stack' ? '#FFFCF5' : 'var(--mute)',
+                  }}
+                  title="Priority List (Live Reorder Stack)"
+                >
+                  <ListOrdered className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Queue</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Segmented Control (Homework / Notes) */}
+          <div
+            className="inline-flex items-center p-1 rounded-full"
+            style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+          >
+            {(['quests', 'notes'] as const).map((tab) => {
+              const active = subTab === tab;
+              return (
+                <motion.button
+                  key={tab}
+                  type="button"
+                  onClick={() => setSubTab(tab)}
+                  whileTap={{ scale: 0.94 }}
+                  transition={SPRING_SNAPPY}
+                  className="relative px-4 py-2 rounded-full text-xs sm:text-sm font-semibold cursor-pointer whitespace-nowrap"
+                  style={{ color: active ? '#2D2D2B' : 'var(--ink)' }}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="homeworkNotesToggle"
+                      transition={SPRING_BOUNCY}
+                      className="absolute inset-0 rounded-full"
+                      style={{ backgroundColor: 'var(--pk)' }}
+                    />
+                  )}
+                  <span className="relative z-10">
+                    {tab === 'quests'
+                      ? `Homework (${homeworkItems.length})`
+                      : `Study notes (${notes.length})`}
+                  </span>
+                </motion.button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
       <AnimatePresence mode="wait">
         {subTab === 'quests' ? (
-          <motion.div
-            key="quests-grid"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={SPRING_SNAPPY}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5"
-          >
-            {PRACTICE_SETS.map((item) => (
-              <BouncySurface
-                key={item.id}
-                onClick={() => onLaunchTopic(item.track, item.topic)}
-                style={{
-                  backgroundColor: `var(${item.colorVar})`,
-                  color: '#2D2D2B',
-                }}
-                className="rounded-3xl p-5 min-h-[148px] flex flex-col justify-between cursor-pointer relative overflow-hidden"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <h4 className="font-display font-extrabold text-xl leading-tight max-w-[80%]">
-                    {item.title}
-                  </h4>
-                  <ArrowUpRight className="w-5 h-5 opacity-70 shrink-0" />
-                </div>
+          homeworkLayout === 'grid' ? (
+            <motion.div
+              key="quests-grid"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={SPRING_SNAPPY}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5"
+            >
+              {homeworkItems.map((item, idx) => {
+                const isDraggingThis = draggingId === item.id;
+                const isDropTarget = dragOverId === item.id && draggingId !== item.id;
+                const isTopPriority = idx === 0;
 
-                <div className="flex items-end justify-between gap-2 pt-6">
-                  <div className="space-y-0.5 text-xs font-semibold opacity-85">
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>{item.dueLabel}</span>
-                      <span aria-hidden="true">·</span>
-                      <span className="tabular-nums">
-                        {item.completedCount}/{item.totalCount} done
-                      </span>
-                    </div>
-                    {item.score && (
-                      <div className="flex items-center gap-1 pt-0.5">
-                        <ThumbsUp className="w-3.5 h-3.5" />
-                        <span className="tabular-nums font-bold">Avg score {item.score.toFixed(1)}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Conic Progress Ring matching HTML .ring */}
-                  <div
-                    className="w-8 h-8 rounded-full shrink-0"
-                    style={{
-                      background: `conic-gradient(#2D2D2B ${item.progress}%, rgba(45,45,43,0.18) 0)`,
-                      WebkitMask:
-                        'radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))',
-                      mask: 'radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))',
+                return (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    data-homework-id={item.id}
+                    drag
+                    dragSnapToOrigin
+                    dragElastic={0.18}
+                    dragMomentum={false}
+                    onDragStart={() => handleGridDragStart(item.id)}
+                    onDrag={handleGridDrag}
+                    onDragEnd={() => handleGridDragEnd(item.id)}
+                    whileHover={
+                      isDraggingThis ? undefined : { y: -4, scale: 1.01 }
+                    }
+                    whileDrag={{
+                      scale: 1.05,
+                      rotate: -1.5,
+                      zIndex: 40,
+                      boxShadow: '0 24px 48px rgba(28, 28, 26, 0.24)',
                     }}
-                    aria-label={`${item.progress}% complete`}
-                  />
-                </div>
-              </BouncySurface>
-            ))}
-          </motion.div>
+                    animate={{
+                      scale: isDropTarget ? 1.03 : 1,
+                    }}
+                    transition={SPRING_BOUNCY}
+                    onClick={() => {
+                      if (!isDraggingRef.current) {
+                        onLaunchTopic(item.track, item.topic);
+                      }
+                    }}
+                    style={{
+                      backgroundColor: `var(${item.colorVar})`,
+                      color: '#2D2D2B',
+                      outline: isDropTarget
+                        ? '3px dashed #2D2D2B'
+                        : isTopPriority
+                        ? '2px solid rgba(45, 45, 43, 0.35)'
+                        : 'none',
+                      outlineOffset: isDropTarget ? '-4px' : '0px',
+                      touchAction: 'none',
+                    }}
+                    className="rounded-3xl p-5 min-h-[168px] flex flex-col justify-between cursor-grab active:cursor-grabbing relative overflow-hidden select-none"
+                  >
+                    {/* Top Row: Priority Badge + Drag Handle & Quick Reorder Controls */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold tabular-nums"
+                          style={{
+                            backgroundColor: isTopPriority
+                              ? '#2D2D2B'
+                              : 'rgba(255, 252, 245, 0.78)',
+                            color: isTopPriority ? '#FFFCF5' : '#2D2D2B',
+                          }}
+                        >
+                          {isTopPriority && <Flame className="w-3 h-3 text-[var(--yl)]" />}
+                          <span>
+                            #{idx + 1} {isTopPriority ? 'Top Priority' : 'Priority'}
+                          </span>
+                        </span>
+                        {isDropTarget && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#2D2D2B] text-[#FFFCF5]">
+                            Drop here
+                          </span>
+                        )}
+                      </div>
+
+                      <div
+                        className="flex items-center gap-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => moveHomeworkItem(idx, idx - 1)}
+                          className="w-6 h-6 rounded-full grid place-items-center bg-white/55 hover:bg-white/85 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed transition-colors"
+                          aria-label={`Move ${item.title} higher in priority`}
+                          title="Move priority up"
+                        >
+                          <ArrowUp className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === homeworkItems.length - 1}
+                          onClick={() => moveHomeworkItem(idx, idx + 1)}
+                          className="w-6 h-6 rounded-full grid place-items-center bg-white/55 hover:bg-white/85 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed transition-colors"
+                          aria-label={`Move ${item.title} lower in priority`}
+                          title="Move priority down"
+                        >
+                          <ArrowDown className="w-3 h-3" />
+                        </button>
+                        <span
+                          className="w-7 h-7 rounded-full grid place-items-center bg-black/10"
+                          title="Drag card to reorder priority"
+                        >
+                          <GripVertical className="w-4 h-4 opacity-75" />
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Middle Row: Title + Launch Arrow */}
+                    <div className="flex items-start justify-between gap-2 pt-2.5">
+                      <h4 className="font-display font-extrabold text-xl leading-tight max-w-[85%]">
+                        {item.title}
+                      </h4>
+                      <ArrowUpRight className="w-5 h-5 opacity-75 shrink-0" />
+                    </div>
+
+                    {/* Bottom Row: Due Date, Score & Conic Progress Ring */}
+                    <div className="flex items-end justify-between gap-2 pt-4">
+                      <div className="space-y-0.5 text-xs font-semibold opacity-85">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>{item.dueLabel}</span>
+                          <span aria-hidden="true">·</span>
+                          <span className="tabular-nums">
+                            {item.completedCount}/{item.totalCount} done
+                          </span>
+                        </div>
+                        {item.score && (
+                          <div className="flex items-center gap-1 pt-0.5">
+                            <ThumbsUp className="w-3.5 h-3.5" />
+                            <span className="tabular-nums font-bold">
+                              Avg score {item.score.toFixed(1)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Conic Progress Ring */}
+                      <div
+                        className="w-8 h-8 rounded-full shrink-0"
+                        style={{
+                          background: `conic-gradient(#2D2D2B ${item.progress}%, rgba(45,45,43,0.18) 0)`,
+                          WebkitMask:
+                            'radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))',
+                          mask: 'radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))',
+                        }}
+                        aria-label={`${item.progress}% complete`}
+                      />
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          ) : (
+            /* Live Vertical Priority Stack using Reorder.Group & Reorder.Item from motion/react */
+            <Reorder.Group
+              key="quests-stack"
+              axis="y"
+              values={homeworkItems}
+              onReorder={(newOrder) => {
+                persistHomeworkOrder(newOrder);
+              }}
+              className="space-y-3"
+            >
+              {homeworkItems.map((item, idx) => {
+                const isTopPriority = idx === 0;
+                return (
+                  <Reorder.Item
+                    key={item.id}
+                    value={item}
+                    onDragStart={() => {
+                      isDraggingRef.current = true;
+                      playSoundCue('tap');
+                    }}
+                    onDragEnd={() => {
+                      playSoundCue('option');
+                      setTimeout(() => {
+                        isDraggingRef.current = false;
+                      }, 120);
+                    }}
+                    whileDrag={{
+                      scale: 1.02,
+                      rotate: -0.5,
+                      boxShadow: '0 22px 44px rgba(28, 28, 26, 0.22)',
+                      zIndex: 40,
+                    }}
+                    transition={SPRING_BOUNCY}
+                    style={{
+                      backgroundColor: `var(${item.colorVar})`,
+                      color: '#2D2D2B',
+                    }}
+                    className="rounded-3xl p-4 sm:p-5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 cursor-grab active:cursor-grabbing select-none"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                      <div
+                        className="w-10 h-10 rounded-2xl grid place-items-center bg-black/10 shrink-0"
+                        title="Drag up or down to reorder priority"
+                      >
+                        <GripVertical className="w-5 h-5" />
+                      </div>
+
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold tabular-nums"
+                            style={{
+                              backgroundColor: isTopPriority
+                                ? '#2D2D2B'
+                                : 'rgba(255, 252, 245, 0.78)',
+                              color: isTopPriority ? '#FFFCF5' : '#2D2D2B',
+                            }}
+                          >
+                            {isTopPriority && <Flame className="w-3 h-3 text-[var(--yl)]" />}
+                            <span>
+                              Priority #{idx + 1}
+                              {isTopPriority ? ' · Next Up' : ''}
+                            </span>
+                          </span>
+                          <span className="text-xs font-bold opacity-80 flex items-center gap-1">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span>{item.dueLabel}</span>
+                            <span>·</span>
+                            <span className="tabular-nums">
+                              {item.completedCount}/{item.totalCount} done
+                            </span>
+                          </span>
+                        </div>
+
+                        <h4 className="font-display font-extrabold text-lg sm:text-xl truncate">
+                          {item.title}
+                        </h4>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0 ml-auto">
+                      <div
+                        className="w-8 h-8 rounded-full shrink-0"
+                        style={{
+                          background: `conic-gradient(#2D2D2B ${item.progress}%, rgba(45,45,43,0.18) 0)`,
+                          WebkitMask:
+                            'radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))',
+                          mask: 'radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))',
+                        }}
+                        aria-label={`${item.progress}% complete`}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isDraggingRef.current) {
+                            onLaunchTopic(item.track, item.topic);
+                          }
+                        }}
+                        className="px-3.5 py-2 rounded-full text-xs font-extrabold flex items-center gap-1.5 bg-[#2D2D2B] text-[#FFFCF5] cursor-pointer active:scale-95 transition-transform"
+                      >
+                        <span>Start</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </Reorder.Item>
+                );
+              })}
+            </Reorder.Group>
+          )
         ) : (
           <motion.div
             key="notes-grid"
