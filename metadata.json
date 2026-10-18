@@ -1,0 +1,6 @@
+{
+  "name": "LearnFlow — AI Study & Practice Tutor",
+  "description": "AI-enhanced educational platform for exam prep, coding interviews, and language learning with dynamic practice generation, instant grading, and streaming step-by-step explanations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

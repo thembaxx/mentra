@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+:root {
+  --yl: #F7D66E;
+  --yls: #FEEFBF;
+  --gr: #9AAB65;
+  --grs: #E1E6D1;
+  --bl: #B6CAEB;
+  --bls: #EAF0F9;
+  --pk: #FFB2DD;
+  --pks: #FAE0E4;
+  --bg: #FFFCF5;
+  --card: #F8F3E7;
+  --ink: #2D2D2B;
+  --mute: #6F6D63;
+  --line: #E9E1CC;
+  --on: #2D2D2B;
+}
+
+:root[data-theme="dark"] {
+  --bg: #1C1C1A;
+  --card: #2A2A27;
+  --ink: #F8F3E7;
+  --mute: #A9A79B;
+  --line: #3A3935;
+  --pks: #3A2B34;
+  --bls: #252C3A;
+  --yls: #3A3422;
+  --grs: #2C3022;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1C1C1A;
+    --card: #2A2A27;
+    --ink: #F8F3E7;
+    --mute: #A9A79B;
+    --line: #3A3935;
+    --pks: #3A2B34;
+    --bls: #252C3A;
+    --yls: #3A3422;
+    --grs: #2C3022;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-plus-jakarta), -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-bricolage), var(--font-plus-jakarta), sans-serif;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+}
+
+.font-mono-code {
+  font-family: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Custom scrollbar hiding for horizontal pill/tile rows */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Streaming cursor blink */
+.stream-cursor::after {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 1.05em;
+  margin-left: 4px;
+  background: var(--pk);
+  vertical-align: -2px;
+  border-radius: 2px;
+  animation: cursorBlink 0.9s steps(2) infinite;
+}
+
+@keyframes cursorBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
