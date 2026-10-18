@@ -32,6 +32,9 @@ import {
   SPRING_GENTLE,
 } from './PhysicsUI';
 import { playSoundCue } from '@/lib/sound-effects';
+import { FlashcardDeckStudio } from './FlashcardDeckStudio';
+import { PomodoroFocusTimer } from './PomodoroFocusTimer';
+import { VoiceDictationBar, InlineVoiceMicButton } from './VoiceDictationBar';
 
 const QUICK_TOPICS: Record<TrackId, string[]> = {
   exam: [
@@ -112,6 +115,7 @@ interface QuestionGeneratorStudioProps {
   onOpenPaywall: (reason: string) => void;
   onNotify: (msg: string) => void;
   initialTopicFilter?: string;
+  initialPracticeMode?: 'questions' | 'flashcards';
   onQuestionCompleted?: () => void;
 }
 
@@ -124,8 +128,12 @@ export function QuestionGeneratorStudio({
   onOpenPaywall,
   onNotify,
   initialTopicFilter,
+  initialPracticeMode = 'questions',
   onQuestionCompleted,
 }: QuestionGeneratorStudioProps) {
+  const [practiceMode, setPracticeMode] = useState<'questions' | 'flashcards'>(
+    initialPracticeMode
+  );
   const [questionsByTrack, setQuestionsByTrack] =
     useState<Record<TrackId, PracticeQuestion[]>>(INITIAL_QUESTIONS);
   const [questionIndex, setQuestionIndex] = useState<number>(0);
@@ -204,7 +212,13 @@ export function QuestionGeneratorStudio({
     []
   );
 
-  // Sync when initialTopicFilter changes from outside
+  // Sync when initialTopicFilter or initialPracticeMode changes from outside
+  useEffect(() => {
+    if (initialPracticeMode) {
+      setPracticeMode(initialPracticeMode);
+    }
+  }, [initialPracticeMode]);
+
   useEffect(() => {
     if (initialTopicFilter) {
       setCustomTopic(initialTopicFilter);
@@ -704,24 +718,85 @@ export function QuestionGeneratorStudio({
             })}
           </div>
 
-          {/* Quota status */}
-          <div className="text-xs font-medium px-3 py-1.5" style={{ color: 'var(--mute)' }}>
-            <span>
-              {isPro
-                ? 'Pro Active · Unlimited AI Streams'
-                : `${freeLeft} of 5 free AI questions left today`}
-            </span>
-            <span aria-hidden="true" className="mx-2">
-              ·
-            </span>
-            <span className="tabular-nums">
-              Question {(questionIndex % trackQuestions.length) + 1} of {trackQuestions.length}
-            </span>
+          {/* Practice Mode Switcher (AI Question Studio vs 3D Flashcards) + Quota Status */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div
+              className="inline-flex items-center p-1 rounded-full"
+              style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+              role="tablist"
+              aria-label="Practice mode"
+            >
+              {(
+                [
+                  { id: 'questions', label: 'AI Question Studio' },
+                  { id: 'flashcards', label: '3D Flashcard Deck' },
+                ] as const
+              ).map((mode) => {
+                const isModeActive = practiceMode === mode.id;
+                return (
+                  <motion.button
+                    key={mode.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isModeActive}
+                    onClick={() => {
+                      playSoundCue('option');
+                      setPracticeMode(mode.id);
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={SPRING_SNAPPY}
+                    className="relative px-4 py-2 rounded-full text-xs sm:text-sm font-bold cursor-pointer whitespace-nowrap"
+                    style={{
+                      color: isModeActive ? '#2D2D2B' : 'var(--ink)',
+                    }}
+                  >
+                    {isModeActive && (
+                      <motion.span
+                        layoutId="practiceModeSwitchPill"
+                        transition={SPRING_BOUNCY}
+                        className="absolute inset-0 rounded-full"
+                        style={{ backgroundColor: 'var(--yl)' }}
+                      />
+                    )}
+                    <span className="relative z-10">{mode.label}</span>
+                  </motion.button>
+                );
+              })}
+            </div>
+
+            <div className="text-xs font-medium px-2 py-1" style={{ color: 'var(--mute)' }}>
+              <span>
+                {isPro
+                  ? 'Pro Active · Unlimited AI Streams'
+                  : `${freeLeft} of 5 free AI generations left`}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* AI Question Generator Control Deck */}
-        <ShakeContainer shakeKey={topicShakeKey}>
+        {/* Pomodoro Focus & Break Interval Timer */}
+        <PomodoroFocusTimer
+          activeTrackLabel={
+            trackMeta.find((t) => t.id === activeTrack)?.label || 'Study'
+          }
+          onNotify={onNotify}
+          onSprintCompleted={onQuestionCompleted}
+        />
+
+        {practiceMode === 'flashcards' ? (
+          <FlashcardDeckStudio
+            activeTrack={activeTrack}
+            difficulty={difficulty}
+            customTopic={customTopic}
+            onChangeCustomTopic={setCustomTopic}
+            onConsumeQuota={onConsumeQuota}
+            onNotify={onNotify}
+            onCardMastered={onQuestionCompleted}
+          />
+        ) : (
+          <>
+            {/* AI Question Generator Control Deck */}
+            <ShakeContainer shakeKey={topicShakeKey}>
           <motion.div
             layout
             transition={SPRING_GENTLE}
@@ -1171,6 +1246,20 @@ export function QuestionGeneratorStudio({
                   )}
                 </div>
 
+                {/* Voice-to-Text Verbal Reasoning & Dictation Interface */}
+                <VoiceDictationBar
+                  activeTrack={activeTrack}
+                  topic={currentQuestion.topic}
+                  currentAnswer={userAnswer}
+                  onAppendTranscript={(spokenText) => {
+                    setUserAnswer((prev) =>
+                      prev.trim() ? `${prev.trim()} ${spokenText}` : spokenText
+                    );
+                  }}
+                  onTriggerGrade={handleGradeAnswer}
+                  onNotify={onNotify}
+                />
+
                 <motion.div
                   animate={{
                     scale: answerFocused ? 1.008 : 1,
@@ -1519,11 +1608,20 @@ export function QuestionGeneratorStudio({
                 className="pt-2 border-t border-white/10 space-y-3"
               >
                 <form onSubmit={handleAskFollowUp} className="flex items-center gap-2">
+                  <InlineVoiceMicButton
+                    activeTrack={activeTrack}
+                    onTranscript={(spoken) =>
+                      setFollowUpInput((prev) =>
+                        prev.trim() ? `${prev.trim()} ${spoken}` : spoken
+                      )
+                    }
+                    onNotify={onNotify}
+                  />
                   <input
                     type="text"
                     value={followUpInput}
                     onChange={(e) => setFollowUpInput(e.target.value)}
-                    placeholder="Ask a follow-up about any step..."
+                    placeholder="Speak or type a follow-up about any step..."
                     aria-label="Ask a follow-up question to the AI tutor"
                     className="flex-1 rounded-full px-4 py-2.5 text-xs sm:text-sm bg-white/10 text-white placeholder:text-white/45 focus:outline-2 focus:outline-[var(--bl)]"
                   />
@@ -1572,6 +1670,8 @@ export function QuestionGeneratorStudio({
             </motion.div>
           </ShakeContainer>
         </motion.div>
+        </>
+        )}
       </div>
     </LayoutGroup>
   );

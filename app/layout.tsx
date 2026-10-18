@@ -76,10 +76,6 @@ const themeInitScript = `
     } else {
       delete root.dataset.theme;
     }
-    var isDark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    var bgHex = isDark ? '#1C1C1A' : '#FFFCF5';
-    var metas = document.querySelectorAll('meta[name="theme-color"]');
-    metas.forEach(function(m) { m.setAttribute('content', bgHex); });
   } catch (e) {}
 })();
 `;
@@ -92,9 +88,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        <meta name="mobile-web-app-capable" content="yes" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body suppressHydrationWarning>{children}</body>

@@ -13,6 +13,7 @@ import {
   Play,
   RotateCcw,
   Target,
+  BarChart3,
 } from 'lucide-react';
 import { FlowerShape, StarburstShape } from './BrandMotifs';
 import {
@@ -71,6 +72,7 @@ interface DailyStudyGoalCardProps {
   onIncrementCompleted: () => void;
   onResetTodayProgress: () => void;
   onStartPractice: () => void;
+  onOpenActivityReport?: () => void;
 }
 
 export function DailyStudyGoalCard({
@@ -82,6 +84,7 @@ export function DailyStudyGoalCard({
   onIncrementCompleted,
   onResetTodayProgress,
   onStartPractice,
+  onOpenActivityReport,
 }: DailyStudyGoalCardProps) {
   const [isEditingGoal, setIsEditingGoal] = useState(false);
 
@@ -360,6 +363,18 @@ export function DailyStudyGoalCard({
               </SpringButton>
             )}
           </div>
+
+          {onOpenActivityReport && (
+            <SpringButton
+              variant="card"
+              size="sm"
+              onClick={onOpenActivityReport}
+              className="w-full justify-center py-2.5"
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>View Weekly Activity Report</span>
+            </SpringButton>
+          )}
         </div>
       </div>
     </div>

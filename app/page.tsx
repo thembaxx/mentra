@@ -15,6 +15,7 @@ import {
   Share2,
   Volume2,
   VolumeX,
+  BarChart3,
 } from 'lucide-react';
 import { TrackId } from '@/lib/study-data';
 import { useSoundSettings } from '@/lib/sound-effects';
@@ -49,14 +50,19 @@ import {
   DailyStudyGoalCard,
   fireLearnFlowConfetti,
 } from '@/components/DailyStudyGoalCard';
+import { GlobalSearchBar } from '@/components/GlobalSearchBar';
+import { WeeklyActivityReport } from '@/components/WeeklyActivityReport';
 import { useNativeCapabilities } from '@/hooks/usePWAInstall';
 
-type ViewId = 'home' | 'practice' | 'catalog' | 'plans';
+type ViewId = 'home' | 'practice' | 'catalog' | 'activity' | 'plans';
 
 export default function LearnFlowApp() {
   const [activeView, setActiveView] = useState<ViewId>('home');
   const [activeTrack, setActiveTrack] = useState<TrackId>('exam');
   const [selectedTopicFilter, setSelectedTopicFilter] = useState<string>('');
+  const [practiceMode, setPracticeMode] = useState<'questions' | 'flashcards'>('questions');
+  const [catalogSearchQuery, setCatalogSearchQuery] = useState<string>('');
+  const [catalogProgramId, setCatalogProgramId] = useState<string>('');
   const [isPro, setIsPro] = useState<boolean>(false);
   const [freeQuestionsLeft, setFreeQuestionsLeft] = useState<number>(5);
   const [themeMode, setThemeMode] = useState<ThemeMode>('system');
@@ -272,11 +278,16 @@ export default function LearnFlowApp() {
     showToast('Pro 7-day trial started! Unlimited AI questions & step-by-step tutor unlocked.');
   }, [showToast, triggerHaptic]);
 
-  const navigateToPractice = (track: TrackId, topic = '') => {
+  const navigateToPractice = (
+    track: TrackId,
+    topic = '',
+    mode: 'questions' | 'flashcards' = 'questions'
+  ) => {
     triggerHaptic(10);
     playSound('tap');
     setActiveTrack(track);
     setSelectedTopicFilter(topic);
+    setPracticeMode(mode);
     setHeroPulse((p) => p + 1);
     setActiveView('practice');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -297,27 +308,49 @@ export default function LearnFlowApp() {
       <OfflineIndicator />
 
       <div className="max-w-[1120px] mx-auto px-4 sm:px-6">
-        {/* Strict 3-Zone Top Navigation Bar */}
+        {/* Top Navigation Header with Global Search Bar */}
         <header
-          className="flex items-center justify-between gap-8 py-4 border-b"
+          className="flex items-center justify-between gap-3 sm:gap-5 py-4 border-b"
           style={{ borderColor: 'var(--line)' }}
         >
-          {/* Zone 1: Single-line Brand Wordmark + Tactile Squircle Logo */}
+          {/* Zone 1: Brand Wordmark + Tactile Squircle Logo */}
           <motion.button
             type="button"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.96 }}
             transition={SPRING_SNAPPY}
             onClick={() => navigateView('home')}
-            className="flex items-center gap-3 font-display font-extrabold text-2xl sm:text-[28px] tracking-tight whitespace-nowrap shrink-0 cursor-pointer"
+            className="flex items-center gap-2.5 sm:gap-3 font-display font-extrabold text-xl sm:text-[26px] tracking-tight whitespace-nowrap shrink-0 cursor-pointer"
           >
             <BrandSquircleLogo variant={brandVariant} size="md" />
             <span>{currentBrand.name}</span>
           </motion.button>
 
-          {/* Zone 2: 4 Single-Line Navigation Links */}
+          {/* Global Header Search Bar (Topics, 3D Flashcards, Curriculum & Mentors) */}
+          <GlobalSearchBar
+            onSelectTopicPractice={(track, topic, mode) => {
+              navigateToPractice(track, topic, mode);
+              showToast(
+                mode === 'flashcards'
+                  ? `Opened 3D Flashcards: ${topic}`
+                  : `Opened AI Practice: ${topic}`
+              );
+            }}
+            onSelectCatalogProgram={(programId, q) => {
+              setCatalogProgramId(programId);
+              setCatalogSearchQuery(q);
+              navigateView('catalog');
+            }}
+            onSelectCatalogSearch={(q) => {
+              setCatalogProgramId('');
+              setCatalogSearchQuery(q);
+              navigateView('catalog');
+            }}
+          />
+
+          {/* Zone 2: Primary Navigation Links */}
           <nav
-            className="hidden md:flex items-center gap-7 text-sm font-semibold"
+            className="hidden lg:flex items-center gap-6 text-sm font-semibold shrink-0"
             aria-label="Primary Navigation"
           >
             {(
@@ -325,6 +358,7 @@ export default function LearnFlowApp() {
                 { id: 'home', label: 'Overview' },
                 { id: 'practice', label: 'AI Practice' },
                 { id: 'catalog', label: 'Curriculum' },
+                { id: 'activity', label: 'Activity Report' },
                 { id: 'plans', label: 'Plans' },
               ] as const
             ).map((item) => {
@@ -354,7 +388,7 @@ export default function LearnFlowApp() {
           </nav>
 
           {/* Zone 3: 1 Primary Action */}
-          <div className="flex items-center shrink-0">
+          <div className="hidden sm:flex items-center shrink-0">
             <SpringButton
               size="sm"
               variant={isPro ? 'yellow' : 'pink'}
@@ -549,6 +583,18 @@ export default function LearnFlowApp() {
                       </span>
                       <button
                         type="button"
+                        onClick={() => navigateView('activity')}
+                        className="px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
+                        style={{
+                          backgroundColor: 'var(--yl)',
+                          color: '#2D2D2B',
+                        }}
+                      >
+                        <BarChart3 className="w-3.5 h-3.5" />
+                        <span>Weekly Report</span>
+                      </button>
+                      <button
+                        type="button"
                         onClick={async () => {
                           triggerHaptic(10);
                           const res = await shareStudyProgress(
@@ -677,7 +723,7 @@ export default function LearnFlowApp() {
                       whileHover={{ y: -5, scale: 1.02 }}
                       whileTap={{ scale: 0.95 }}
                       transition={SPRING_BOUNCY}
-                      onClick={() => navigateToPractice('exam', 'Probability & combinatorics')}
+                      onClick={() => navigateToPractice('code', 'Sliding window', 'flashcards')}
                       className="h-40 rounded-3xl p-4 relative overflow-hidden text-left flex items-end font-display font-extrabold text-lg leading-tight cursor-pointer"
                       style={{ backgroundColor: 'var(--yl)', color: '#2D2D2B' }}
                     >
@@ -685,7 +731,7 @@ export default function LearnFlowApp() {
                         className="w-24 h-24 absolute -right-2 -top-2"
                         color="var(--gr)"
                       />
-                      <span className="relative z-10">{streakDays}-day streak sprint</span>
+                      <span className="relative z-10">3D Flashcards · Swipe to master</span>
                     </motion.button>
                   </div>
                 </div>
@@ -847,6 +893,7 @@ export default function LearnFlowApp() {
                   onOpenPaywall={handleOpenPaywall}
                   onNotify={showToast}
                   initialTopicFilter={selectedTopicFilter}
+                  initialPracticeMode={practiceMode}
                   onQuestionCompleted={handleIncrementDailyCompleted}
                 />
               </motion.section>
@@ -862,6 +909,26 @@ export default function LearnFlowApp() {
               >
                 <CatalogExplorerView
                   onStartProgramTrack={(track, topic) => navigateToPractice(track, topic)}
+                  onNotify={showToast}
+                  initialSearchQuery={catalogSearchQuery}
+                  initialProgramId={catalogProgramId}
+                />
+              </motion.section>
+            )}
+
+            {activeView === 'activity' && (
+              <motion.section
+                key="view-activity"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={SPRING_SNAPPY}
+              >
+                <WeeklyActivityReport
+                  dailyCompleted={dailyCompleted}
+                  dailyTarget={dailyTarget}
+                  streakDays={streakDays}
+                  onStartTrackPractice={(track, topic) => navigateToPractice(track, topic)}
                   onNotify={showToast}
                 />
               </motion.section>
@@ -901,6 +968,7 @@ export default function LearnFlowApp() {
             { id: 'home', label: 'Home', icon: Home },
             { id: 'practice', label: 'Practice', icon: PenTool },
             { id: 'catalog', label: 'Catalog', icon: Compass },
+            { id: 'activity', label: 'Activity', icon: BarChart3 },
             { id: 'plans', label: 'Plans', icon: Sparkles },
           ] as const
         ).map((item) => {

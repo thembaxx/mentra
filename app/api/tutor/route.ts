@@ -253,6 +253,80 @@ Student's Answer: ${userAnswer}`,
       });
     }
 
+    if (action === 'generate_flashcard') {
+      const trackLabel =
+        track === 'code'
+          ? 'Coding Interviews & Algorithms (TypeScript code snippet)'
+          : track === 'lang'
+            ? 'Spanish & Language Learning (Grammar pattern & conjugated examples)'
+            : 'Standardized Exam Prep (Math/Logic formulas & algebraic invariants)';
+
+      const systemPrompt = `You are LearnFlow AI, an expert educational flashcard creator for ${trackLabel}.
+Create ONE high-yield study flashcard on the topic "${topic}" at "${difficulty}" difficulty.
+Format your output using this exact plain-text template:
+TITLE: [Concise 3-6 word concept title]
+PROMPT: [Clear recall question or prompt on the front of the card]
+DEFINITION: [Crisp 1-2 sentence definition or core invariant on the back]
+SNIPPET:
+[4-8 lines of clean code snippet, formula derivation, or language example pattern]
+TIP: [One memorable exam or interview lifehack]`;
+
+      if (ai) {
+        try {
+          const responseStream = await ai.models.generateContentStream({
+            model: 'gemini-3.8-flash',
+            contents: `Generate a new ${difficulty} flashcard about "${topic}" for ${trackLabel}.`,
+            config: {
+              systemInstruction: systemPrompt,
+              thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+            },
+          });
+
+          const encoder = new TextEncoder();
+          const stream = new ReadableStream({
+            async start(controller) {
+              try {
+                for await (const chunk of responseStream) {
+                  if (chunk.text) {
+                    controller.enqueue(encoder.encode(chunk.text));
+                  }
+                }
+                controller.close();
+              } catch {
+                controller.close();
+              }
+            },
+          });
+
+          return new Response(stream, {
+            headers: {
+              'Content-Type': 'text/plain; charset=utf-8',
+              'Cache-Control': 'no-cache, no-transform',
+            },
+          });
+        } catch {
+          // Fall through to simulated stream
+        }
+      }
+
+      const synthesizedCard = `TITLE: ${topic} Core Invariant
+PROMPT: What is the primary invariant and step-by-step pattern for solving ${topic} problems at ${difficulty} level?
+DEFINITION: Isolate the governing relationship for ${topic} first, maintaining invariant state across each transformation step.
+SNIPPET:
+// ${topic} (${difficulty}) Pattern
+1. Identify boundary conditions & base state
+2. Apply invariant transformation step-by-step
+3. Verify complexity & edge cases in O(n)
+TIP: Always test ${topic} with minimal boundary inputs (0, 1, or empty state) before generalizing.`;
+
+      return new Response(createSimulatedStream(synthesizedCard, 12), {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+        },
+      });
+    }
+
     return new Response('Unsupported action', { status: 400 });
   } catch (error) {
     return new Response(

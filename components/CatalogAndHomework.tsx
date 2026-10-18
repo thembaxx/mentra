@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Plus,
@@ -336,18 +336,39 @@ export function HomeworkAndNotesSection({
 export function CatalogExplorerView({
   onStartProgramTrack,
   onNotify,
+  initialSearchQuery = '',
+  initialProgramId = '',
 }: {
   onStartProgramTrack: (track: TrackId, topic: string) => void;
   onNotify: (msg: string) => void;
+  initialSearchQuery?: string;
+  initialProgramId?: string;
 }) {
   const [catalogMode, setCatalogMode] = useState<'programs' | 'mentors'>('programs');
   const [subjectFilter, setSubjectFilter] = useState<string>('All');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>(initialSearchQuery);
   const [sortBy, setSortBy] = useState<'rating' | 'price'>('rating');
   const [selectedProgram, setSelectedProgram] = useState<CatalogProgram | null>(null);
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoShake, setPromoShake] = useState(0);
+
+  useEffect(() => {
+    if (initialSearchQuery !== undefined) {
+      setSearchQuery(initialSearchQuery);
+      setSubjectFilter('All');
+    }
+  }, [initialSearchQuery]);
+
+  useEffect(() => {
+    if (initialProgramId) {
+      const found = CATALOG_PROGRAMS.find((p) => p.id === initialProgramId);
+      if (found) {
+        setCatalogMode('programs');
+        setSelectedProgram(found);
+      }
+    }
+  }, [initialProgramId]);
 
   const subjects = ['All', 'Mathematics', 'Computer Science', 'Languages'];
 

@@ -490,3 +490,327 @@ export const MENTOR_PROFILES: MentorProfile[] = [
     accentColor: '--yl',
   },
 ];
+
+export interface FlashcardItem {
+  id: string;
+  track: TrackId;
+  topic: string;
+  difficulty: DifficultyLevel;
+  frontTitle: string;
+  frontPrompt: string;
+  backDefinition: string;
+  codeOrFormulaSnippet: string;
+  snippetLabel: string;
+  memoryTip: string;
+  colorVar: '--pk' | '--yl' | '--gr' | '--bl';
+}
+
+export const INITIAL_FLASHCARDS: Record<TrackId, FlashcardItem[]> = {
+  exam: [
+    {
+      id: 'fc-exam-1',
+      track: 'exam',
+      topic: 'Quadratic functions',
+      difficulty: 'Medium',
+      frontTitle: 'Discriminant & Root Nature',
+      frontPrompt:
+        'How does the discriminant Δ = b² − 4ac determine the number and nature of roots for ax² + bx + c = 0?',
+      backDefinition:
+        'The discriminant measures the signed distance under the radical in the quadratic formula, dictating whether the parabola intersects the x-axis twice, tangentially once, or not at all in ℝ.',
+      codeOrFormulaSnippet: `Δ = b² - 4ac
+
+• Δ > 0  → 2 distinct real roots
+• Δ = 0  → 1 repeated real root (vertex on x-axis)
+• Δ < 0  → 0 real roots (2 complex conjugate roots)
+• Sum of roots: r₁ + r₂ = -b / a
+• Product of roots: r₁ · r₂ = c / a`,
+      snippetLabel: 'Algebraic Invariants & Vieta’s Formulas',
+      memoryTip:
+        'Think of Δ = 0 as the exact moment the parabola "kisses" the x-axis at a single tangent vertex.',
+      colorVar: '--pk',
+    },
+    {
+      id: 'fc-exam-2',
+      track: 'exam',
+      topic: 'Probability & combinatorics',
+      difficulty: 'Hard',
+      frontTitle: 'Complementary Counting Rule',
+      frontPrompt:
+        'When a problem asks for the probability of "at least one" event occurring across n independent trials, what is the fastest formula?',
+      backDefinition:
+        'Instead of summing every possible positive case (1, 2, ..., n), subtract the single probability that the event happens ZERO times from 1.',
+      codeOrFormulaSnippet: `P(at least 1 success) = 1 - P(0 successes)
+
+For n independent trials with success rate p:
+P(X ≥ 1) = 1 - (1 - p)ⁿ
+
+Example (at least one 6 in 3 dice rolls):
+P = 1 - (5/6)³ = 1 - 125/216 = 91/216`,
+      snippetLabel: 'Probability Shortcut Formula',
+      memoryTip:
+        'Whenever you spot the words "at least one" on the SAT/GRE, immediately write "1 − P(none)".',
+      colorVar: '--yl',
+    },
+    {
+      id: 'fc-exam-3',
+      track: 'exam',
+      topic: 'Exponents & radicals',
+      difficulty: 'Easy',
+      frontTitle: 'Fractional & Negative Exponents',
+      frontPrompt:
+        'How do you rewrite x^(-m/n) in radical form, and what happens when multiplying bases with exponents?',
+      backDefinition:
+        'A negative exponent takes the reciprocal of the base, the numerator m raises the power, and the denominator n extracts the n-th root.',
+      codeOrFormulaSnippet: `x^(-m/n) = 1 / (ⁿ√x)ᵐ = 1 / ⁿ√(xᵐ)
+
+• Product Rule:   aˣ · aʸ = a^(x + y)
+• Quotient Rule:  aˣ / aʸ = a^(x - y)
+• Power of Power: (aˣ)ʸ  = a^(x · y)`,
+      snippetLabel: 'Exponent Transformation Rules',
+      memoryTip:
+        'Denominator = Root ("Roots grow underground in the bottom of the fraction").',
+      colorVar: '--gr',
+    },
+    {
+      id: 'fc-exam-4',
+      track: 'exam',
+      topic: 'Linear equations',
+      difficulty: 'Medium',
+      frontTitle: 'Infinite vs. No Solutions in Linear Systems',
+      frontPrompt:
+        'Given two linear equations a₁x + b₁y = c₁ and a₂x + b₂y = c₂, when does the system have NO solution vs. INFINITELY MANY solutions?',
+      backDefinition:
+        'Parallel lines share identical slopes but different intercepts (no intersection), whereas coincident lines have proportional coefficients across all three terms.',
+      codeOrFormulaSnippet: `System:
+a₁x + b₁y = c₁
+a₂x + b₂y = c₂
+
+• No Solution (Parallel):
+  (a₁ / a₂) = (b₁ / b₂) ≠ (c₁ / c₂)
+
+• Infinite Solutions (Identical Line):
+  (a₁ / a₂) = (b₁ / b₂) = (c₁ / c₂)`,
+      snippetLabel: 'Coefficient Ratio Test',
+      memoryTip:
+        'Match the x and y ratios first; if the constant ratio c₁/c₂ breaks the pattern, the lines never meet.',
+      colorVar: '--bl',
+    },
+  ],
+  code: [
+    {
+      id: 'fc-code-1',
+      track: 'code',
+      topic: 'Sliding window',
+      difficulty: 'Medium',
+      frontTitle: 'Variable-Size Sliding Window Template',
+      frontPrompt:
+        'What is the O(n) two-pointer window expansion and contraction pattern for finding the longest valid substring/subarray?',
+      backDefinition:
+        'Expand the right pointer step-by-step to ingest elements into window state, and shrink the left pointer in a while-loop only when the window invariant is violated.',
+      codeOrFormulaSnippet: `function longestValidWindow(s: string): number {
+  const freq = new Map<string, number>();
+  let left = 0, maxLen = 0;
+
+  for (let right = 0; right < s.length; right++) {
+    freq.set(s[right], (freq.get(s[right]) ?? 0) + 1);
+    while ((freq.get(s[right]) ?? 0) > 1) {
+      freq.set(s[left], freq.get(s[left])! - 1);
+      left++;
+    }
+    maxLen = Math.max(maxLen, right - left + 1);
+  }
+  return maxLen; // Time: O(n) | Space: O(k)
+}`,
+      snippetLabel: 'TypeScript · O(n) Sliding Window',
+      memoryTip:
+        'Each index is visited at most twice (once by right, once by left), guaranteeing linear O(n) runtime.',
+      colorVar: '--bl',
+    },
+    {
+      id: 'fc-code-2',
+      track: 'code',
+      topic: 'Linked lists',
+      difficulty: 'Medium',
+      frontTitle: 'Floyd’s Tortoise & Hare Cycle Detection',
+      frontPrompt:
+        'How do you detect a cycle in a singly linked list in O(1) extra space and find its exact entry node?',
+      backDefinition:
+        'Advance a slow pointer by 1 step and a fast pointer by 2 steps. If they meet, reset one pointer to head and advance both by 1 step; their next meeting point is the cycle start.',
+      codeOrFormulaSnippet: `function detectCycleStart(head: ListNode | null): ListNode | null {
+  let slow = head, fast = head;
+  while (fast && fast.next) {
+    slow = slow!.next;
+    fast = fast.next.next;
+    if (slow === fast) {
+      let entry = head;
+      while (entry !== slow) {
+        entry = entry!.next;
+        slow = slow!.next;
+      }
+      return entry;
+    }
+  }
+  return null;
+}`,
+      snippetLabel: 'TypeScript · O(1) Space Cycle Entry',
+      memoryTip:
+        'Distance from head to cycle start equals distance from meeting point to cycle start (modulo cycle length).',
+      colorVar: '--pk',
+    },
+    {
+      id: 'fc-code-3',
+      track: 'code',
+      topic: 'Binary tree BFS',
+      difficulty: 'Easy',
+      frontTitle: 'Level-Order BFS Traversal',
+      frontPrompt:
+        'How do you process a binary tree level-by-level so you can isolate nodes belonging to the same depth d?',
+      backDefinition:
+        'Snapshot the queue length at the start of each while-loop iteration; that exact count equals the number of nodes in the current depth level.',
+      codeOrFormulaSnippet: `function levelOrder(root: TreeNode | null): number[][] {
+  if (!root) return [];
+  const res: number[][] = [], queue: TreeNode[] = [root];
+
+  while (queue.length > 0) {
+    const levelSize = queue.length;
+    const currentLevel: number[] = [];
+    for (let i = 0; i < levelSize; i++) {
+      const node = queue.shift()!;
+      currentLevel.push(node.val);
+      if (node.left) queue.push(node.left);
+      if (node.right) queue.push(node.right);
+    }
+    res.push(currentLevel);
+  }
+  return res;
+}`,
+      snippetLabel: 'TypeScript · Level Snapshot BFS',
+      memoryTip:
+        'Capture const levelSize = queue.length BEFORE pushing child nodes inside the inner for-loop.',
+      colorVar: '--gr',
+    },
+    {
+      id: 'fc-code-4',
+      track: 'code',
+      topic: 'Dynamic programming',
+      difficulty: 'Hard',
+      frontTitle: '1D Space-Optimized 0/1 Knapsack',
+      frontPrompt:
+        'Why must you iterate capacity w BACKWARDS from W down to weight[i] when optimizing 0/1 Knapsack to a 1D array?',
+      backDefinition:
+        'Iterating backwards ensures dp[w - weight] still holds values from the PREVIOUS item row (i - 1), preventing the same item from being picked multiple times.',
+      codeOrFormulaSnippet: `function knapsack01(weights: number[], values: number[], W: number): number {
+  const dp = new Array(W + 1).fill(0);
+  for (let i = 0; i < weights.length; i++) {
+    // Backwards loop = 0/1 Knapsack (use item once)
+    for (let w = W; w >= weights[i]; w--) {
+      dp[w] = Math.max(dp[w], dp[w - weights[i]] + values[i]);
+    }
+  }
+  return dp[W]; // Time: O(n·W) | Space: O(W)
+}`,
+      snippetLabel: 'TypeScript · 1D DP State Compression',
+      memoryTip:
+        'Backwards loop = 0/1 Knapsack (once per item); Forwards loop = Unbounded Knapsack (infinite copies).',
+      colorVar: '--yl',
+    },
+  ],
+  lang: [
+    {
+      id: 'fc-lang-1',
+      track: 'lang',
+      topic: 'Ongoing actions (Llevar + Gerund)',
+      difficulty: 'Medium',
+      frontTitle: 'Llevar + Duration + Gerundio',
+      frontPrompt:
+        'How do native Spanish speakers express "I have been studying for three years" without translating word-for-word from English?',
+      backDefinition:
+        'Use the present tense of llevar + [time duration] + verb in the gerund (-ando / -iendo) to emphasize an ongoing action that started in the past.',
+      codeOrFormulaSnippet: `Formula:
+[Llevar (present)] + [Time Duration] + [Gerund (-ando / -iendo)]
+
+• Llevo tres años estudiando español.
+  ("I have been studying Spanish for three years.")
+
+• ¿Cuánto tiempo llevas viviendo aquí?
+  ("How long have you been living here?")
+
+• Negative (without doing):
+  Llevo dos días SIN dormir bien.`,
+      snippetLabel: 'Spanish Idiomatic Construction',
+      memoryTip:
+        'Swap the gerund for "sin + infinitive" whenever you want to say how long you have NOT done something.',
+      colorVar: '--yl',
+    },
+    {
+      id: 'fc-lang-2',
+      track: 'lang',
+      topic: 'Conditionals & Subjunctive',
+      difficulty: 'Hard',
+      frontTitle: 'Hypothetical "Si" Clauses (Contrary-to-Fact)',
+      frontPrompt:
+        'What tense pair is required for unlikely or hypothetical present conditions ("If I had more time, I would travel")?',
+      backDefinition:
+        'Combine "Si + Imperfect Subjunctive (-ra / -se)" in the condition clause with the "Conditional (-ía)" in the result clause. Never use conditional directly after "si".',
+      codeOrFormulaSnippet: `Structure:
+Si + [Imperfect Subjunctive], [Simple Conditional]
+
+• Si tuviera (tuviese) más tiempo, viajaría por Sudamérica.
+  (If I had more time, I would travel through South America.)
+
+• Si pudiera elegir, viviría frente al mar.
+  (If I could choose, I would live by the sea.)`,
+      snippetLabel: 'Subjunctive + Conditional Matrix',
+      memoryTip:
+        'Rhyme cue: "-ra" in the Si-clause unlocks "-ría" in the result clause (tuviera → viajaría).',
+      colorVar: '--pk',
+    },
+    {
+      id: 'fc-lang-3',
+      track: 'lang',
+      topic: 'Por vs. Para Mastery',
+      difficulty: 'Medium',
+      frontTitle: 'Por (Cause/Exchange) vs. Para (Goal/Deadline)',
+      frontPrompt:
+        'How do you distinguish between "por" and "para" when describing movement, time, or motivation?',
+      backDefinition:
+        'Think of PARA as a forward-pointing arrow toward a destination, recipient, goal ("in order to"), or deadline. Think of POR as a scale/bridge representing cause, exchange, duration, or route.',
+      codeOrFormulaSnippet: `PARA (Forward Arrow → Goal / Destination / Deadline):
+• Estudio PARA aprobar el examen. (In order to)
+• Este regalo es PARA ti. (Recipient)
+• La tarea es PARA el lunes. (Deadline)
+
+POR (Cause / Exchange / Through / Duration):
+• Pagó veinte euros POR el libro. (Exchange)
+• Caminamos POR el parque. (Route through)
+• Gracias POR tu ayuda. (Cause / Reason)`,
+      snippetLabel: 'Preposition Mental Model',
+      memoryTip:
+        'PARA looks forward to the finish line; POR looks back at the reason or price paid.',
+      colorVar: '--gr',
+    },
+    {
+      id: 'fc-lang-4',
+      track: 'lang',
+      topic: 'Preterite vs. Imperfect',
+      difficulty: 'Medium',
+      frontTitle: 'Interrupted Past Actions',
+      frontPrompt:
+        'When one past action is in progress ("I was reading") and another suddenly interrupts it ("when the phone rang"), which tenses do you pair?',
+      backDefinition:
+        'Use the Imperfect (-aba / -ía) for the ongoing background scene and the Preterite for the completed interrupting event.',
+      codeOrFormulaSnippet: `[Background Scene: Imperfect] + cuando + [Interruption: Preterite]
+
+• Leía un libro cuando sonó el teléfono.
+  (I was reading a book when the phone rang.)
+
+• Lloviendo / Llovía fuerte cuando salimos de casa.
+  (It was raining hard when we left home.)`,
+      snippetLabel: 'Past Aspect Contrast',
+      memoryTip:
+        'Imperfect = movie camera rolling in the background; Preterite = camera flash capturing a single instant.',
+      colorVar: '--bl',
+    },
+  ],
+};
+
