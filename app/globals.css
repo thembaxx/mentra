@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light dark;
   --yl: #F7D66E;
   --yls: #FEEFBF;
   --gr: #9AAB65;
@@ -17,7 +18,12 @@
   --on: #2D2D2B;
 }
 
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --bg: #1C1C1A;
   --card: #2A2A27;
   --ink: #F8F3E7;
@@ -31,6 +37,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --bg: #1C1C1A;
     --card: #2A2A27;
     --ink: #F8F3E7;
@@ -45,9 +52,13 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
+  background-color: var(--bg);
+  color: var(--ink);
+  min-height: 100%;
   scroll-behavior: smooth;
   scroll-padding-top: env(safe-area-inset-top, 0px);
 }
@@ -55,6 +66,10 @@ html {
 body {
   background-color: var(--bg);
   color: var(--ink);
+  min-height: 100dvh;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
   font-family: var(--font-plus-jakarta), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);

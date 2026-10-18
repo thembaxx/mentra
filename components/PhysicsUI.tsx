@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, HTMLMotionProps } from 'motion/react';
+import { playSoundCue, SoundCueType } from '@/lib/sound-effects';
 
 export const SPRING_SNAPPY = {
   type: 'spring' as const,
@@ -28,6 +29,7 @@ interface SpringButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref'> {
   variant?: 'pink' | 'soft' | 'blue' | 'yellow' | 'green' | 'ink' | 'card';
   size?: 'sm' | 'md' | 'lg';
   magnetic?: boolean;
+  soundCue?: SoundCueType | false;
   children: React.ReactNode;
 }
 
@@ -35,9 +37,11 @@ export function SpringButton({
   variant = 'pink',
   size = 'md',
   magnetic = false,
+  soundCue = 'tap',
   className = '',
   children,
   disabled,
+  onClick,
   onMouseMove,
   onMouseLeave,
   ...props
@@ -62,6 +66,13 @@ export function SpringButton({
       setOffset({ x: 0, y: 0 });
     }
     onMouseLeave?.(e);
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!disabled && soundCue) {
+      playSoundCue(soundCue);
+    }
+    onClick?.(e);
   };
 
   const bgStyles: Record<NonNullable<SpringButtonProps['variant']>, React.CSSProperties> = {
@@ -103,6 +114,7 @@ export function SpringButton({
             }
       }
       transition={SPRING_SNAPPY}
+      onClick={handleClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={bgStyles[variant]}
@@ -123,6 +135,12 @@ export function ShakeContainer({
   className?: string;
   children: React.ReactNode;
 }) {
+  useEffect(() => {
+    if (shakeKey > 0) {
+      playSoundCue('error');
+    }
+  }, [shakeKey]);
+
   return (
     <motion.div
       key={shakeKey}
@@ -154,9 +172,16 @@ export function BouncySurface({
   onClick?: () => void;
   hoverLift?: number;
 }) {
+  const handleSurfaceClick = () => {
+    if (onClick) {
+      playSoundCue('tap');
+      onClick();
+    }
+  };
+
   return (
     <motion.div
-      onClick={onClick}
+      onClick={onClick ? handleSurfaceClick : undefined}
       whileHover={onClick ? { y: -hoverLift, scale: 1.012 } : undefined}
       whileTap={onClick ? { scale: 0.975, y: 0 } : undefined}
       transition={SPRING_BOUNCY}

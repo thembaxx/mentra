@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Home,
@@ -11,9 +11,17 @@ import {
   Moon,
   Clock,
   Play,
+  Layers,
+  Share2,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { TrackId } from '@/lib/study-data';
+import { useSoundSettings } from '@/lib/sound-effects';
 import {
+  BrandSquircleLogo,
+  BrandLogoVariant,
+  BRAND_IDENTITY_PRESETS,
   FlowerShape,
   StarburstShape,
   SquiggleBoltShape,
@@ -31,6 +39,17 @@ import {
   CatalogExplorerView,
 } from '@/components/CatalogAndHomework';
 import { PlansSectionView, PaywallModal } from '@/components/PlansAndPaywall';
+import {
+  PWAInstallButton,
+  OfflineIndicator,
+  BrandAndNativeStudioModal,
+  ThemeMode,
+} from '@/components/PWAAndBrandBar';
+import {
+  DailyStudyGoalCard,
+  fireLearnFlowConfetti,
+} from '@/components/DailyStudyGoalCard';
+import { useNativeCapabilities } from '@/hooks/usePWAInstall';
 
 type ViewId = 'home' | 'practice' | 'catalog' | 'plans';
 
@@ -40,41 +59,205 @@ export default function LearnFlowApp() {
   const [selectedTopicFilter, setSelectedTopicFilter] = useState<string>('');
   const [isPro, setIsPro] = useState<boolean>(false);
   const [freeQuestionsLeft, setFreeQuestionsLeft] = useState<number>(5);
-  const [isDark, setIsDark] = useState<boolean>(false);
+  const [themeMode, setThemeMode] = useState<ThemeMode>('system');
+  const [resolvedDark, setResolvedDark] = useState<boolean>(false);
+  const [brandVariant, setBrandVariant] = useState<BrandLogoVariant>('flow');
+  const [brandStudioOpen, setBrandStudioOpen] = useState<boolean>(false);
   const [heroPulse, setHeroPulse] = useState<number>(0);
+
+  // Daily Study Goal & Streak Tracking state
+  const [dailyTarget, setDailyTarget] = useState<number>(5);
+  const [dailyCompleted, setDailyCompleted] = useState<number>(3);
+  const [streakDays, setStreakDays] = useState<number>(7);
+  const [celebratedToday, setCelebratedToday] = useState<boolean>(false);
 
   // Paywall & Toast states
   const [paywallOpen, setPaywallOpen] = useState<boolean>(false);
   const [paywallReason, setPaywallReason] = useState<string>('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  const { triggerHaptic, shareStudyProgress } = useNativeCapabilities();
+  const { muted: audioMuted, toggleMute: toggleAudioMute, playSound } = useSoundSettings();
+
+  const currentBrand =
+    BRAND_IDENTITY_PRESETS.find((b) => b.id === brandVariant) || BRAND_IDENTITY_PRESETS[0];
+
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
   }, []);
 
-  React.useEffect(() => {
+  // Synchronize browser theme-color meta tags, color-scheme, and document background seamlessly
+  const applyBrowserThemeSync = useCallback((mode: ThemeMode) => {
+    if (typeof window === 'undefined') return;
+    const root = document.documentElement;
+
+    if (mode === 'light' || mode === 'dark') {
+      root.dataset.theme = mode;
+      localStorage.setItem('learnflow-theme', mode);
+    } else {
+      delete root.dataset.theme;
+      localStorage.removeItem('learnflow-theme');
+    }
+
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isNowDark = mode === 'dark' || (mode === 'system' && systemPrefersDark);
+    setResolvedDark(isNowDark);
+
+    const bgHex = isNowDark ? '#1C1C1A' : '#FFFCF5';
+    const metaTags = document.querySelectorAll('meta[name="theme-color"]');
+    metaTags.forEach((meta) => meta.setAttribute('content', bgHex));
+  }, []);
+
+  // Hydrate saved theme, brand variant, daily study goal, and PWA shortcut query params
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const savedTheme = localStorage.getItem('learnflow-theme') as ThemeMode | null;
+    const initialMode: ThemeMode =
+      savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : 'system';
+    setThemeMode(initialMode);
+    applyBrowserThemeSync(initialMode);
+
+    const savedBrand = localStorage.getItem('learnflow-brand') as BrandLogoVariant | null;
+    if (savedBrand && BRAND_IDENTITY_PRESETS.some((b) => b.id === savedBrand)) {
+      setBrandVariant(savedBrand);
+    }
+
+    const savedTarget = localStorage.getItem('learnflow-daily-target');
+    if (savedTarget) {
+      const parsed = parseInt(savedTarget, 10);
+      if (!isNaN(parsed) && parsed >= 1 && parsed <= 50) setDailyTarget(parsed);
+    }
+
+    const savedCompleted = localStorage.getItem('learnflow-daily-completed');
+    if (savedCompleted) {
+      const parsed = parseInt(savedCompleted, 10);
+      if (!isNaN(parsed) && parsed >= 0) setDailyCompleted(parsed);
+    }
+
+    const savedStreak = localStorage.getItem('learnflow-streak-days');
+    if (savedStreak) {
+      const parsed = parseInt(savedStreak, 10);
+      if (!isNaN(parsed) && parsed >= 1) setStreakDays(parsed);
+    }
+
+    // Handle native PWA launcher shortcut URLs (/?track=exam | code | lang)
+    const params = new URLSearchParams(window.location.search);
+    const trackParam = params.get('track') as TrackId | null;
+    if (trackParam === 'exam' || trackParam === 'code' || trackParam === 'lang') {
+      setActiveTrack(trackParam);
+      setActiveView('practice');
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = () => {
+      const currentSaved = localStorage.getItem('learnflow-theme') as ThemeMode | null;
+      if (!currentSaved) {
+        applyBrowserThemeSync('system');
+      }
+    };
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+  }, [applyBrowserThemeSync]);
+
+  // Update document title when brand identity changes
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.title = `${currentBrand.name} — AI Study & Practice Tutor`;
+    }
+  }, [currentBrand]);
+
+  useEffect(() => {
     if (!toastMessage) return;
     const timer = setTimeout(() => setToastMessage(null), 2800);
     return () => clearTimeout(timer);
   }, [toastMessage]);
 
-  const toggleTheme = () => {
-    const root = document.documentElement;
-    const nextDark = !isDark;
-    setIsDark(nextDark);
-    root.dataset.theme = nextDark ? 'dark' : 'light';
+  const handleUpdateDailyTarget = useCallback(
+    (newTarget: number) => {
+      triggerHaptic(10);
+      setDailyTarget(newTarget);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('learnflow-daily-target', String(newTarget));
+      }
+      if (dailyCompleted >= newTarget && !celebratedToday) {
+        setCelebratedToday(true);
+        fireLearnFlowConfetti();
+        showToast(`Daily goal of ${newTarget} questions achieved! Streak extended!`);
+      } else {
+        showToast(`Daily study target updated to ${newTarget} questions/day`);
+      }
+    },
+    [dailyCompleted, celebratedToday, showToast, triggerHaptic]
+  );
+
+  const handleIncrementDailyCompleted = useCallback(() => {
+    triggerHaptic(15);
+    setDailyCompleted((prev) => {
+      const next = prev + 1;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('learnflow-daily-completed', String(next));
+      }
+      if (next >= dailyTarget && prev < dailyTarget) {
+        setCelebratedToday(true);
+        setStreakDays((s) => {
+          const nextStreak = s + 1;
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('learnflow-streak-days', String(nextStreak));
+          }
+          return nextStreak;
+        });
+        fireLearnFlowConfetti();
+        showToast(`Daily study goal complete (${next}/${dailyTarget})! Streak extended!`);
+      } else {
+        showToast(`Progress logged: ${next} of ${dailyTarget} daily questions completed`);
+      }
+      return next;
+    });
+    setHeroPulse((p) => p + 1);
+  }, [dailyTarget, showToast, triggerHaptic]);
+
+  const handleResetTodayProgress = useCallback(() => {
+    triggerHaptic(10);
+    setDailyCompleted(0);
+    setCelebratedToday(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('learnflow-daily-completed', '0');
+    }
+    showToast("Reset today's study goal counter");
+  }, [showToast, triggerHaptic]);
+
+  const handleSelectThemeMode = (mode: ThemeMode) => {
+    setThemeMode(mode);
+    applyBrowserThemeSync(mode);
+  };
+
+  const toggleQuickTheme = () => {
+    triggerHaptic(10);
+    const nextMode: ThemeMode = resolvedDark ? 'light' : 'dark';
+    handleSelectThemeMode(nextMode);
+  };
+
+  const handleSelectBrandVariant = (variant: BrandLogoVariant) => {
+    setBrandVariant(variant);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('learnflow-brand', variant);
+    }
+    setHeroPulse((p) => p + 1);
   };
 
   const consumeQuota = useCallback((): boolean => {
     if (isPro) return true;
     if (freeQuestionsLeft <= 0) {
-      setPaywallReason("You've used today's 5 free AI questions. Start your 7-day Pro trial for unlimited practice.");
+      setPaywallReason(
+        `You've used today's 5 free AI questions. Start your 7-day ${currentBrand.name} Pro trial for unlimited practice.`
+      );
       setPaywallOpen(true);
       return false;
     }
     setFreeQuestionsLeft((prev) => Math.max(0, prev - 1));
     return true;
-  }, [isPro, freeQuestionsLeft]);
+  }, [isPro, freeQuestionsLeft, currentBrand.name]);
 
   const handleOpenPaywall = useCallback((reason: string) => {
     setPaywallReason(reason);
@@ -82,12 +265,16 @@ export default function LearnFlowApp() {
   }, []);
 
   const handleUpgradeToPro = useCallback(() => {
+    triggerHaptic([15, 40, 20]);
     setIsPro(true);
     setPaywallOpen(false);
+    fireLearnFlowConfetti();
     showToast('Pro 7-day trial started! Unlimited AI questions & step-by-step tutor unlocked.');
-  }, [showToast]);
+  }, [showToast, triggerHaptic]);
 
   const navigateToPractice = (track: TrackId, topic = '') => {
+    triggerHaptic(10);
+    playSound('tap');
     setActiveTrack(track);
     setSelectedTopicFilter(topic);
     setHeroPulse((p) => p + 1);
@@ -96,27 +283,37 @@ export default function LearnFlowApp() {
   };
 
   const navigateView = (v: ViewId) => {
+    triggerHaptic(8);
+    playSound('tap');
     setActiveView(v);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const goalCompletedToday = dailyCompleted >= dailyTarget;
+
   return (
-    <div className="min-h-screen pb-32">
+    <div className="min-h-[100dvh] pb-32">
+      {/* Offline Connectivity Banner */}
+      <OfflineIndicator />
+
       <div className="max-w-[1120px] mx-auto px-4 sm:px-6">
         {/* Strict 3-Zone Top Navigation Bar */}
         <header
           className="flex items-center justify-between gap-8 py-4 border-b"
           style={{ borderColor: 'var(--line)' }}
         >
-          {/* Zone 1: Single-line Brand Wordmark */}
-          <button
+          {/* Zone 1: Single-line Brand Wordmark + Tactile Squircle Logo */}
+          <motion.button
             type="button"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.96 }}
+            transition={SPRING_SNAPPY}
             onClick={() => navigateView('home')}
-            className="flex items-center gap-2.5 font-display font-extrabold text-2xl sm:text-[28px] tracking-tight whitespace-nowrap shrink-0 cursor-pointer"
+            className="flex items-center gap-3 font-display font-extrabold text-2xl sm:text-[28px] tracking-tight whitespace-nowrap shrink-0 cursor-pointer"
           >
-            <FlowerShape className="w-7 h-7" color="var(--bl)" centerColor="var(--pk)" />
-            <span>LearnFlow</span>
-          </button>
+            <BrandSquircleLogo variant={brandVariant} size="md" />
+            <span>{currentBrand.name}</span>
+          </motion.button>
 
           {/* Zone 2: 4 Single-Line Navigation Links */}
           <nav
@@ -222,26 +419,74 @@ export default function LearnFlowApp() {
                   {/* Interactive Three.js WebGL 3D Sculptures */}
                   <HeroThreeScene activeTrack={activeTrack} pulseTrigger={heroPulse} />
 
-                  {/* Top Hero Bar */}
-                  <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-                    <span className="text-xs sm:text-sm font-bold tracking-tight opacity-85">
-                      Mentra × LearnFlow · Interactive 3D & AI Study Engine
-                    </span>
+                  {/* Top Hero Controls Row: In-App PWA Install + Brand & Settings Studio + Audio + Theme Switcher */}
+                  <div className="relative z-10 flex flex-wrap items-center justify-between gap-2">
                     <button
                       type="button"
-                      onClick={toggleTheme}
-                      className="pointer-events-auto px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-                      style={{ backgroundColor: 'rgba(255, 252, 245, 0.85)', color: '#2D2D2B' }}
+                      onClick={() => {
+                        playSound('tap');
+                        setBrandStudioOpen(true);
+                      }}
+                      className="px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer transition-transform active:scale-95"
+                      style={{ backgroundColor: 'rgba(255, 252, 245, 0.88)', color: '#2D2D2B' }}
                     >
-                      {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-                      <span>{isDark ? 'Light canvas' : 'Dark canvas'}</span>
+                      <Layers className="w-3.5 h-3.5" />
+                      <span>Settings & Brand Studio</span>
                     </button>
+
+                    <div className="flex items-center gap-2">
+                      {/* Mandatory In-App PWA Install Button */}
+                      <PWAInstallButton
+                        brandVariant={brandVariant}
+                        brandName={currentBrand.name}
+                        onOpenBrandStudio={() => setBrandStudioOpen(true)}
+                        onNotify={showToast}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic(10);
+                          const nowMuted = toggleAudioMute();
+                          showToast(
+                            nowMuted
+                              ? 'Interaction audio cues muted'
+                              : 'Interaction audio cues enabled'
+                          );
+                        }}
+                        aria-label={audioMuted ? 'Unmute audio cues' : 'Mute audio cues'}
+                        className="px-3.5 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
+                        style={{ backgroundColor: 'rgba(255, 252, 245, 0.88)', color: '#2D2D2B' }}
+                      >
+                        {audioMuted ? (
+                          <VolumeX className="w-3.5 h-3.5" />
+                        ) : (
+                          <Volume2 className="w-3.5 h-3.5" />
+                        )}
+                        <span>{audioMuted ? 'Muted' : 'Sound'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={toggleQuickTheme}
+                        className="px-3.5 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
+                        style={{ backgroundColor: 'rgba(255, 252, 245, 0.88)', color: '#2D2D2B' }}
+                      >
+                        {resolvedDark ? (
+                          <Sun className="w-3.5 h-3.5" />
+                        ) : (
+                          <Moon className="w-3.5 h-3.5" />
+                        )}
+                        <span>{resolvedDark ? 'Light' : 'Dark'}</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Giant Hero Display Wordmark */}
                   <motion.h1
-                    initial={{ scale: 0.96, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
+                    key={currentBrand.name}
+                    initial={{ scale: 0.96, opacity: 0, y: 8 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
                     transition={SPRING_BOUNCY}
                     className="relative z-10 font-display font-extrabold select-none pointer-events-none my-4"
                     style={{
@@ -251,13 +496,13 @@ export default function LearnFlowApp() {
                       lineHeight: 0.86,
                     }}
                   >
-                    LearnFlow
+                    {currentBrand.name}
                   </motion.h1>
 
                   {/* Bottom Hero Copy & Bouncy CTAs */}
                   <div className="relative z-10 flex flex-wrap items-end justify-between gap-4 pt-2">
                     <p
-                      className="max-w-[360px] font-semibold text-base sm:text-[18px] leading-snug"
+                      className="max-w-[380px] font-semibold text-base sm:text-[18px] leading-snug"
                       style={{ color: '#2D2D2B', textWrap: 'balance' }}
                     >
                       AI practice that grades you, explains every step, and never runs out of questions.
@@ -283,7 +528,7 @@ export default function LearnFlowApp() {
                   </div>
                 </div>
 
-                {/* Greeting & Next Session Card + Story Tiles Row */}
+                {/* Greeting & Daily Study Goal Tracking Section */}
                 <div className="space-y-4">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <h2
@@ -292,24 +537,66 @@ export default function LearnFlowApp() {
                     >
                       Hi, Alex
                     </h2>
-                    <span className="text-xs sm:text-sm font-semibold" style={{ color: 'var(--mute)' }}>
-                      7-day study streak · {isPro ? 'Pro Member' : `${freeQuestionsLeft}/5 free daily AI questions`}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="text-xs sm:text-sm font-semibold tabular-nums"
+                        style={{ color: 'var(--mute)' }}
+                      >
+                        {streakDays}-day study streak ·{' '}
+                        {isPro
+                          ? 'Pro Member'
+                          : `${freeQuestionsLeft}/5 free daily AI questions`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          triggerHaptic(10);
+                          const res = await shareStudyProgress(
+                            `${currentBrand.name} Study Progress`,
+                            `${streakDays}-day study streak (${dailyCompleted}/${dailyTarget} daily goal) on ${currentBrand.name}!`
+                          );
+                          showToast(
+                            res === 'shared'
+                              ? 'Shared study streak!'
+                              : 'Study progress link copied!'
+                          );
+                        }}
+                        className="p-2 rounded-full cursor-pointer"
+                        style={{
+                          backgroundColor: 'var(--card)',
+                          border: '1px solid var(--line)',
+                        }}
+                        title="Share study progress"
+                        aria-label="Share study progress"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Daily Study Goal Tracker Card with Visual Progress Ring & Confetti */}
+                  <DailyStudyGoalCard
+                    completedCount={dailyCompleted}
+                    targetCount={dailyTarget}
+                    streakDays={streakDays}
+                    goalCompletedToday={goalCompletedToday}
+                    onUpdateTarget={handleUpdateDailyTarget}
+                    onIncrementCompleted={handleIncrementDailyCompleted}
+                    onResetTodayProgress={handleResetTodayProgress}
+                    onStartPractice={() => navigateToPractice(activeTrack)}
+                  />
 
                   {/* Next AI Session Banner Card matching HTML .sess */}
                   <BouncySurface
                     onClick={() => navigateToPractice('exam', 'Linear equations')}
-                    style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                    style={{
+                      backgroundColor: 'var(--card)',
+                      border: '1px solid var(--line)',
+                    }}
                     className="rounded-3xl p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div
-                        className="w-12 h-12 rounded-full grid place-items-center font-display font-extrabold text-sm shrink-0"
-                        style={{ backgroundColor: 'var(--pk)', color: '#2D2D2B' }}
-                      >
-                        AI
-                      </div>
+                      <BrandSquircleLogo variant={brandVariant} size="md" />
                       <div>
                         <div className="font-bold text-base sm:text-lg">
                           SAT Math: algebra sprint
@@ -355,7 +642,9 @@ export default function LearnFlowApp() {
                       whileHover={{ y: -5, scale: 1.02 }}
                       whileTap={{ scale: 0.95 }}
                       transition={SPRING_BOUNCY}
-                      onClick={() => navigateToPractice('lang', 'Ongoing actions (Llevar + Gerund)')}
+                      onClick={() =>
+                        navigateToPractice('lang', 'Ongoing actions (Llevar + Gerund)')
+                      }
                       className="h-40 rounded-3xl p-4 relative overflow-hidden text-left flex items-end font-display font-extrabold text-lg leading-tight cursor-pointer"
                       style={{ backgroundColor: 'var(--bl)', color: '#2D2D2B' }}
                     >
@@ -396,7 +685,7 @@ export default function LearnFlowApp() {
                         className="w-24 h-24 absolute -right-2 -top-2"
                         color="var(--gr)"
                       />
-                      <span className="relative z-10">7-day streak sprint</span>
+                      <span className="relative z-10">{streakDays}-day streak sprint</span>
                     </motion.button>
                   </div>
                 </div>
@@ -447,7 +736,10 @@ export default function LearnFlowApp() {
                       <BouncySurface
                         key={trk.id}
                         onClick={() => navigateToPractice(trk.id)}
-                        style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                        style={{
+                          backgroundColor: 'var(--card)',
+                          border: '1px solid var(--line)',
+                        }}
                         className="rounded-3xl p-6 min-h-[210px] flex flex-col justify-between cursor-pointer relative"
                       >
                         <div className="flex items-start justify-between">
@@ -457,7 +749,10 @@ export default function LearnFlowApp() {
                           >
                             {trk.symbol}
                           </div>
-                          <span className="text-xs font-bold tabular-nums" style={{ color: 'var(--mute)' }}>
+                          <span
+                            className="text-xs font-bold tabular-nums"
+                            style={{ color: 'var(--mute)' }}
+                          >
                             ★ {trk.rating}
                           </span>
                         </div>
@@ -478,6 +773,60 @@ export default function LearnFlowApp() {
                   onLaunchTopic={(track, topic) => navigateToPractice(track, topic)}
                   onNotify={showToast}
                 />
+
+                {/* Tactile App Icon & Brand Identity Dock (Direct inspiration from IMG_5047.jpeg) */}
+                <div
+                  className="rounded-3xl p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4"
+                  style={{
+                    backgroundColor: '#21211F',
+                    color: '#F8F3E7',
+                    border: '1px solid var(--line)',
+                  }}
+                >
+                  <div className="space-y-1 max-w-md">
+                    <div className="text-xs font-bold" style={{ color: 'var(--yl)' }}>
+                      Interactive Brand & PWA Icon Switcher
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-display font-extrabold">
+                      {currentBrand.name} — {currentBrand.tagline}
+                    </h3>
+                    <p className="text-xs" style={{ color: '#A9A79B' }}>
+                      Tap any tactile squircle icon to switch the live brand identity, or install as a standalone native app.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    {BRAND_IDENTITY_PRESETS.map((preset) => {
+                      const active = preset.id === brandVariant;
+                      return (
+                        <motion.button
+                          key={preset.id}
+                          type="button"
+                          whileHover={{ y: -5, scale: 1.06 }}
+                          whileTap={{ scale: 0.92 }}
+                          transition={SPRING_BOUNCY}
+                          onClick={() => {
+                            triggerHaptic(12);
+                            handleSelectBrandVariant(preset.id);
+                            showToast(`Switched brand identity to ${preset.name}`);
+                          }}
+                          className="flex flex-col items-center gap-1.5 p-2 rounded-2xl cursor-pointer"
+                          style={{
+                            backgroundColor: active
+                              ? 'rgba(255, 252, 245, 0.12)'
+                              : 'transparent',
+                            outline: active ? '2px solid var(--pk)' : 'none',
+                          }}
+                        >
+                          <BrandSquircleLogo variant={preset.id} size="lg" />
+                          <span className="text-[11px] font-bold tracking-tight">
+                            {preset.name}
+                          </span>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </div>
               </motion.section>
             )}
 
@@ -498,6 +847,7 @@ export default function LearnFlowApp() {
                   onOpenPaywall={handleOpenPaywall}
                   onNotify={showToast}
                   initialTopicFilter={selectedTopicFilter}
+                  onQuestionCompleted={handleIncrementDailyCompleted}
                 />
               </motion.section>
             )}
@@ -536,11 +886,12 @@ export default function LearnFlowApp() {
         </main>
       </div>
 
-      {/* Floating Bottom Navigation Dock with Physics Layout Indicator */}
+      {/* Floating Bottom Navigation Dock with Safe-Area Inset & Physics Layout Indicator */}
       <nav
         aria-label="Bottom Dock Navigation"
-        className="fixed left-1/2 -translate-x-1/2 bottom-4 z-40 flex items-center gap-1 p-1.5 rounded-full shadow-xl"
+        className="fixed left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 p-1.5 rounded-full shadow-xl"
         style={{
+          bottom: 'calc(14px + env(safe-area-inset-bottom, 0px))',
           backgroundColor: 'var(--card)',
           border: '1px solid var(--line)',
         }}
@@ -584,17 +935,31 @@ export default function LearnFlowApp() {
 
         <motion.button
           type="button"
-          onClick={toggleTheme}
-          whileTap={{ scale: 0.9, rotate: 15 }}
+          onClick={() => {
+            playSound('tap');
+            setBrandStudioOpen(true);
+          }}
+          whileTap={{ scale: 0.9 }}
           transition={SPRING_SNAPPY}
-          aria-label="Toggle color theme"
+          aria-label="Open Brand, Audio & Native PWA Settings"
           className="px-3.5 py-2 rounded-full flex flex-col items-center gap-0.5 text-[11px] font-semibold cursor-pointer"
           style={{ color: 'var(--mute)' }}
         >
-          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          <span>Theme</span>
+          <Layers className="w-5 h-5" />
+          <span>Settings</span>
         </motion.button>
       </nav>
+
+      {/* Brand, App Icon & Native PWA Studio Modal */}
+      <BrandAndNativeStudioModal
+        open={brandStudioOpen}
+        onClose={() => setBrandStudioOpen(false)}
+        brandVariant={brandVariant}
+        onSelectBrandVariant={handleSelectBrandVariant}
+        themeMode={themeMode}
+        onSelectThemeMode={handleSelectThemeMode}
+        onNotify={showToast}
+      />
 
       {/* Pro Paywall Modal */}
       <PaywallModal
