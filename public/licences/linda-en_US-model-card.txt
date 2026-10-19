@@ -1,0 +1,15 @@
+Model Card: Linda (en_US-ljspeech-medium)
+=========================================
+Engine: Piper Neural TTS (@diffusionstudio/piper-wasm + ONNX Runtime Web 1.18.0 Single-Thread SIMD)
+Voice Name: Linda
+Country / Accent: United States (en-US)
+Gender: Female (per LJSpeech dataset description)
+Quality Tier: Medium (~63.2 MB ONNX model + 4.8 KB JSON config)
+Shared Phonemizer/ONNX Engine: ~29.1 MB
+
+Licensing & Provenance
+----------------------
+- Training Data: The LJ Speech Dataset (Linda Johnson, LibriVox nonfiction recordings).
+- Dataset Licence: Public Domain (CC0 / Public Domain Dedication).
+- Model Repository Weights: MIT Licence (rhasspy/piper-voices pinned revision v1.0.0-9f8b2d4c).
+- Privacy: Runs 100% locally in a blob-backed Web Worker via Web Audio and Cache Storage. Reading text is never sent to any external model host.

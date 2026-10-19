@@ -292,66 +292,98 @@ export function GlobalSearchBar({
   };
 
   return (
-    <div ref={containerRef} className="relative flex-1 max-w-xs sm:max-w-sm">
-      {/* Header Search Input Pill */}
-      <motion.div
-        animate={{ scale: isOpen ? 1.015 : 1 }}
-        transition={SPRING_SNAPPY}
-        className="flex items-center gap-2 rounded-full px-3.5 py-2 transition-colors"
-        style={{
-          backgroundColor: 'var(--card)',
-          border: isOpen ? '2px solid var(--pk)' : '1px solid var(--line)',
-        }}
-      >
-        <Search className="w-4 h-4 shrink-0" style={{ color: 'var(--mute)' }} />
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onFocus={() => setIsOpen(true)}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            if (!isOpen) setIsOpen(true);
-          }}
-          onKeyDown={handleInputKeyDown}
-          placeholder="Search topics, flashcards, curriculum..."
-          aria-label="Global search for topics, flashcards, and curriculum"
-          aria-expanded={isOpen}
-          className="w-full bg-transparent text-base font-medium focus:outline-none truncate"
-          style={{ color: 'var(--ink)' }}
-        />
-
-        {query ? (
-          <button
+    <div ref={containerRef} className="relative shrink-0">
+      {/* Compact Header Search Trigger Button Icon (Expands when clicked) */}
+      <AnimatePresence mode="wait" initial={false}>
+        {!isOpen ? (
+          <motion.button
+            key="search-trigger-btn"
             type="button"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            whileHover={{ y: -1, scale: 1.04 }}
+            whileTap={{ scale: 0.93 }}
+            transition={SPRING_SNAPPY}
             onClick={() => {
               playSoundCue('tap');
-              setQuery('');
-              inputRef.current?.focus();
-            }}
-            aria-label="Clear search query"
-            className="p-0.5 rounded-full cursor-pointer"
-            style={{ color: 'var(--mute)' }}
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        ) : (
-          <kbd
-            onClick={() => {
               setIsOpen(true);
-              inputRef.current?.focus();
+              setTimeout(() => inputRef.current?.focus(), 30);
             }}
-            className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-bold rounded-md cursor-pointer select-none shrink-0"
+            aria-label="Open search for topics, flashcards, and curriculum"
+            aria-expanded={false}
+            title="Search topics, flashcards, curriculum (⌘K)"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full grid place-items-center cursor-pointer transition-colors"
             style={{
-              backgroundColor: 'var(--bg)',
-              color: 'var(--mute)',
+              backgroundColor: 'var(--card)',
+              color: 'var(--ink)',
               border: '1px solid var(--line)',
             }}
           >
-            ⌘K
-          </kbd>
+            <Search className="w-4 h-4" />
+          </motion.button>
+        ) : (
+          <motion.div
+            key="search-expanded-pill"
+            initial={{ opacity: 0, width: 42, scale: 0.96 }}
+            animate={{ opacity: 1, width: 'auto', scale: 1 }}
+            exit={{ opacity: 0, width: 42, scale: 0.96 }}
+            transition={SPRING_SNAPPY}
+            className="fixed inset-x-3 top-3 z-50 sm:static sm:inset-auto sm:w-[280px] md:w-[340px] flex items-center gap-2 rounded-full px-3.5 py-2 shadow-lg sm:shadow-none"
+            style={{
+              backgroundColor: 'var(--card)',
+              border: '2px solid var(--pk)',
+            }}
+          >
+            <Search className="w-4 h-4 shrink-0" style={{ color: 'var(--mute)' }} />
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleInputKeyDown}
+              placeholder="Search topics, flashcards, curriculum..."
+              aria-label="Global search for topics, flashcards, and curriculum"
+              aria-expanded={isOpen}
+              className="w-full bg-transparent text-base font-medium focus:outline-none truncate"
+              style={{ color: 'var(--ink)' }}
+            />
+
+            {query && (
+              <button
+                type="button"
+                onClick={() => {
+                  playSoundCue('tap');
+                  setQuery('');
+                  inputRef.current?.focus();
+                }}
+                aria-label="Clear search query"
+                className="p-1 rounded-full cursor-pointer shrink-0"
+                style={{ color: 'var(--mute)' }}
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                playSoundCue('tap');
+                setIsOpen(false);
+              }}
+              aria-label="Close search"
+              className="px-2 py-0.5 rounded-full text-[11px] font-bold cursor-pointer shrink-0"
+              style={{
+                backgroundColor: 'var(--bg)',
+                color: 'var(--ink)',
+                border: '1px solid var(--line)',
+              }}
+            >
+              Esc
+            </button>
+          </motion.div>
         )}
-      </motion.div>
+      </AnimatePresence>
 
       {/* Floating Search Results Dropdown Popover */}
       <AnimatePresence>
@@ -363,7 +395,7 @@ export function GlobalSearchBar({
             transition={SPRING_BOUNCY}
             role="listbox"
             aria-label="Search results"
-            className="fixed inset-x-4 top-[72px] sm:absolute sm:inset-x-auto sm:left-0 sm:top-full sm:mt-2.5 sm:w-[460px] z-50 rounded-3xl p-4 shadow-2xl space-y-3"
+            className="fixed inset-x-3 top-[64px] sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2.5 sm:w-[460px] z-50 rounded-3xl p-4 shadow-2xl space-y-3"
             style={{
               backgroundColor: 'var(--bg)',
               color: 'var(--ink)',

@@ -410,16 +410,18 @@ export function VoiceDictationBar({
               )}
             </motion.button>
 
-            {/* Read Question Aloud with Active Open-Source Neural Voice */}
+            {/* Read Question Aloud with Active Natural Reading Voice */}
             {questionPrompt && (
               <motion.button
                 type="button"
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
-                  speakWithVoice(activeVoice, questionPrompt);
+                  speakWithVoice(activeVoice, questionPrompt, {
+                    preferRepositorySample: false,
+                  });
                   if (!isReadingAloud) {
                     onNotify(
-                      `Reading question with ${activeVoice.name} (${activeVoice.engine})`
+                      `Reading question with ${activeVoice.displayTitle} (${activeVoice.engine})`
                     );
                   }
                 }}
@@ -428,7 +430,7 @@ export function VoiceDictationBar({
                   backgroundColor: isReadingAloud ? '#2D2D2B' : 'var(--bl)',
                   color: isReadingAloud ? '#FFFCF5' : '#2D2D2B',
                 }}
-                title={`Read question aloud with ${activeVoice.name} (${activeVoice.sizeMB} MB)`}
+                title={`Read question aloud with ${activeVoice.displayTitle} (${activeVoice.sizeMB} MB)`}
               >
                 {isReadingAloud ? (
                   <>
@@ -438,7 +440,7 @@ export function VoiceDictationBar({
                 ) : (
                   <>
                     <Volume2 className="w-3.5 h-3.5" />
-                    <span>Read ({activeVoice.name.split(' ')[0]})</span>
+                    <span>Read ({activeVoice.name})</span>
                   </>
                 )}
               </motion.button>

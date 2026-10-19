@@ -1,0 +1,21 @@
+eSpeak-NG Afrikaans Compact Engine & Data Pack (GPL-3.0-or-later)
+=================================================================
+Engine: eSpeak-NG 1.51.1 WebAssembly Compact Synthesizer
+Shared Engine & Data Pack Size: ~3.3 MB (3,460,300 bytes)
+Worker Architecture: Isolated GPL-3.0-or-later Web Worker (separate from the MIT Piper ONNX neural worker)
+
+Included Afrikaans Tone Variants
+--------------------------------
+Piper currently lists no Afrikaans model. eSpeak-NG supplies Afrikaans using a ~3.3 MB shared compact engine/data pack:
+1. Afrikaans (Female - Synthetic Tone Variant, af+f3)
+2. Afrikaans (Male - Synthetic Tone Variant, af+m3)
+
+Both selections are documented synthetic tone variants, labelled as such rather than presented as neural recordings. Both share the same 3.3 MB download.
+
+Licence & Exact Compiled-Source Links
+-------------------------------------
+- Licence: GNU General Public License v3.0 or later (GPL-3.0-or-later)
+- Upstream Source Repository: https://github.com/espeak-ng/espeak-ng/tree/1.51.1
+- Afrikaans Phoneme & Dictionary Rules: https://github.com/espeak-ng/espeak-ng/blob/1.51.1/dictsource/af_rules
+- WebAssembly Build Target: https://github.com/espeak-ng/espeak-ng/tree/1.51.1/emscripten
+- Full GPL-3.0 Licence Text: https://www.gnu.org/licenses/gpl-3.0.txt

@@ -1,0 +1,14 @@
+Piper Neural Worker & ONNX Runtime Web 1.18.0 (MIT)
+===================================================
+Researched: 12 October 2026
+
+Runtime Architecture
+--------------------
+- Phonemizer: @diffusionstudio/piper-wasm (MIT / Mozilla Public License compatible WASM phonemization interface)
+- Inference Engine: ONNX Runtime Web 1.18.0 pinned for single-thread SIMD inference (ort-wasm-simd.wasm)
+- Shared Engine Size: ~29.1 MB (bundled runtime + WASM phonemizer/inference binary)
+- Model Switching: Reloads both ONNX model weights and JSON config when changing voices. Does NOT use a global model singleton (diverging from Mintplex Piper browser singleton to ensure clean multi-voice switching and memory release).
+- Excluded Alternatives:
+  * Alan (en_GB-alan): Excluded due to all-rights-reserved training card.
+  * Ryan (en_US-ryan): Excluded due to noncommercial dataset restriction.
+  * Kokoro: Considered during research; excluded because its larger English-only quantized base did not improve Afrikaans coverage.

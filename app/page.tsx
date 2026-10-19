@@ -322,28 +322,6 @@ export default function LearnFlowApp() {
             <span>{currentBrand.name}</span>
           </motion.button>
 
-          {/* Global Header Search Bar (Topics, 3D Flashcards, Curriculum & Mentors) */}
-          <GlobalSearchBar
-            onSelectTopicPractice={(track, topic, mode) => {
-              navigateToPractice(track, topic, mode);
-              showToast(
-                mode === 'flashcards'
-                  ? `Opened 3D Flashcards: ${topic}`
-                  : `Opened AI Practice: ${topic}`
-              );
-            }}
-            onSelectCatalogProgram={(programId, q) => {
-              setCatalogProgramId(programId);
-              setCatalogSearchQuery(q);
-              navigateView('catalog');
-            }}
-            onSelectCatalogSearch={(q) => {
-              setCatalogProgramId('');
-              setCatalogSearchQuery(q);
-              navigateView('catalog');
-            }}
-          />
-
           {/* Zone 2: Primary Navigation Links */}
           <nav
             className="hidden lg:flex items-center gap-6 text-sm font-semibold shrink-0"
@@ -382,8 +360,29 @@ export default function LearnFlowApp() {
             })}
           </nav>
 
-          {/* Zone 3: Plans & Settings Actions (Moved out of Bottom Navbar) */}
+          {/* Zone 3: Search Icon Trigger, Plans & Settings Actions */}
           <div className="flex items-center gap-2 shrink-0">
+            <GlobalSearchBar
+              onSelectTopicPractice={(track, topic, mode) => {
+                navigateToPractice(track, topic, mode);
+                showToast(
+                  mode === 'flashcards'
+                    ? `Opened 3D Flashcards: ${topic}`
+                    : `Opened AI Practice: ${topic}`
+                );
+              }}
+              onSelectCatalogProgram={(programId, q) => {
+                setCatalogProgramId(programId);
+                setCatalogSearchQuery(q);
+                navigateView('catalog');
+              }}
+              onSelectCatalogSearch={(q) => {
+                setCatalogProgramId('');
+                setCatalogSearchQuery(q);
+                navigateView('catalog');
+              }}
+            />
+
             <motion.button
               type="button"
               whileHover={{ y: -1 }}

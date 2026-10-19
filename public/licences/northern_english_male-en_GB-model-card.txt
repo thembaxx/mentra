@@ -1,0 +1,16 @@
+Model Card: Northern English (en_GB-northern_english_male-medium)
+=================================================================
+Engine: Piper Neural TTS (@diffusionstudio/piper-wasm + ONNX Runtime Web 1.18.0 Single-Thread SIMD)
+Voice Name: Northern English
+Country / Accent: United Kingdom (en-GB, Northern English accent)
+Gender: Male (per OpenSLR dataset description)
+Quality Tier: Medium (~63.0 MB ONNX model + 4.9 KB JSON config)
+Shared Phonemizer/ONNX Engine: ~29.1 MB
+
+Licensing & Provenance
+----------------------
+- Training Data: OpenSLR SLR83 Crowdsourced high-quality UK and Ireland English Dialect speech data set (Northern English male speaker).
+- Dataset Licence: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
+- Model Repository Weights: MIT Licence (rhasspy/piper-voices pinned revision v1.0.0-9f8b2d4c).
+- Exclusions Note: Alan's all-rights-reserved training card and Ryan's noncommercial dataset were excluded from this catalogue.
+- Privacy: Runs 100% locally in a blob-backed Web Worker via Web Audio and Cache Storage. Reading text is never sent to any external model host.

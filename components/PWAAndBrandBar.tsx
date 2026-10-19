@@ -322,7 +322,7 @@ export function BrandAndNativeStudioModal({
             exit={{ scale: 0.92, y: 14 }}
             transition={SPRING_BOUNCY}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-2xl rounded-[32px] p-6 sm:p-7 space-y-6 shadow-2xl max-h-[90dvh] overflow-y-auto"
+            className="w-full max-w-3xl rounded-[32px] p-5 sm:p-7 space-y-6 shadow-2xl max-h-[90dvh] overflow-y-auto"
             style={{
               backgroundColor: 'var(--bg)',
               color: 'var(--ink)',
@@ -467,80 +467,109 @@ export function BrandAndNativeStudioModal({
 
                 {/* Daily Study Goal Target & Progress Reset */}
                 <div
-                  className="rounded-2xl p-4 sm:p-5 space-y-3.5"
+                  className="rounded-3xl p-5 sm:p-6 space-y-4 w-full"
                   style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      <h3 className="font-display font-extrabold text-lg flex items-center gap-2">
-                        <Target className="w-4 h-4" />
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="space-y-1">
+                      <h3 className="font-display font-extrabold text-lg sm:text-xl flex items-center gap-2">
+                        <Target className="w-4 h-4 shrink-0" />
                         <span>Daily Study Goal Target</span>
                       </h3>
-                      <p className="text-xs" style={{ color: 'var(--mute)' }}>
-                        Today’s progress: {dailyCompleted} / {dailyTarget} questions completed
+                      <p className="text-xs sm:text-sm" style={{ color: 'var(--mute)' }}>
+                        Today’s progress:{' '}
+                        <strong style={{ color: 'var(--ink)' }}>
+                          {dailyCompleted} / {dailyTarget}
+                        </strong>{' '}
+                        questions completed
                       </p>
                     </div>
 
                     {onUpdateDailyTarget && (
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => onUpdateDailyTarget(Math.max(1, dailyTarget - 1))}
-                          className="w-8 h-8 rounded-xl grid place-items-center cursor-pointer"
+                      <div className="flex items-center justify-between sm:justify-end gap-2.5 shrink-0">
+                        <div
+                          className="inline-flex items-center gap-1.5 p-1 rounded-2xl"
                           style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--line)' }}
-                          aria-label="Decrease daily target"
                         >
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="font-display font-extrabold text-base px-2.5 tabular-nums">
-                          {dailyTarget}/day
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => onUpdateDailyTarget(Math.min(50, dailyTarget + 1))}
-                          className="w-8 h-8 rounded-xl grid place-items-center cursor-pointer"
-                          style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--line)' }}
-                          aria-label="Increase daily target"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => onUpdateDailyTarget(Math.max(1, dailyTarget - 1))}
+                            className="w-9 h-9 rounded-xl grid place-items-center cursor-pointer transition-transform active:scale-90"
+                            style={{ backgroundColor: 'var(--card)' }}
+                            aria-label="Decrease daily target"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <span className="font-display font-extrabold text-base sm:text-lg px-3 tabular-nums whitespace-nowrap">
+                            {dailyTarget} / day
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => onUpdateDailyTarget(Math.min(50, dailyTarget + 1))}
+                            className="w-9 h-9 rounded-xl grid place-items-center cursor-pointer transition-transform active:scale-90"
+                            style={{ backgroundColor: 'var(--card)' }}
+                            aria-label="Increase daily target"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        {onResetTodayProgress && dailyCompleted > 0 && (
+                          <SpringButton
+                            size="sm"
+                            variant="soft"
+                            onClick={onResetTodayProgress}
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Reset ({dailyCompleted})</span>
+                          </SpringButton>
+                        )}
                       </div>
                     )}
                   </div>
 
-                  {onUpdateDailyTarget && (
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                      <div className="flex items-center gap-1.5 flex-1">
-                        {GOAL_PRESETS.map((preset) => {
-                          const active = dailyTarget === preset;
-                          return (
-                            <button
-                              key={preset}
-                              type="button"
-                              onClick={() => onUpdateDailyTarget(preset)}
-                              className="flex-1 py-2 rounded-xl text-xs font-extrabold cursor-pointer tabular-nums transition-transform active:scale-95"
-                              style={{
-                                backgroundColor: active ? 'var(--yl)' : 'var(--bg)',
-                                color: active ? '#2D2D2B' : 'var(--ink)',
-                                border: '1px solid var(--line)',
-                              }}
-                            >
-                              {preset} Qs
-                            </button>
-                          );
-                        })}
-                      </div>
+                  {/* Full-Width Progress Bar */}
+                  <div
+                    className="w-full h-2.5 rounded-full overflow-hidden p-0.5"
+                    style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--line)' }}
+                  >
+                    <motion.div
+                      initial={false}
+                      animate={{
+                        width: `${Math.min(100, Math.round((dailyCompleted / Math.max(1, dailyTarget)) * 100))}%`,
+                      }}
+                      transition={SPRING_SNAPPY}
+                      className="h-full rounded-full"
+                      style={{
+                        backgroundColor:
+                          dailyCompleted >= dailyTarget ? 'var(--gr)' : 'var(--pk)',
+                      }}
+                    />
+                  </div>
 
-                      {onResetTodayProgress && dailyCompleted > 0 && (
-                        <SpringButton
-                          size="sm"
-                          variant="soft"
-                          onClick={onResetTodayProgress}
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" />
-                          <span>Reset Today ({dailyCompleted})</span>
-                        </SpringButton>
-                      )}
+                  {/* Full-Width 5-Column Preset Selector Grid (Never squashed) */}
+                  {onUpdateDailyTarget && (
+                    <div className="grid grid-cols-5 gap-2 sm:gap-2.5 w-full pt-0.5">
+                      {GOAL_PRESETS.map((preset) => {
+                        const active = dailyTarget === preset;
+                        return (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => onUpdateDailyTarget(preset)}
+                            className="w-full py-2.5 px-2 rounded-xl text-xs sm:text-sm font-extrabold cursor-pointer tabular-nums text-center whitespace-nowrap transition-transform active:scale-95"
+                            style={{
+                              backgroundColor: active ? 'var(--yl)' : 'var(--bg)',
+                              color: active ? '#2D2D2B' : 'var(--ink)',
+                              border: active
+                                ? '2px solid #2D2D2B'
+                                : '1px solid var(--line)',
+                            }}
+                          >
+                            {preset} Qs
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

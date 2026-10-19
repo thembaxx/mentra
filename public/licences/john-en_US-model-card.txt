@@ -1,0 +1,15 @@
+Model Card: John (en_US-john-medium)
+====================================
+Engine: Piper Neural TTS (@diffusionstudio/piper-wasm + ONNX Runtime Web 1.18.0 Single-Thread SIMD)
+Voice Name: John
+Country / Accent: United States (en-US)
+Gender: Male (per dataset description)
+Quality Tier: Medium (~63.1 MB ONNX model + 4.9 KB JSON config)
+Shared Phonemizer/ONNX Engine: ~29.1 MB
+
+Licensing & Provenance
+----------------------
+- Training Data: Public-domain LibriVox recordings by John Van Stan.
+- Dataset Licence: Public Domain.
+- Model Repository Weights: MIT Licence (rhasspy/piper-voices pinned revision v1.0.0-9f8b2d4c).
+- Privacy: Runs 100% locally in a blob-backed Web Worker via Web Audio and Cache Storage. Reading text is never sent to any external model host.
