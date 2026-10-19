@@ -1,27 +1,36 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from 'recharts';
 import {
   Flame,
   Trophy,
   Plus,
   Minus,
   Check,
-  Sparkles,
   Play,
   RotateCcw,
   Target,
   BarChart3,
+  Activity,
 } from 'lucide-react';
 import { FlowerShape, StarburstShape } from './BrandMotifs';
 import {
   SpringButton,
-  BouncySurface,
   SPRING_SNAPPY,
   SPRING_BOUNCY,
 } from './PhysicsUI';
+import { DirectInspiredTooltipCard } from './WeeklyActivityReport';
 import { playSoundCue } from '@/lib/sound-effects';
 
 const PRESET_TARGETS = [3, 5, 10, 15, 20];
@@ -87,14 +96,93 @@ export function DailyStudyGoalCard({
   onOpenActivityReport,
 }: DailyStudyGoalCardProps) {
   const [isEditingGoal, setIsEditingGoal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const progressRatio = Math.min(1, targetCount > 0 ? completedCount / targetCount : 0);
   const progressPercent = Math.round(progressRatio * 100);
   const remaining = Math.max(0, targetCount - completedCount);
 
+  const miniTrendData = useMemo(() => {
+    const todayRuntime = Math.max(10, completedCount * 4 + 2);
+    const todayBestPractices = Math.max(4, completedCount * 2);
+    const todayVerification = Math.max(3, completedCount * 2 - 1);
+    const todayOther = Math.max(18, completedCount * 7 + 4);
+
+    return [
+      {
+        day: 'Mon',
+        dateLabel: 'Oct 13, 2026',
+        runtime: 12,
+        bestPractices: 8,
+        verification: 5,
+        other: 27,
+        totalUses: 52,
+      },
+      {
+        day: 'Tue',
+        dateLabel: 'Oct 14, 2026',
+        runtime: 15,
+        bestPractices: 7,
+        verification: 6,
+        other: 31,
+        totalUses: 59,
+      },
+      {
+        day: 'Wed',
+        dateLabel: 'Oct 15, 2026',
+        runtime: 14,
+        bestPractices: 6,
+        verification: 5,
+        other: 33,
+        totalUses: 58,
+      },
+      {
+        day: 'Thu',
+        dateLabel: 'Oct 16, 2026',
+        runtime: 18,
+        bestPractices: 9,
+        verification: 7,
+        other: 34,
+        totalUses: 68,
+      },
+      {
+        day: 'Fri',
+        dateLabel: 'Oct 17, 2026',
+        runtime: 16,
+        bestPractices: 8,
+        verification: 6,
+        other: 29,
+        totalUses: 59,
+      },
+      {
+        day: 'Sat',
+        dateLabel: 'Oct 18, 2026',
+        runtime: 21,
+        bestPractices: 11,
+        verification: 8,
+        other: 38,
+        totalUses: 78,
+      },
+      {
+        day: 'Today',
+        dateLabel: 'Oct 19, 2026',
+        runtime: todayRuntime,
+        bestPractices: todayBestPractices,
+        verification: todayVerification,
+        other: todayOther,
+        totalUses:
+          todayRuntime + todayBestPractices + todayVerification + todayOther,
+      },
+    ];
+  }, [completedCount]);
+
   return (
     <div
-      className="rounded-[28px] p-5 sm:p-7 relative overflow-hidden"
+      className="rounded-[28px] p-5 sm:p-7 relative overflow-hidden space-y-6 transition-colors"
       style={{
         backgroundColor: 'var(--card)',
         border: '1px solid var(--line)',
@@ -374,6 +462,201 @@ export function DailyStudyGoalCard({
               <BarChart3 className="w-3.5 h-3.5" />
               <span>View Weekly Activity Report</span>
             </SpringButton>
+          )}
+        </div>
+      </div>
+
+      {/* Interactive Theme-Aware Multi-Series Chart Strip with Direct-Inspired Tooltip */}
+      <div
+        className="relative z-10 rounded-2xl p-4 sm:p-5 space-y-3 transition-colors"
+        style={{
+          backgroundColor: 'var(--bg)',
+          border: '1px solid var(--line)',
+        }}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 shrink-0" style={{ color: 'var(--series-blue)' }} />
+            <span className="text-sm font-display font-extrabold">
+              Weekly Skill Telemetry
+            </span>
+            <span aria-hidden="true" style={{ color: 'var(--mute)' }}>
+              ·
+            </span>
+            <span className="text-xs" style={{ color: 'var(--mute)' }}>
+              Hover any day for detailed breakdown
+            </span>
+          </div>
+
+          {/* Series Legend (Clean unboxed inline metadata with colored dots) */}
+          <div className="flex flex-wrap items-center gap-4 text-xs" style={{ color: 'var(--mute)' }}>
+            {[
+              { label: 'Runtime', color: 'var(--series-blue)' },
+              { label: 'STEM Best Practices', color: 'var(--series-orange)' },
+              { label: 'Verification', color: 'var(--series-green)' },
+              { label: 'Other', color: 'var(--series-pink)' },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-1.5">
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: item.color }}
+                />
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="h-[185px] w-full">
+          {mounted ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={miniTrendData}
+                margin={{ top: 8, right: 14, left: -22, bottom: 0 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="4 4"
+                  vertical={false}
+                  stroke="var(--chart-grid)"
+                />
+                <XAxis
+                  dataKey="day"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: 'var(--mute)', fontSize: 12, fontWeight: 600 }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: 'var(--mute)', fontSize: 11, fontWeight: 600 }}
+                />
+                <Tooltip
+                  cursor={{
+                    stroke: 'var(--chart-cursor)',
+                    strokeWidth: 1.5,
+                    strokeDasharray: '4 4',
+                  }}
+                  content={({ active, payload }) => {
+                    if (!active || !payload || !payload.length) return null;
+                    const pt = payload[0].payload;
+                    return (
+                      <DirectInspiredTooltipCard
+                        headline={`${pt.totalUses} uses`}
+                        dateLabel={pt.dateLabel}
+                        rows={[
+                          {
+                            label: 'Runtime',
+                            value: pt.runtime,
+                            color: 'var(--series-blue)',
+                          },
+                          {
+                            label: 'STEM Best Practices',
+                            value: pt.bestPractices,
+                            color: 'var(--series-orange)',
+                          },
+                          {
+                            label: 'Verification',
+                            value: pt.verification,
+                            color: 'var(--series-green)',
+                          },
+                          {
+                            label: 'Other',
+                            value: pt.other,
+                            color: 'var(--series-pink)',
+                          },
+                        ]}
+                      />
+                    );
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="runtime"
+                  name="Runtime"
+                  stroke="var(--series-blue)"
+                  strokeWidth={2.5}
+                  dot={{
+                    r: 3.5,
+                    fill: 'var(--series-blue)',
+                    stroke: 'var(--bg)',
+                    strokeWidth: 1.5,
+                  }}
+                  activeDot={{
+                    r: 5.5,
+                    fill: 'var(--series-blue)',
+                    stroke: 'var(--tooltip-bg)',
+                    strokeWidth: 2,
+                  }}
+                  isAnimationActive
+                  animationDuration={650}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="bestPractices"
+                  name="STEM Best Practices"
+                  stroke="var(--series-orange)"
+                  strokeWidth={2.5}
+                  dot={{
+                    r: 3.5,
+                    fill: 'var(--series-orange)',
+                    stroke: 'var(--bg)',
+                    strokeWidth: 1.5,
+                  }}
+                  activeDot={{
+                    r: 5.5,
+                    fill: 'var(--series-orange)',
+                    stroke: 'var(--tooltip-bg)',
+                    strokeWidth: 2,
+                  }}
+                  isAnimationActive
+                  animationDuration={720}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="verification"
+                  name="Verification"
+                  stroke="var(--series-green)"
+                  strokeWidth={2.5}
+                  dot={{
+                    r: 3.5,
+                    fill: 'var(--series-green)',
+                    stroke: 'var(--bg)',
+                    strokeWidth: 1.5,
+                  }}
+                  activeDot={{
+                    r: 5.5,
+                    fill: 'var(--series-green)',
+                    stroke: 'var(--tooltip-bg)',
+                    strokeWidth: 2,
+                  }}
+                  isAnimationActive
+                  animationDuration={780}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="other"
+                  name="Other"
+                  stroke="var(--series-pink)"
+                  strokeWidth={2.5}
+                  dot={{
+                    r: 3.5,
+                    fill: 'var(--series-pink)',
+                    stroke: 'var(--bg)',
+                    strokeWidth: 1.5,
+                  }}
+                  activeDot={{
+                    r: 5.5,
+                    fill: 'var(--series-pink)',
+                    stroke: 'var(--tooltip-bg)',
+                    strokeWidth: 2,
+                  }}
+                  isAnimationActive
+                  animationDuration={840}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="w-full h-full rounded-xl animate-pulse bg-black/5" />
           )}
         </div>
       </div>
