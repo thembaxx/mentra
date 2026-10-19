@@ -898,7 +898,7 @@ export function FlashcardDeckStudio({
                       : 'e.g., Binomial theorem, Circle equations...'
                 }
                 aria-label="Custom flashcard topic"
-                className="w-full rounded-2xl px-4 py-3 text-sm bg-white/10 text-white placeholder:text-white/45 focus:outline-2 focus:outline-[var(--pk)]"
+                className="w-full rounded-2xl px-4 py-3 text-base bg-white/10 text-white placeholder:text-white/45 focus:outline-2 focus:outline-[var(--pk)]"
               />
 
               <SpringButton

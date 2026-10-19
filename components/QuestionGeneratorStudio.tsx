@@ -880,7 +880,7 @@ export function QuestionGeneratorStudio({
                         : 'math or exam topic'
                   }...`}
                   aria-label="Custom question topic"
-                  className="w-full bg-transparent text-sm sm:text-base font-medium focus:outline-none"
+                  className="w-full bg-transparent text-base font-medium focus:outline-none"
                   style={{ color: 'var(--ink)' }}
                 />
                 {customTopic && (
@@ -1310,8 +1310,8 @@ export function QuestionGeneratorStudio({
                           ? 'Type your isiZulu / Afrikaans sentence or grammar explanation...'
                           : 'Show your algebraic steps, KaTeX formula, or final numeric answer...'
                     }
-                    className={`w-full p-4 bg-transparent focus:outline-none resize-y text-[15px] leading-relaxed ${
-                      activeTrack === 'code' ? 'font-mono-code text-sm' : ''
+                    className={`w-full p-4 bg-transparent focus:outline-none resize-y text-base leading-relaxed ${
+                      activeTrack === 'code' ? 'font-mono-code' : ''
                     }`}
                     style={{ color: 'var(--ink)' }}
                   />
@@ -1682,7 +1682,7 @@ export function QuestionGeneratorStudio({
                     onChange={(e) => setFollowUpInput(e.target.value)}
                     placeholder="Speak or type a follow-up about any step..."
                     aria-label="Ask a follow-up question to the AI tutor"
-                    className="flex-1 rounded-full px-4 py-2.5 text-xs sm:text-sm bg-white/10 text-white placeholder:text-white/45 focus:outline-2 focus:outline-[var(--bl)]"
+                    className="flex-1 rounded-full px-4 py-2.5 text-base bg-white/10 text-white placeholder:text-white/45 focus:outline-2 focus:outline-[var(--bl)]"
                   />
                   <SpringButton
                     type="submit"

@@ -702,7 +702,7 @@ export function HomeworkAndNotesSection({
                       value={newNoteTitle}
                       onChange={(e) => setNewNoteTitle(e.target.value)}
                       placeholder="How to remember the unit circle & trig identities..."
-                      className="w-full rounded-2xl px-4 py-3 text-sm font-semibold focus:outline-2 focus:outline-[var(--pk)]"
+                      className="w-full rounded-2xl px-4 py-3 text-base font-semibold focus:outline-2 focus:outline-[var(--pk)]"
                       style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)' }}
                     />
                     <textarea
@@ -710,7 +710,7 @@ export function HomeworkAndNotesSection({
                       value={newNoteContent}
                       onChange={(e) => setNewNoteContent(e.target.value)}
                       placeholder="Rule 1: Write your key formula, mnemonic, or code pattern..."
-                      className="w-full rounded-2xl p-4 text-sm focus:outline-2 focus:outline-[var(--pk)]"
+                      className="w-full rounded-2xl p-4 text-base focus:outline-2 focus:outline-[var(--pk)]"
                       style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)' }}
                     />
                     <div className="flex gap-2">
@@ -928,7 +928,7 @@ export function CatalogExplorerView({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search trig, algorithms..."
-              className="bg-transparent text-xs sm:text-sm w-full focus:outline-none"
+              className="bg-transparent text-base w-full focus:outline-none"
               style={{ color: 'var(--ink)' }}
             />
           </div>
@@ -1157,7 +1157,7 @@ export function CatalogExplorerView({
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
                       placeholder="Promo code (try MATRIC20)"
-                      className="flex-1 rounded-full px-4 py-2.5 text-sm font-medium focus:outline-2 focus:outline-[var(--pk)]"
+                      className="flex-1 rounded-full px-4 py-2.5 text-base font-medium focus:outline-2 focus:outline-[var(--pk)]"
                       style={{ backgroundColor: 'var(--card)', color: 'var(--ink)' }}
                     />
                     <SpringButton size="sm" variant="pink" onClick={handleApplyPromo}>

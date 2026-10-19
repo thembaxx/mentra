@@ -86,6 +86,12 @@ h1, h2, h3, h4, .font-display {
   font-family: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
 /* Custom scrollbar hiding for horizontal pill/tile rows */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

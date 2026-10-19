@@ -317,7 +317,7 @@ export function GlobalSearchBar({
           placeholder="Search topics, flashcards, curriculum..."
           aria-label="Global search for topics, flashcards, and curriculum"
           aria-expanded={isOpen}
-          className="w-full bg-transparent text-xs sm:text-sm font-medium focus:outline-none truncate"
+          className="w-full bg-transparent text-base font-medium focus:outline-none truncate"
           style={{ color: 'var(--ink)' }}
         />
 
