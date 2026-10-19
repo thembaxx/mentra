@@ -76,58 +76,82 @@ export const INITIAL_QUESTIONS: Record<TrackId, PracticeQuestion[]> = {
     {
       id: 'exam-1',
       track: 'exam',
-      topic: 'Linear equations',
-      difficulty: 'Easy',
-      prompt: 'If 3x + 7 = 2x + 19, what is the value of 5x − 4? Show your algebraic reasoning or select the final value.',
-      options: ['46', '52', '56', '60'],
-      correctOptionIndex: 2,
-      okKeywords: ['56', 'x = 12', 'x=12'],
-      partialKeywords: ['12', '3x - 2x', '60'],
-      hint: 'Solve for x first by subtracting 2x from both sides, then substitute x into 5x − 4.',
+      topic: 'Quadratic & nature of roots',
+      difficulty: 'Medium',
+      prompt:
+        'Grade 12 NSC Paper 1: The parabola $f(x) = x^2 - 6x + k$ has its turning point on the horizontal line $y = 4$. Determine the value of the constant $k$ and state the nature of the roots of $f(x) = 0$.',
+      options: [
+        '$k = 9$ (equal real roots)',
+        '$k = 13$ (non-real roots, $\\Delta < 0$)',
+        '$k = 15$ (rational roots)',
+        '$k = -5$ (two distinct real roots)',
+      ],
+      correctOptionIndex: 1,
+      okKeywords: ['13', 'k = 13', 'k=13', 'non-real'],
+      partialKeywords: ['x = 3', 'x=3', '(x - 3)', 'turning point', '-b/2a'],
+      hint: 'Find the turning point axis of symmetry using $x = -\\frac{b}{2a}$, substitute $(3, 4)$ into $f(x)$, and check $\\Delta = b^2 - 4ac$.',
       steps:
-        'Step 1: Group the x terms on the left side. Subtract 2x from both sides:\n3x − 2x + 7 = 19  ⇒  x + 7 = 19.\n\nStep 2: Isolate x by subtracting 7 from both sides:\nx = 19 − 7 = 12.\n\nStep 3: Substitute x = 12 into the target expression 5x − 4:\n5(12) − 4 = 60 − 4 = 56.\n\nVerification: Left side = 3(12) + 7 = 43. Right side = 2(12) + 19 = 43. Both sides match!',
+        'Step 1: Find the $x$-coordinate of the turning point using $x = -\\frac{b}{2a}$:\nHere $a = 1$ and $b = -6$, so $$x = -\\frac{-6}{2(1)} = 3$$\n\nStep 2: Since the turning point lies on the line $y = 4$, the minimum turning point is $(3, 4)$. Substitute $x = 3$ and $y = 4$ into $f(x) = x^2 - 6x + k$:\n$$4 = (3)^2 - 6(3) + k \\implies 4 = 9 - 18 + k \\implies k = 13$$\n\nStep 3: Check the discriminant $\\Delta = b^2 - 4ac$ for $x^2 - 6x + 13 = 0$:\n$$\\Delta = (-6)^2 - 4(1)(13) = 36 - 52 = -16 < 0$$\n\nVerification: Because $\\Delta < 0$ and the minimum value is $y = 4 > 0$, the parabola never intersects the $x$-axis, so $k = 13$ gives non-real roots.',
     },
     {
       id: 'exam-2',
       track: 'exam',
-      topic: 'Word problems',
+      topic: 'Financial maths (Annuities)',
       difficulty: 'Medium',
-      prompt: 'A mobile plan costs $20 per month plus $0.05 per minute of call time. For how many minutes m does a monthly bill equal exactly $32.50?',
-      options: ['180 minutes', '225 minutes', '250 minutes', '275 minutes'],
-      correctOptionIndex: 2,
-      okKeywords: ['250'],
-      partialKeywords: ['12.5', '12.50', '0.05m'],
-      hint: 'Set up the linear equation 20 + 0.05m = 32.50, then isolate m.',
+      prompt:
+        'Grade 12 NSC Paper 1: Thabo sets up a sinking fund to save $\\text{R}180\\,000$ for a solar inverter system in Johannesburg. If the account earns $12\\%$ p.a. compounded monthly ($i = 0.01$ per month) over $n = 36$ months, which formula gives his required monthly deposit $x$?',
+      options: [
+        '$x = \\frac{180\\,000 \\times 0.01}{(1 + 0.01)^{36} - 1} \\approx \\text{R}4\\,178.57$',
+        '$x = \\frac{180\\,000 \\times 0.01}{1 - (1 + 0.01)^{-36}} \\approx \\text{R}5\\,978.57$',
+        '$x = \\frac{180\\,000}{36 \\times 1.01} \\approx \\text{R}4\\,950.50$',
+        '$x = 180\\,000(1 + 0.01)^{-36} \\approx \\text{R}125\\,806.45$',
+      ],
+      correctOptionIndex: 0,
+      okKeywords: ['4178', '4 178', 'future value', '(1 + 0.01)^36 - 1', '1.01^36'],
+      partialKeywords: ['0.01', '36', 'annuity', 'sinking fund'],
+      hint: 'Use the NSC Future Value Annuity formula $F = \\frac{x[(1 + i)^n - 1]}{i}$ with $F = 180\\,000$, $i = \\frac{0.12}{12} = 0.01$, and $n = 36$.',
       steps:
-        'Step 1: Translate the billing structure into an algebraic equation:\nTotal Cost = Base Fee + (Rate × Minutes)\n20 + 0.05m = 32.50.\n\nStep 2: Subtract the $20 flat monthly fee from both sides:\n0.05m = 12.50.\n\nStep 3: Divide both sides by 0.05 (which is equivalent to multiplying by 20):\nm = 12.50 / 0.05 = 250 minutes.\n\nVerification: $20 + $0.05 × 250 = $20 + $12.50 = $32.50.',
+        'Step 1: Identify the NSC Future Value Annuity formula from the Grade 12 formula sheet:\n$$F = \\frac{x\\left[(1 + i)^n - 1\\right]}{i}$$\n\nStep 2: Substitute $F = 180\\,000$, monthly interest rate $i = \\frac{0.12}{12} = 0.01$, and $n = 36$ monthly payments:\n$$180\\,000 = \\frac{x\\left[(1 + 0.01)^{36} - 1\\right]}{0.01}$$\n\nStep 3: Make $x$ the subject of the formula:\n$$x = \\frac{180\\,000 \\times 0.01}{(1.01)^{36} - 1} = \\frac{1\\,800}{0.43076878} \\approx \\text{R}4\\,178.57\\text{ per month}$$\n\nVerification: Over $36$ months, Thabo contributes $36 \\times \\text{R}4\\,178.57 = \\text{R}150\\,428.52$ in capital and earns $\\text{R}29\\,571.48$ in compound interest.',
     },
     {
       id: 'exam-3',
       track: 'exam',
-      topic: 'Quadratic functions',
+      topic: 'Calculus & cubic graphs',
       difficulty: 'Hard',
-      prompt: 'The parabola y = x² − 6x + k has its vertex on the line y = 4. What is the value of the constant k?',
-      options: ['k = 9', 'k = 13', 'k = 15', 'k = −5'],
-      correctOptionIndex: 1,
-      okKeywords: ['13', 'k = 13', 'k=13'],
-      partialKeywords: ['x = 3', 'x=3', '(x - 3)', 'vertex'],
-      hint: 'Complete the square or use the vertex x-coordinate formula x = −b / (2a) to find where the minimum occurs.',
+      prompt:
+        'Grade 12 NSC Paper 1: Given the cubic function $f(x) = -x^3 + 6x^2 - 9x + 4$, determine the $x$-coordinates of the stationary (turning) points where $f\'(x) = 0$ and the $x$-coordinate of the point of inflection.',
+      options: [
+        'Turning points at $x = 1$ and $x = 3$; inflection at $x = 2$',
+        'Turning points at $x = -1$ and $x = 3$; inflection at $x = 1$',
+        'Turning points at $x = 0$ and $x = 4$; inflection at $x = 2$',
+        'Turning points at $x = 1$ and $x = 4$; inflection at $x = 2.5$',
+      ],
+      correctOptionIndex: 0,
+      okKeywords: ['x = 1', 'x = 3', 'x=1', 'x=3', 'inflection at x = 2', 'x = 2'],
+      partialKeywords: ['-3x^2 + 12x - 9', 'derivative', 'f\'(x) = 0'],
+      hint: 'Differentiate $f(x)$ using power rules to get $f\'(x) = -3x^2 + 12x - 9 = 0$, then solve for $x$. For inflection, solve $f\'\'(x) = 0$.',
       steps:
-        'Step 1: Find the x-coordinate of the vertex using x = −b / (2a):\nHere a = 1 and b = −6, so x = −(−6) / (2 × 1) = 3.\n\nStep 2: Since the vertex lies on the horizontal line y = 4, the vertex coordinates must be (3, 4).\n\nStep 3: Substitute x = 3 and y = 4 into the parabola equation:\n4 = (3)² − 6(3) + k\n4 = 9 − 18 + k\n4 = −9 + k  ⇒  k = 13.',
+        'Step 1: Differentiate $f(x) = -x^3 + 6x^2 - 9x + 4$ with respect to $x$:\n$$f\'(x) = -3x^2 + 12x - 9$$\n\nStep 2: Set $f\'(x) = 0$ to find the stationary points and divide through by $-3$:\n$$-3(x^2 - 4x + 3) = 0 \\implies (x - 1)(x - 3) = 0$$\nTherefore, the stationary points occur at $x = 1$ and $x = 3$.\n\nStep 3: Find the second derivative $f\'\'(x)$ and set $f\'\'(x) = 0$ for the point of inflection:\n$$f\'\'(x) = -6x + 12 = 0 \\implies x = 2$$\n\nVerification: Notice that $x = 2$ is also the midpoint $\\frac{1 + 3}{2} = 2$ between the two stationary points of a cubic parabola!',
     },
     {
       id: 'exam-4',
       track: 'exam',
-      topic: 'Probability & combinatorics',
+      topic: 'Physical Sciences (Mechanics & Doppler)',
       difficulty: 'Hard',
-      prompt: 'A bag contains 4 red marbles and 6 blue marbles. If two marbles are drawn at random without replacement, what is the probability that both marbles are red?',
-      options: ['2/15', '4/25', '1/6', '3/10'],
+      prompt:
+        'Grade 12 NSC Physical Sciences Paper 1: An emergency ambulance in Pretoria approaches a stationary listener at $v_S = 30\\text{ m}\\cdot\\text{s}^{-1}$ while emitting a siren of frequency $f_S = 850\\text{ Hz}$. Take the speed of sound in air as $v = 340\\text{ m}\\cdot\\text{s}^{-1}$. Calculate the frequency $f_L$ heard by the stationary listener.',
+      options: [
+        '$f_L = 932.26\\text{ Hz}$',
+        '$f_L = 781.08\\text{ Hz}$',
+        '$f_L = 850.00\\text{ Hz}$',
+        '$f_L = 918.50\\text{ Hz}$',
+      ],
       correctOptionIndex: 0,
-      okKeywords: ['2/15', '12/90', '0.133'],
-      partialKeywords: ['4/10', '3/9', 'without replacement'],
-      hint: 'Multiply the probability of drawing a red marble first (4/10) by the conditional probability of drawing a second red marble (3/9).',
+      okKeywords: ['932.26', '932.3', '340 / 310', '340/310'],
+      partialKeywords: ['doppler', '340 - 30', '310', 'f_l'],
+      hint: 'Use the NSC Doppler equation $f_L = \\frac{v \\pm v_L}{v \\pm v_S} f_S$. Since the source moves TOWARDS a stationary listener ($v_L = 0$), use the minus sign in the denominator ($v - v_S$).',
       steps:
-        'Step 1: Probability that the first marble is red:\nP(R₁) = 4 / 10 = 2 / 5.\n\nStep 2: After removing one red marble, 3 red marbles remain out of 9 total marbles:\nP(R₂ | R₁) = 3 / 9 = 1 / 3.\n\nStep 3: Multiply the two probabilities:\nP(R₁ and R₂) = (2 / 5) × (1 / 3) = 2 / 15.',
+        'Step 1: Write down the official NSC Doppler Effect formula from the Physical Sciences data sheet:\n$$f_L = \\frac{v \\pm v_L}{v \\pm v_S} f_S$$\n\nStep 2: The listener is stationary ($v_L = 0$) and the ambulance approaches the listener, compressing wavefronts so the observed frequency increases (subtract $v_S$ in the denominator):\n$$f_L = \\left(\\frac{v}{v - v_S}\\right) f_S$$\n\nStep 3: Substitute $v = 340\\text{ m}\\cdot\\text{s}^{-1}$, $v_S = 30\\text{ m}\\cdot\\text{s}^{-1}$, and $f_S = 850\\text{ Hz}$:\n$$f_L = \\left(\\frac{340}{340 - 30}\\right) \\times 850 = \\frac{340}{310} \\times 850 \\approx 932.26\\text{ Hz}$$\n\nVerification: Since $932.26\\text{ Hz} > 850\\text{ Hz}$, the pitch is higher as the ambulance approaches, matching physical intuition.',
     },
   ],
   code: [
@@ -136,114 +160,125 @@ export const INITIAL_QUESTIONS: Record<TrackId, PracticeQuestion[]> = {
       track: 'code',
       topic: 'Two pointers',
       difficulty: 'Medium',
-      prompt: 'Given a 1-indexed sorted array of integers and a target sum, find the indices of two numbers that add up to target in O(n) time and O(1) auxiliary space. Explain your algorithm or write pseudocode.',
+      prompt:
+        'Given a 1-indexed sorted array of transaction amounts in ZAR and a target sum, find the indices of two transactions that add up to target in $\\mathcal{O}(n)$ time and $\\mathcal{O}(1)$ auxiliary space. Explain your algorithm or write pseudocode.',
       options: [
-        'Nested loops checking every pair in O(n²) time',
-        'Hash map storing complements in O(n) space',
-        'Two pointers starting at left = 0 and right = n - 1 moving inward',
-        'Binary search for each element in O(n log n) time',
+        'Nested loops checking every pair in $\\mathcal{O}(n^2)$ time',
+        'Hash map storing complements in $\\mathcal{O}(n)$ extra space',
+        'Two pointers starting at $L = 0$ and $R = n - 1$ moving inward in $\\mathcal{O}(n)$ time',
+        'Binary search for each element in $\\mathcal{O}(n \\log n)$ time',
       ],
       correctOptionIndex: 2,
       okKeywords: ['two pointer', 'two-pointer', 'left', 'right', 'inward'],
       partialKeywords: ['sorted', 'sum', 'o(n)', 'o(1)'],
-      hint: 'Place one pointer at the smallest element (start) and one at the largest element (end). How does their sum compare to target?',
-      starterCode: `function twoSumSorted(nums: number[], target: number): [number, number] {\n  let left = 0;\n  let right = nums.length - 1;\n  // Complete your O(n) time, O(1) space logic:\n  \n}`,
+      hint: 'Place one pointer at the smallest element ($L = 0$) and one at the largest element ($R = n - 1$). How does their sum $A[L] + A[R]$ compare to target?',
+      starterCode: `function twoSumSortedZAR(amounts: number[], target: number): [number, number] {\n  let left = 0;\n  let right = amounts.length - 1;\n  // Complete your O(n) time, O(1) space logic:\n  \n}`,
       steps:
-        'Step 1: Initialize two pointers at opposite ends of the sorted array: left = 0 and right = n − 1.\n\nStep 2: In a while (left < right) loop, compute currentSum = nums[left] + nums[right].\n\nStep 3: Compare currentSum with target:\n• If currentSum === target, return [left + 1, right + 1].\n• If currentSum < target, we need a larger sum, so increment left++.\n• If currentSum > target, we need a smaller sum, so decrement right--.\n\nStep 4: Complexity Analysis: Each step moves at least one pointer inward, visiting at most n elements → O(n) time and O(1) extra memory.',
+        'Step 1: Initialize two pointers at opposite ends of the sorted array: $L = 0$ and $R = n - 1$.\n\nStep 2: In a `while (L < R)` loop, compute $\\text{sum} = A[L] + A[R]$.\n\nStep 3: Compare $\\text{sum}$ with $\\text{target}$:\n• If $\\text{sum} = \\text{target}$, return $[L + 1, R + 1]$.\n• If $\\text{sum} < \\text{target}$, we need a larger value, so increment $L \\leftarrow L + 1$.\n• If $\\text{sum} > \\text{target}$, we need a smaller value, so decrement $R \\leftarrow R - 1$.\n\nStep 4: Complexity Analysis: Each step moves at least one pointer inward, visiting at most $n$ elements $\\implies \\mathcal{O}(n)$ time and $\\mathcal{O}(1)$ auxiliary memory.',
     },
     {
       id: 'code-2',
       track: 'code',
       topic: 'Linked lists',
       difficulty: 'Medium',
-      prompt: 'How do you detect whether a singly linked list contains a cycle using strictly O(1) extra memory? Describe the pointer speeds and why they are guaranteed to meet.',
+      prompt:
+        'How do you detect whether a singly linked list contains a cycle using strictly $\\mathcal{O}(1)$ extra memory? Describe the pointer speeds and why they are guaranteed to meet.',
       options: [
-        'Store visited node references in a Set',
-        'Floyd Tortoise & Hare: slow moves 1 step, fast moves 2 steps',
+        'Store visited node references in a Set in $\\mathcal{O}(n)$ space',
+        'Floyd Tortoise & Hare: slow moves $1$ step, fast moves $2$ steps ($\\Delta v = 1$)',
         'Reverse the linked list and compare heads',
-        'Count total nodes up to 10,000 iterations',
+        'Count total nodes up to $10\\,000$ iterations',
       ],
       correctOptionIndex: 1,
       okKeywords: ['slow', 'fast', 'floyd', 'tortoise', 'hare', '2 steps'],
       partialKeywords: ['pointer', 'cycle', 'null'],
-      hint: 'Use two pointers moving at different speeds (1x and 2x). What happens once both enter the cycle?',
+      hint: 'Use two pointers moving at different speeds ($1\\times$ and $2\\times$). What is the relative closing speed once both enter a cycle of length $C$?',
       starterCode: `function hasCycle(head: ListNode | null): boolean {\n  let slow = head;\n  let fast = head;\n  // Write the loop condition and pointer updates:\n  \n}`,
       steps:
-        'Step 1: Initialize two pointers at the head of the list: slow = head and fast = head.\n\nStep 2: Advance slow by 1 node (slow = slow.next) and fast by 2 nodes (fast = fast.next.next) while fast and fast.next are non-null.\n\nStep 3: If fast reaches null, the list terminates and has no cycle (return false).\n\nStep 4: Why they must meet: Once both pointers are inside the cycle, fast closes the distance to slow by exactly 1 link per iteration (2 − 1 = 1). Therefore, fast can never jump over slow without landing on the exact same node in O(n) time and O(1) space.',
+        'Step 1: Initialize two pointers at the head of the list: `slow = head` and `fast = head`.\n\nStep 2: Advance `slow` by $1$ node (`slow = slow.next`) and `fast` by $2$ nodes (`fast = fast.next.next`) while `fast` and `fast.next` are non-null.\n\nStep 3: If `fast` reaches `null`, the list terminates and has no cycle (return `false`).\n\nStep 4: Mathematical Proof: Once both pointers are inside a cycle of length $C$, the relative speed is $v_{\\text{rel}} = 2 - 1 = 1$ link per step. Thus `fast` closes the gap $d \\pmod C$ by $1$ node per iteration and must land on `slow` in $\\mathcal{O}(n)$ time and $\\mathcal{O}(1)$ space.',
     },
     {
       id: 'code-3',
       track: 'code',
       topic: 'Sliding window',
       difficulty: 'Hard',
-      prompt: 'Given a string s, find the length of the longest substring without repeating characters in O(n) time. Explain how the window expands and contracts.',
+      prompt:
+        'Given a string $s$, find the length of the longest substring without repeating characters in $\\mathcal{O}(n)$ time. Explain how the window $[L, R]$ expands and contracts.',
       options: [
-        'Generate all substrings and check uniqueness in O(n³)',
-        'Maintain [left, right] window with a Map of last-seen character indices',
-        'Sort the string characters alphabetically first',
+        'Generate all substrings and check uniqueness in $\\mathcal{O}(n^3)$',
+        'Maintain $[L, R]$ window with a Map of last-seen character indices in $\\mathcal{O}(n)$ time',
+        'Sort the string characters alphabetically in $\\mathcal{O}(n \\log n)$',
         'Divide and conquer recursion on midpoint',
       ],
       correctOptionIndex: 1,
       okKeywords: ['window', 'left', 'right', 'map', 'set', 'last'],
       partialKeywords: ['substring', 'duplicate', 'repeat'],
-      hint: 'Maintain a sliding window [left, right] and a Map or Set of characters currently inside the window.',
+      hint: 'Maintain a sliding window $[L, R]$ of length $R - L + 1$ and a Map of characters currently inside the window.',
       starterCode: `function lengthOfLongestSubstring(s: string): number {\n  const seen = new Map<string, number>();\n  let left = 0, maxLen = 0;\n  // Expand right pointer and update left:\n  \n}`,
       steps:
-        'Step 1: Maintain a sliding window [left, right] and a hash map `seen` mapping each character to its most recent index.\n\nStep 2: Iterate `right` from 0 to s.length − 1. If s[right] is in `seen` and its previous index ≥ left, jump `left` directly to `seen.get(s[right]) + 1`.\n\nStep 3: Record `seen.set(s[right], right)` and update `maxLen = Math.max(maxLen, right − left + 1)`.\n\nStep 4: Both pointers move strictly forward, giving O(n) time and O(min(n, alphabet)) space.',
+        'Step 1: Maintain a sliding window $[L, R]$ and a hash map `seen` mapping each character to its most recent index.\n\nStep 2: Iterate $R$ from $0$ to $n - 1$. If $s[R]$ is in `seen` and its previous index $idx \\ge L$, jump $L$ directly to $\\max(L, idx + 1)$.\n\nStep 3: Record `seen.set(s[R], R)` and update $\\text{maxLen} = \\max(\\text{maxLen}, R - L + 1)$.\n\nStep 4: Both pointers move strictly forward across $n$ indices, giving $\\mathcal{O}(n)$ time and $\\mathcal{O}(\\min(n, |\\Sigma|))$ space.',
     },
   ],
   lang: [
     {
       id: 'lang-1',
       track: 'lang',
-      topic: 'Ongoing actions (Llevar + Gerund)',
+      topic: 'isiZulu Noun Classes (Amabizo)',
       difficulty: 'Easy',
-      prompt: 'Translate into natural Spanish: "I have been studying Spanish for two years." Explain which idiomatic verb construction expresses ongoing duration.',
+      prompt:
+        'SA Languages (isiZulu FAL/HL): Transform the singular sentence "Umfundi uyafunda" (The learner is studying — Class 1 umu-/um-) into the plural (Class 2 aba-) and explain the subject concord change.',
       options: [
-        'Yo estudio español por dos años.',
-        'Llevo dos años estudiando español.',
-        'Fui estudiando español dos años.',
-        'Tengo dos años estudiar español.',
+        'Imifundi iyafunda.',
+        'Abafundi bayafunda.',
+        'Amakholwa ayafunda.',
+        'Izifundi ziyafunda.',
       ],
       correctOptionIndex: 1,
-      okKeywords: ['llevo dos años', 'llevo 2 años', 'hace dos años que estudio'],
-      partialKeywords: ['llevo', 'dos años', 'estudiando'],
-      hint: 'Spanish uses "llevar + [time period] + gerund (-ando/-iendo)" for actions that started in the past and continue now.',
+      okKeywords: ['abafundi bayafunda', 'abafundi', 'baya', 'ba-'],
+      partialKeywords: ['plural', 'aba-', 'concord', 'isivumelwano'],
+      hint: 'Class 1 personal nouns starting with "um-" take the plural prefix "aba-" in Class 2, and the subject concord changes from "u-" (uya-) to "ba-" (baya-).',
       steps:
-        'Step 1: Recognize the English present perfect continuous ("have been studying"), which emphasizes duration continuing into the present.\n\nStep 2: Use the idiomatic Spanish structure: llevar (conjugated in present) + duration + gerund.\n• First-person singular of llevar → Llevo\n• Duration → dos años\n• Gerund of estudiar → estudiando\n\nStep 3: Combine into the complete sentence:\n"Llevo dos años estudiando español." (Alternative valid structure: "Hace dos años que estudio español.")',
+        'Step 1: Identify the noun class of "umfundi" (learner/student). It belongs to Class 1 (umu-/um-), which designates people in the singular.\n\nStep 2: Form the Class 2 plural by replacing the singular prefix "um-" with "aba-":\n• umfundi → abafundi (learners/students).\n\nStep 3: Match the verb’s subject concord (isivumelwano senhloko) to Class 2:\n• Class 1 present long form: u- + -ya- + funda → uyafunda\n• Class 2 present long form: ba- + -ya- + funda → bayafunda.\n\nFinal Sentence: "Abafundi bayafunda." (The learners are studying.)',
     },
     {
       id: 'lang-2',
       track: 'lang',
-      topic: 'Conditionals & Subjunctive',
+      topic: 'Afrikaans Tye & STOMPI',
       difficulty: 'Medium',
-      prompt: 'Complete the hypothetical Spanish sentence and explain the mood: "Si yo ___ (tener) más tiempo libre, viajaría por todo el mundo."',
-      options: ['tengo', 'tendría', 'tuviera', 'había tenido'],
-      correctOptionIndex: 2,
-      okKeywords: ['tuviera', 'tuviese'],
-      partialKeywords: ['subjunctive', 'imperfect', 'viajaría', 'tendría'],
-      hint: 'Never use the conditional tense immediately after "si" in a contrary-to-fact condition; pair the imperfect subjunctive with the conditional.',
+      prompt:
+        'SA Languages (Afrikaans FAL Paper 1): Rewrite the present-tense sentence in the Verledetyd (Past Tense) using the STOMPI word-order rule: "Sipho skryf vandag sy Wiskunde-eksamen in die saal."',
+      options: [
+        'Sipho skryf gister sy Wiskunde-eksamen in die saal geskryf.',
+        'Sipho het vandag sy Wiskunde-eksamen in die saal geskryf.',
+        'Sipho het geskryf vandag sy Wiskunde-eksamen in die saal.',
+        'Vandag Sipho het sy Wiskunde-eksamen in die saal geskryf.',
+      ],
+      correctOptionIndex: 1,
+      okKeywords: ['het vandag sy wiskunde-eksamen in die saal geskryf', 'het', 'geskryf'],
+      partialKeywords: ['stompi', 'verledetyd', 'ge-'],
+      hint: 'In Afrikaans Verledetyd, place the helping verb "het" in the Verb 1 position (after Subject) and move the main verb with prefix "ge-" (geskryf) to the very end of the sentence (Verb 2).',
       steps:
-        'Step 1: Identify the main clause verb: "viajaría" (conditional tense: "I would travel"). This signals a hypothetical or contrary-to-fact situation in the present.\n\nStep 2: In Spanish "si" (if) clauses expressing unlikely or contrary-to-fact conditions, the "si" clause requires the Imperfect Subjunctive (never the conditional).\n\nStep 3: Derive the imperfect subjunctive of "tener":\n• 3rd person plural preterite: tuvieron\n• Drop "-ron" → tuvie-\n• Add "-ra" (or "-se") → tuviera (or tuviese).\n\nFinal Sentence: "Si yo tuviera más tiempo libre, viajaría por todo el mundo."',
+        'Step 1: Recall the Afrikaans STOMPI rule:\nSubject · Verb 1 · Time (vandag) · Object (sy Wiskunde-eksamen) · Manner · Place (in die saal) · Verb 2 / Infinitive.\n\nStep 2: To convert to Verledetyd (past tense), insert the auxiliary verb "het" in the Verb 1 slot immediately after the subject "Sipho".\n\nStep 3: Add the past participle prefix "ge-" to the main verb "skryf" → "geskryf" and move it to the final Verb 2 slot at the end of the clause:\n"Sipho het vandag sy Wiskunde-eksamen in die saal geskryf."',
     },
     {
       id: 'lang-3',
       track: 'lang',
-      topic: 'Por vs. Para Mastery',
+      topic: 'isiZulu Past & Future Tenses',
       difficulty: 'Hard',
-      prompt: 'Fill in both blanks with "por" or "para" and justify each choice: "Pagué veinte dólares ___ el libro que compré ___ el cumpleaños de mi hermana."',
+      prompt:
+        'SA Languages (isiZulu Grammar): How do you express the definite future tense "We will write the examination tomorrow" in natural isiZulu using the "-zo-" future infix?',
       options: [
-        'por ... para',
-        'para ... por',
-        'por ... por',
-        'para ... para',
+        'Sibhala ukuhlolwa kusasa.',
+        'Sizobhala ukuhlolwa kusasa.',
+        'Sabhala ukuhlolwa izolo.',
+        'Singabhala ukuhlolwa kusasa.',
       ],
-      correctOptionIndex: 0,
-      okKeywords: ['por el libro', 'para el cumpleaños', 'por ... para', 'por, para'],
-      partialKeywords: ['exchange', 'recipient', 'por', 'para'],
-      hint: 'Which preposition expresses financial exchange ("in exchange for"), and which expresses a recipient or goal/occasion?',
+      correctOptionIndex: 1,
+      okKeywords: ['sizobhala', 'ukuhlolwa kusasa', '-zo-'],
+      partialKeywords: ['si-', 'bhala', 'kusasa', 'future'],
+      hint: 'Combine the 1st person plural subject concord "si-" (we) + immediate future marker "-zo-" + verb stem "-bhala" (write).',
       steps:
-        'Step 1: First blank — "Pagué veinte dólares ___ el libro".\nFinancial transactions and exchanges ("in exchange for") always take POR → "por el libro".\n\nStep 2: Second blank — "...que compré ___ el cumpleaños de mi hermana".\nIntended recipients, destinations, and future occasions/deadlines take PARA → "para el cumpleaños".\n\nStep 3: Complete sentence:\n"Pagué veinte dólares por el libro que compré para el cumpleaños de mi hermana."',
+        'Step 1: Identify the components of the isiZulu future tense (Inkathi ezayo):\n[Subject Concord] + [-zo- (definite/near future)] + [Verb Stem].\n\nStep 2: Assemble the verb "we will write":\n• "We" (thina) subject concord → si-\n• Future tense infix → -zo-\n• Verb root "write" → -bhala\n• Combined verb → Sizobhala.\n\nStep 3: Add the object "ukuhlolwa" (the examination) and time adverb "kusasa" (tomorrow):\n"Sizobhala ukuhlolwa kusasa."',
     },
   ],
 };
@@ -251,9 +286,9 @@ export const INITIAL_QUESTIONS: Record<TrackId, PracticeQuestion[]> = {
 export const PRACTICE_SETS: PracticeSetItem[] = [
   {
     id: 'set-linear',
-    title: 'Linear equations & systems',
+    title: 'NSC Paper 1: Quadratics & Δ Roots',
     track: 'exam',
-    topic: 'Linear equations',
+    topic: 'Quadratic & nature of roots',
     dueLabel: 'Due Friday',
     progress: 75,
     score: 9.8,
@@ -263,7 +298,7 @@ export const PRACTICE_SETS: PracticeSetItem[] = [
   },
   {
     id: 'set-pointers',
-    title: 'Two pointers & arrays',
+    title: 'Two Pointers & O(n) Array Scans',
     track: 'code',
     topic: 'Two pointers',
     dueLabel: 'Due Sunday',
@@ -275,9 +310,9 @@ export const PRACTICE_SETS: PracticeSetItem[] = [
   },
   {
     id: 'set-conditionals',
-    title: 'Subjunctive conditionals',
+    title: 'isiZulu Amabizo & Subject Concords',
     track: 'lang',
-    topic: 'Conditionals & Subjunctive',
+    topic: 'isiZulu Noun Classes (Amabizo)',
     dueLabel: 'Due Monday',
     progress: 88,
     score: 10.0,
@@ -287,9 +322,9 @@ export const PRACTICE_SETS: PracticeSetItem[] = [
   },
   {
     id: 'set-word-problems',
-    title: 'Rate & mixture word problems',
+    title: 'Financial Maths: ZAR Annuities & Loans',
     track: 'exam',
-    topic: 'Word problems',
+    topic: 'Financial maths (Annuities)',
     dueLabel: 'Due Tuesday',
     progress: 38,
     score: 8.6,
@@ -299,7 +334,7 @@ export const PRACTICE_SETS: PracticeSetItem[] = [
   },
   {
     id: 'set-sliding-window',
-    title: 'Sliding window substrings',
+    title: 'Sliding Window Substrings',
     track: 'code',
     topic: 'Sliding window',
     dueLabel: 'Completed',
@@ -311,9 +346,9 @@ export const PRACTICE_SETS: PracticeSetItem[] = [
   },
   {
     id: 'set-por-para',
-    title: 'Por vs. Para idioms',
+    title: 'Afrikaans FAL: STOMPI & Tye',
     track: 'lang',
-    topic: 'Por vs. Para Mastery',
+    topic: 'Afrikaans Tye & STOMPI',
     dueLabel: 'Completed',
     progress: 100,
     score: 9.5,
@@ -326,34 +361,34 @@ export const PRACTICE_SETS: PracticeSetItem[] = [
 export const INITIAL_STUDY_NOTES: StudyNoteItem[] = [
   {
     id: 'note-1',
-    title: 'Fast Mental Math & Factoring Lifehacks',
-    category: 'Exam prep',
+    title: 'NSC Maths Paper 1: Nature of Roots & Calculus Checklist',
+    category: 'NSC / IEB STEM',
     dateLabel: 'Updated Oct 14',
-    summary: 'Difference of squares and Vieta formulas for 10-second quadratic roots.',
+    summary: 'Discriminant $\\Delta = b^2 - 4ac$ rules and cubic stationary/inflection shortcuts.',
     content:
-      'Rule 1: For x² + bx + c = 0, the sum of roots is −b and the product is c.\nRule 2: Always check x = 1 (sum of coefficients = 0) before applying the quadratic formula.\nRule 3: Difference of squares a² − b² = (a − b)(a + b) turns 53² − 47² into (6)(100) = 600 instantly.',
+      'Rule 1: For $ax^2 + bx + c = 0$, compute $\\Delta = b^2 - 4ac$. If $\\Delta \\ge 0$ roots are real; if $\\Delta$ is a perfect square, roots are rational.\nRule 2: For a cubic $f(x) = ax^3 + bx^2 + cx + d$, stationary points satisfy $f\'(x) = 3ax^2 + 2bx + c = 0$.\nRule 3: The $x$-coordinate of the point of inflection is $x = -\\frac{b}{3a}$, which is always halfway between the two turning points!',
     motif: 'burst',
     bgVar: '--yl',
   },
   {
     id: 'note-2',
     title: 'When to Pick Two Pointers vs. Sliding Window',
-    category: 'Coding interviews',
+    category: 'Coding & IT',
     dateLabel: 'Updated Oct 16',
-    summary: 'Decision checklist for O(n) contiguous subarrays vs. sorted pair searches.',
+    summary: 'Decision checklist for $\\mathcal{O}(n)$ contiguous subarrays vs. sorted pair searches.',
     content:
-      '• Use Two Pointers (opposite ends) when the input is sorted and you are comparing pairs or reversing in-place.\n• Use Sliding Window (same direction) when optimizing a contiguous subarray or substring metric.\n• Use Fast/Slow Pointers when detecting cycles or finding the midpoint of a linked list.',
+      '• Use Two Pointers (opposite ends $L=0, R=n-1$) when the input is sorted and you are comparing pairs in $\\mathcal{O}(n)$ time and $\\mathcal{O}(1)$ space.\n• Use Sliding Window (same direction) when optimizing a contiguous subarray or substring metric.\n• Use Fast/Slow Pointers ($1\\times$ and $2\\times$) when detecting cycles or finding the midpoint of a linked list.',
     motif: 'squiggle',
     bgVar: '--gr',
   },
   {
     id: 'note-3',
-    title: 'WEIRDO Mnemonic for the Spanish Subjunctive',
-    category: 'Languages',
+    title: 'Afrikaans STOMPI & isiZulu Prefix Harmony',
+    category: 'SA Languages',
     dateLabel: 'Updated Oct 18',
-    summary: 'Wishes, Emotions, Impersonal expressions, Recommendations, Doubt, Ojalá.',
+    summary: 'Quick Paper 1 grammar rules for Afrikaans FAL and isiZulu FAL/HL.',
     content:
-      'Trigger the subjunctive mood whenever Clause 1 (main subject) influences or reacts to Clause 2 (different subject) across "que":\n• Wishes: Quiero que vengas.\n• Doubt: Dudo que llueva hoy.\n• Hypothetical Si-Clauses: Si tuviera tiempo, iría contigo.',
+      '• Afrikaans STOMPI: Subject · Verb 1 · Time · Object · Manner · Place · Verb 2 (Infinitive).\n• Verledetyd: Insert "het" at Verb 1 and move "ge-" + verb to the end (except prefixes be-, ge-, her-, er-, ont-, ver- which never take ge-).\n• isiZulu Concords: Umfundi (Class 1) → uya-; Abafundi (Class 2) → baya-; Izincwadi (Class 10) → ziya-.',
     motif: 'flower',
     bgVar: '--pk',
   },
@@ -362,39 +397,39 @@ export const INITIAL_STUDY_NOTES: StudyNoteItem[] = [
 export const CATALOG_PROGRAMS: CatalogProgram[] = [
   {
     id: 'prog-sat-algebra',
-    title: 'Mastering SAT & GRE Quantitative Reasoning',
+    title: 'NSC & IEB Grade 12 Mathematics & Physical Sciences Distinction',
     subject: 'Mathematics',
-    gradeRange: 'High School & Grad',
-    goal: 'Boost exam score',
+    gradeRange: 'Grade 10–12 (CAPS & IEB)',
+    goal: 'Level 7 Distinction (80%+)',
     lessonsCount: 16,
-    pricePerLesson: 14,
-    totalPrice: 224,
-    rating: 4.9,
-    reviewsCount: 142,
+    pricePerLesson: 220,
+    totalPrice: 3520,
+    rating: 4.95,
+    reviewsCount: 312,
     bgVar: '--pk',
     description:
-      'We build a personalized study roadmap from your diagnostic sprint, combining adaptive AI problem sets with step-by-step algebraic proofs.',
+      'Built for South African Matriculants targeting a Level 7 Distinction in DBE NSC or IEB Paper 1 & Paper 2, plus NBT MAT/AQL university entrance for UCT, Wits, UP, and Stellenbosch.',
     syllabus: [
-      'Module 1: Linear Systems, Inequalities & Absolute Value Traps',
-      'Module 2: Quadratic Vertex Geometry & Polynomial Remainder Theorem',
-      'Module 3: Exponential Growth, Ratios & Statistical Margin of Error',
-      'Module 4: Full Timed Adaptive Mock Sprints with AI Rubric Grading',
+      'Module 1: Paper 1 Algebra, Surds, $\\Delta = b^2 - 4ac$ & Financial Annuities (ZAR)',
+      'Module 2: Differential Calculus First Principles & Cubic Graph Sketching',
+      'Module 3: Paper 2 Analytical Geometry, Circle Tangents & Euclidean Riders',
+      'Module 4: Physical Sciences Doppler Effect, Work-Energy & Past Exam Sprints',
     ],
   },
   {
     id: 'prog-coding-interviews',
-    title: 'Algorithmic Patterns for Staff & FAANG Interviews',
+    title: 'SA Graduate SWE & CAPS IT Algorithmic Mastery',
     subject: 'Computer Science',
-    gradeRange: 'University & Pro',
-    goal: 'Ace technical interviews',
+    gradeRange: 'Grade 12 IT & BSc CS / SWE',
+    goal: 'Ace OfferZen & Grad Tech Interviews',
     lessonsCount: 24,
-    pricePerLesson: 18,
-    totalPrice: 432,
+    pricePerLesson: 260,
+    totalPrice: 6240,
     rating: 4.95,
     reviewsCount: 218,
     bgVar: '--bl',
     description:
-      'Stop memorizing 500 random LeetCode solutions. Master the 14 underlying invariant patterns with live Big-O complexity grading.',
+      'Master the 14 core algorithmic patterns tested by top South African engineering teams (Takealot, Luno, BBD, Entelect, Discovery) and university CS honours programs with live $\\mathcal{O}(n)$ grading.',
     syllabus: [
       'Module 1: Two Pointers, Monotonic Stacks & Sliding Window Invariants',
       'Module 2: Trees, Graph Topological Sort & Dijkstra Shortest Paths',
@@ -404,44 +439,44 @@ export const CATALOG_PROGRAMS: CatalogProgram[] = [
   },
   {
     id: 'prog-spanish-fluency',
-    title: 'Spanish B1→C1 Subjunctive & Conversational Fluency',
+    title: 'isiZulu & Afrikaans FAL/HL Matric Paper 1 Mastery',
     subject: 'Languages',
-    gradeRange: 'Intermediate B1+',
-    goal: 'Speak with confidence',
+    gradeRange: 'Grade 8–12 & Conversational',
+    goal: 'Boost FAL/HL Exam Marks',
     lessonsCount: 12,
-    pricePerLesson: 12,
-    totalPrice: 144,
-    rating: 4.8,
-    reviewsCount: 98,
+    pricePerLesson: 190,
+    totalPrice: 2280,
+    rating: 4.88,
+    reviewsCount: 164,
     bgVar: '--yl',
     description:
-      'Transition from textbook phrases to natural idiomatic Spanish with instant grammar correction and subjunctive scenario drills.',
+      'Conquer isiZulu noun classes (Amabizo & Izivumelwano) and Afrikaans Taalstrukture (STOMPI, Lydende & Bedrywende Vorm, Direkte & Indirekte Rede) with instant AI marking.',
     syllabus: [
-      'Module 1: Ongoing Actions (Llevar + Gerund, Acabar de, Volver a)',
-      'Module 2: Present & Imperfect Subjunctive in Real Conversations',
-      'Module 3: Por vs. Para & Nuanced Prepositional Connectors',
-      'Module 4: Live Dialogue Roleplay & Idiomatic Storytelling',
+      'Module 1: isiZulu Noun Classes 1–15 & Subject/Object Concords',
+      'Module 2: Afrikaans STOMPI Word Order, Verledetyd & Voegwoorde',
+      'Module 3: Negative Forms (Ontkenning / Ukuphika) & Tense Transformations',
+      'Module 4: Paper 1 Comprehension, Summary & Oral Roleplay Drills',
     ],
   },
   {
     id: 'prog-olympiad-logic',
-    title: 'Competitive Combinatorics & Number Theory',
+    title: 'SAMO (SA Mathematics Olympiad) & NBT Quantitative Prep',
     subject: 'Mathematics',
-    gradeRange: 'Advanced / Olympiad',
-    goal: 'Solve hard problems',
+    gradeRange: 'Grade 11–12 & NBT MAT',
+    goal: 'Top 10% NBT & Olympiad Round 3',
     lessonsCount: 20,
-    pricePerLesson: 16,
-    totalPrice: 320,
-    rating: 4.9,
-    reviewsCount: 76,
+    pricePerLesson: 240,
+    totalPrice: 4800,
+    rating: 4.92,
+    reviewsCount: 94,
     bgVar: '--gr',
     description:
-      'Deep mathematical intuition training for AMC, AIME, and university proof competitions with guided hint ladders.',
+      'High-intensity problem solving for the South African Mathematics Olympiad (SAMO), UCT Mathematics Competition, and National Benchmark Tests (NBT MAT & AQL).',
     syllabus: [
-      'Module 1: Pigeonhole Principle, Invariants & Coloring Proofs',
-      'Module 2: Modular Arithmetic, Fermat & Euler Theorems',
-      'Module 3: Generating Functions & Recurrence Relations',
-      'Module 4: Proof Writing & Automated Step Verification',
+      'Module 1: Number Theory, Modular Arithmetic & Diophantine Equations',
+      'Module 2: Non-Calculator NBT Functions, Logarithms & Trig Transformations',
+      'Module 3: Combinatorics, Probability & Geometric Invariants',
+      'Module 4: Full Timed NBT MAT & SAMO Proof Sprints',
     ],
   },
 ];
@@ -449,44 +484,44 @@ export const CATALOG_PROGRAMS: CatalogProgram[] = [
 export const MENTOR_PROFILES: MentorProfile[] = [
   {
     id: 'mentor-1',
-    name: 'Svetlana Petrova',
-    role: 'Lead Quantitative Coach + AI Curriculum Twin',
+    name: 'Dr. Naledi Khumalo',
+    role: 'NSC / IEB STEM Lead & NBT Specialist (Wits PhD)',
     subject: 'Mathematics',
-    gradeRange: 'SAT / GRE / Olympiad',
-    pricePerLesson: 15,
-    rating: 4.9,
-    reviewsCount: 128,
-    experienceYears: 10,
-    studentsCount: 340,
-    bio: 'Former Olympiad medalist who designed LearnFlow’s algebraic hint ladder. Specializes in turning intimidating word problems into visual 3-step diagrams.',
+    gradeRange: 'Grade 10–12 CAPS / IEB / NBT',
+    pricePerLesson: 250,
+    rating: 4.95,
+    reviewsCount: 184,
+    experienceYears: 11,
+    studentsCount: 460,
+    bio: 'Former NSC national marker and Wits Mathematics lecturer. Designed the KaTeX step-by-step hint ladder for Paper 1 Calculus, Financial Maths, and Physical Sciences.',
     accentColor: '--pk',
   },
   {
     id: 'mentor-2',
-    name: 'Alexander Konstantinov',
-    role: 'Staff Systems Architect & Interview Grader',
+    name: 'Sipho Ndlovu',
+    role: 'Principal Systems Architect & SA Tech Interview Grader',
     subject: 'Computer Science',
-    gradeRange: 'L4–L6 SWE Prep',
-    pricePerLesson: 22,
-    rating: 4.95,
+    gradeRange: 'CAPS IT · UCT/Wits CS · SWE',
+    pricePerLesson: 320,
+    rating: 4.96,
     reviewsCount: 259,
     experienceYears: 12,
     studentsCount: 510,
-    bio: 'Conducted over 400 technical interviews. Trains engineers to articulate space-time trade-offs clearly before writing a single line of code.',
+    bio: 'Conducted over 400 technical interviews across Cape Town and Johannesburg fintech teams. Trains learners and grads to articulate Big-O trade-offs clearly.',
     accentColor: '--bl',
   },
   {
     id: 'mentor-3',
-    name: 'Elena Morales',
-    role: 'Cervantes Certified Linguistics Specialist',
+    name: 'Annelize van der Merwe',
+    role: 'Afrikaans FAL & Multilingual Curriculum Specialist',
     subject: 'Languages',
-    gradeRange: 'A2 to C1 Fluency',
-    pricePerLesson: 14,
-    rating: 4.85,
-    reviewsCount: 144,
-    experienceYears: 8,
-    studentsCount: 290,
-    bio: 'Focuses on high-frequency conversational patterns and eliminating direct English-to-Spanish translation habits through contextual storytelling.',
+    gradeRange: 'Grade 8–12 FAL & HL',
+    pricePerLesson: 210,
+    rating: 4.9,
+    reviewsCount: 148,
+    experienceYears: 9,
+    studentsCount: 330,
+    bio: 'Stellenbosch & UKZN linguistics graduate specializing in high-yield Paper 1 grammar patterns across Afrikaans (STOMPI) and isiZulu (Amabizo & Concords).',
     accentColor: '--yl',
   },
 ];
@@ -510,89 +545,79 @@ export const INITIAL_FLASHCARDS: Record<TrackId, FlashcardItem[]> = {
     {
       id: 'fc-exam-1',
       track: 'exam',
-      topic: 'Quadratic functions',
+      topic: 'Quadratic & nature of roots',
       difficulty: 'Medium',
-      frontTitle: 'Discriminant & Root Nature',
+      frontTitle: 'Discriminant & Nature of Roots (NSC Paper 1)',
       frontPrompt:
-        'How does the discriminant Δ = b² − 4ac determine the number and nature of roots for ax² + bx + c = 0?',
+        'How does the discriminant $\\Delta = b^2 - 4ac$ determine the nature of roots for $ax^2 + bx + c = 0$?',
       backDefinition:
-        'The discriminant measures the signed distance under the radical in the quadratic formula, dictating whether the parabola intersects the x-axis twice, tangentially once, or not at all in ℝ.',
-      codeOrFormulaSnippet: `Δ = b² - 4ac
+        'The discriminant $\\Delta$ under the square root in $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$ determines whether roots are real, equal, rational, or non-real.',
+      codeOrFormulaSnippet: `$$x = \\frac{-b \\pm \\sqrt{\\Delta}}{2a}, \\quad \\Delta = b^2 - 4ac$$
 
-• Δ > 0  → 2 distinct real roots
-• Δ = 0  → 1 repeated real root (vertex on x-axis)
-• Δ < 0  → 0 real roots (2 complex conjugate roots)
-• Sum of roots: r₁ + r₂ = -b / a
-• Product of roots: r₁ · r₂ = c / a`,
-      snippetLabel: 'Algebraic Invariants & Vieta’s Formulas',
+• $\\Delta > 0$ (perfect square) $\\implies$ Real, rational & unequal
+• $\\Delta > 0$ (not square) $\\implies$ Real, irrational & unequal
+• $\\Delta = 0 \\implies$ Real, rational & equal (turning point on $x$-axis)
+• $\\Delta < 0 \\implies$ Non-real roots (no $x$-intercepts)`,
+      snippetLabel: 'NSC Paper 1 · KaTeX Quadratic Invariants',
       memoryTip:
-        'Think of Δ = 0 as the exact moment the parabola "kisses" the x-axis at a single tangent vertex.',
+        'Think of $\\Delta = 0$ as the exact moment the parabola touches the $x$-axis at a single tangent turning point.',
       colorVar: '--pk',
     },
     {
       id: 'fc-exam-2',
       track: 'exam',
-      topic: 'Probability & combinatorics',
+      topic: 'Financial maths (Annuities)',
       difficulty: 'Hard',
-      frontTitle: 'Complementary Counting Rule',
+      frontTitle: 'Future vs. Present Value Annuities (ZAR)',
       frontPrompt:
-        'When a problem asks for the probability of "at least one" event occurring across n independent trials, what is the fastest formula?',
+        'When solving NSC Paper 1 Financial Maths, when do you choose the Future Value formula $F$ vs. the Present Value formula $P$?',
       backDefinition:
-        'Instead of summing every possible positive case (1, 2, ..., n), subtract the single probability that the event happens ZERO times from 1.',
-      codeOrFormulaSnippet: `P(at least 1 success) = 1 - P(0 successes)
+        'Use Future Value $F$ when accumulating savings or a sinking fund into the future. Use Present Value $P$ when amortizing a home loan or vehicle finance taken out today.',
+      codeOrFormulaSnippet: `$$F = \\frac{x\\left[(1 + i)^n - 1\\right]}{i} \\quad \\text{(Savings / Sinking Fund)}$$
+$$P = \\frac{x\\left[1 - (1 + i)^{-n}\\right]}{i} \\quad \\text{(Bond / Loan Repayment)}$$
 
-For n independent trials with success rate p:
-P(X ≥ 1) = 1 - (1 - p)ⁿ
-
-Example (at least one 6 in 3 dice rolls):
-P = 1 - (5/6)³ = 1 - 125/216 = 91/216`,
-      snippetLabel: 'Probability Shortcut Formula',
+Monthly compounding: $i = \\frac{r}{12}, \\quad n = \\text{years} \\times 12$`,
+      snippetLabel: 'NSC Paper 1 · Financial Mathematics Sheet',
       memoryTip:
-        'Whenever you spot the words "at least one" on the SAT/GRE, immediately write "1 − P(none)".',
+        'Loans have a negative exponent $(1 + i)^{-n}$ because you are discounting future monthly instalments back to today’s loan value $P$.',
       colorVar: '--yl',
     },
     {
       id: 'fc-exam-3',
       track: 'exam',
-      topic: 'Exponents & radicals',
-      difficulty: 'Easy',
-      frontTitle: 'Fractional & Negative Exponents',
+      topic: 'Calculus & cubic graphs',
+      difficulty: 'Medium',
+      frontTitle: 'First Principles & Cubic Inflection Point',
       frontPrompt:
-        'How do you rewrite x^(-m/n) in radical form, and what happens when multiplying bases with exponents?',
+        'What is the First Principles derivative definition, and how do you find the turning points and inflection point of $f(x) = ax^3 + bx^2 + cx + d$?',
       backDefinition:
-        'A negative exponent takes the reciprocal of the base, the numerator m raises the power, and the denominator n extracts the n-th root.',
-      codeOrFormulaSnippet: `x^(-m/n) = 1 / (ⁿ√x)ᵐ = 1 / ⁿ√(xᵐ)
+        'Differentiate from first principles using the limit as $h \\to 0$. Stationary points occur where $f\'(x) = 0$, and concavity changes where $f\'\'(x) = 0$.',
+      codeOrFormulaSnippet: `$$f'(x) = \\lim_{h \\to 0} \\frac{f(x + h) - f(x)}{h}$$
 
-• Product Rule:   aˣ · aʸ = a^(x + y)
-• Quotient Rule:  aˣ / aʸ = a^(x - y)
-• Power of Power: (aˣ)ʸ  = a^(x · y)`,
-      snippetLabel: 'Exponent Transformation Rules',
+• Stationary / Turning points: $f'(x) = 3ax^2 + 2bx + c = 0$
+• Point of inflection: $f''(x) = 6ax + 2b = 0 \\implies x = -\\frac{b}{3a}$`,
+      snippetLabel: 'NSC Paper 1 · Differential Calculus',
       memoryTip:
-        'Denominator = Root ("Roots grow underground in the bottom of the fraction").',
+        'Never drop the "$\\lim_{h \\to 0}$" notation until the very step where you substitute $h = 0$, or you lose 1 notation mark in NSC marking!',
       colorVar: '--gr',
     },
     {
       id: 'fc-exam-4',
       track: 'exam',
-      topic: 'Linear equations',
+      topic: 'Physical Sciences (Mechanics & Doppler)',
       difficulty: 'Medium',
-      frontTitle: 'Infinite vs. No Solutions in Linear Systems',
+      frontTitle: 'Doppler Effect Sign Convention',
       frontPrompt:
-        'Given two linear equations a₁x + b₁y = c₁ and a₂x + b₂y = c₂, when does the system have NO solution vs. INFINITELY MANY solutions?',
+        'Given the NSC Physical Sciences formula $f_L = \\frac{v \\pm v_L}{v \\pm v_S} f_S$, which signs apply when source and listener move TOWARDS each other?',
       backDefinition:
-        'Parallel lines share identical slopes but different intercepts (no intersection), whereas coincident lines have proportional coefficients across all three terms.',
-      codeOrFormulaSnippet: `System:
-a₁x + b₁y = c₁
-a₂x + b₂y = c₂
+        'Approaching increases the observed frequency $f_L > f_S$. Therefore, make the numerator larger ($+v_L$) and the denominator smaller ($-v_S$).',
+      codeOrFormulaSnippet: `$$f_L = \\left(\\frac{v \\pm v_L}{v \\pm v_S}\\right) f_S$$
 
-• No Solution (Parallel):
-  (a₁ / a₂) = (b₁ / b₂) ≠ (c₁ / c₂)
-
-• Infinite Solutions (Identical Line):
-  (a₁ / a₂) = (b₁ / b₂) = (c₁ / c₂)`,
-      snippetLabel: 'Coefficient Ratio Test',
+• Towards each other ($f_L > f_S$): $f_L = \\left(\\frac{v + v_L}{v - v_S}\\right) f_S$
+• Away from each other ($f_L < f_S$): $f_L = \\left(\\frac{v - v_L}{v + v_S}\\right) f_S$`,
+      snippetLabel: 'NSC Physical Sciences Paper 1 · Waves & Sound',
       memoryTip:
-        'Match the x and y ratios first; if the constant ratio c₁/c₂ breaks the pattern, the lines never meet.',
+        'Towards = Higher pitch: Top goes UP ($+$), Bottom goes DOWN ($-$).',
       colorVar: '--bl',
     },
   ],
@@ -604,9 +629,9 @@ a₂x + b₂y = c₂
       difficulty: 'Medium',
       frontTitle: 'Variable-Size Sliding Window Template',
       frontPrompt:
-        'What is the O(n) two-pointer window expansion and contraction pattern for finding the longest valid substring/subarray?',
+        'What is the $\\mathcal{O}(n)$ two-pointer window expansion and contraction pattern for finding the longest valid substring/subarray?',
       backDefinition:
-        'Expand the right pointer step-by-step to ingest elements into window state, and shrink the left pointer in a while-loop only when the window invariant is violated.',
+        'Expand the right pointer $R$ step-by-step to ingest elements into window state, and shrink the left pointer $L$ in a while-loop only when the window invariant is violated.',
       codeOrFormulaSnippet: `function longestValidWindow(s: string): number {
   const freq = new Map<string, number>();
   let left = 0, maxLen = 0;
@@ -623,7 +648,7 @@ a₂x + b₂y = c₂
 }`,
       snippetLabel: 'TypeScript · O(n) Sliding Window',
       memoryTip:
-        'Each index is visited at most twice (once by right, once by left), guaranteeing linear O(n) runtime.',
+        'Each index is visited at most twice (once by $R$, once by $L$), guaranteeing linear $\\mathcal{O}(n)$ runtime.',
       colorVar: '--bl',
     },
     {
@@ -633,9 +658,9 @@ a₂x + b₂y = c₂
       difficulty: 'Medium',
       frontTitle: 'Floyd’s Tortoise & Hare Cycle Detection',
       frontPrompt:
-        'How do you detect a cycle in a singly linked list in O(1) extra space and find its exact entry node?',
+        'How do you detect a cycle in a singly linked list in $\\mathcal{O}(1)$ extra space and find its exact entry node?',
       backDefinition:
-        'Advance a slow pointer by 1 step and a fast pointer by 2 steps. If they meet, reset one pointer to head and advance both by 1 step; their next meeting point is the cycle start.',
+        'Advance a slow pointer by $1$ step and a fast pointer by $2$ steps. If they meet, reset one pointer to head and advance both by $1$ step; their next meeting point is the cycle start.',
       codeOrFormulaSnippet: `function detectCycleStart(head: ListNode | null): ListNode | null {
   let slow = head, fast = head;
   while (fast && fast.next) {
@@ -654,7 +679,7 @@ a₂x + b₂y = c₂
 }`,
       snippetLabel: 'TypeScript · O(1) Space Cycle Entry',
       memoryTip:
-        'Distance from head to cycle start equals distance from meeting point to cycle start (modulo cycle length).',
+        'Distance $L_1$ from head to cycle start equals distance $L_2$ from meeting point to cycle start ($\\pmod C$).',
       colorVar: '--pk',
     },
     {
@@ -664,9 +689,9 @@ a₂x + b₂y = c₂
       difficulty: 'Easy',
       frontTitle: 'Level-Order BFS Traversal',
       frontPrompt:
-        'How do you process a binary tree level-by-level so you can isolate nodes belonging to the same depth d?',
+        'How do you process a binary tree level-by-level so you can isolate nodes belonging to the same depth $d$?',
       backDefinition:
-        'Snapshot the queue length at the start of each while-loop iteration; that exact count equals the number of nodes in the current depth level.',
+        'Snapshot the queue length at the start of each while-loop iteration; that exact count equals the number of nodes in the current depth level $d$.',
       codeOrFormulaSnippet: `function levelOrder(root: TreeNode | null): number[][] {
   if (!root) return [];
   const res: number[][] = [], queue: TreeNode[] = [root];
@@ -686,7 +711,7 @@ a₂x + b₂y = c₂
 }`,
       snippetLabel: 'TypeScript · Level Snapshot BFS',
       memoryTip:
-        'Capture const levelSize = queue.length BEFORE pushing child nodes inside the inner for-loop.',
+        'Capture `const levelSize = queue.length` BEFORE pushing child nodes inside the inner for-loop.',
       colorVar: '--gr',
     },
     {
@@ -696,9 +721,9 @@ a₂x + b₂y = c₂
       difficulty: 'Hard',
       frontTitle: '1D Space-Optimized 0/1 Knapsack',
       frontPrompt:
-        'Why must you iterate capacity w BACKWARDS from W down to weight[i] when optimizing 0/1 Knapsack to a 1D array?',
+        'Why must you iterate capacity $w$ BACKWARDS from $W$ down to $w_i$ when optimizing 0/1 Knapsack to a 1D array?',
       backDefinition:
-        'Iterating backwards ensures dp[w - weight] still holds values from the PREVIOUS item row (i - 1), preventing the same item from being picked multiple times.',
+        'Iterating backwards ensures $dp[w - w_i]$ still holds values from the PREVIOUS item row ($i - 1$), preventing the same item from being picked multiple times.',
       codeOrFormulaSnippet: `function knapsack01(weights: number[], values: number[], W: number): number {
   const dp = new Array(W + 1).fill(0);
   for (let i = 0; i < weights.length; i++) {
@@ -719,98 +744,87 @@ a₂x + b₂y = c₂
     {
       id: 'fc-lang-1',
       track: 'lang',
-      topic: 'Ongoing actions (Llevar + Gerund)',
+      topic: 'isiZulu Noun Classes (Amabizo)',
       difficulty: 'Medium',
-      frontTitle: 'Llevar + Duration + Gerundio',
+      frontTitle: 'isiZulu Noun Classes 1 & 2 (Umu- / Aba-)',
       frontPrompt:
-        'How do native Spanish speakers express "I have been studying for three years" without translating word-for-word from English?',
+        'How do personal nouns in isiZulu shift from singular (Class 1) to plural (Class 2), and how does the subject concord (isivumelwano senhloko) change?',
       backDefinition:
-        'Use the present tense of llevar + [time duration] + verb in the gerund (-ando / -iendo) to emphasize an ongoing action that started in the past.',
-      codeOrFormulaSnippet: `Formula:
-[Llevar (present)] + [Time Duration] + [Gerund (-ando / -iendo)]
+        'Singular personal nouns prefix "um-" / "umu-" with subject concord "u-". Plural personal nouns prefix "aba-" with subject concord "ba-".',
+      codeOrFormulaSnippet: `Class 1 (Singular: um- / umu-) → Concord: u- (uya-)
+• Umfundi uyafunda. (The student is studying.)
+• Uthisha uyafundisa. (The teacher is teaching.)
 
-• Llevo tres años estudiando español.
-  ("I have been studying Spanish for three years.")
-
-• ¿Cuánto tiempo llevas viviendo aquí?
-  ("How long have you been living here?")
-
-• Negative (without doing):
-  Llevo dos días SIN dormir bien.`,
-      snippetLabel: 'Spanish Idiomatic Construction',
+Class 2 (Plural: aba- / o-) → Concord: ba- (baya-)
+• Abafundi bayafunda. (The students are studying.)
+• Othisha bayafundisa. (The teachers are teaching.)`,
+      snippetLabel: 'isiZulu FAL/HL · Amabizo & Izivumelwano',
       memoryTip:
-        'Swap the gerund for "sin + infinitive" whenever you want to say how long you have NOT done something.',
+        'Listen for alliteration: ABafundi BAyafunda (the prefix "aba-" echoes directly in the concord "ba-").',
       colorVar: '--yl',
     },
     {
       id: 'fc-lang-2',
       track: 'lang',
-      topic: 'Conditionals & Subjunctive',
+      topic: 'Afrikaans Tye & STOMPI',
       difficulty: 'Hard',
-      frontTitle: 'Hypothetical "Si" Clauses (Contrary-to-Fact)',
+      frontTitle: 'Afrikaans STOMPI & Verledetyd Rule',
       frontPrompt:
-        'What tense pair is required for unlikely or hypothetical present conditions ("If I had more time, I would travel")?',
+        'What is the exact word order of an Afrikaans clause, and which verb prefixes NEVER take "ge-" in the past tense?',
       backDefinition:
-        'Combine "Si + Imperfect Subjunctive (-ra / -se)" in the condition clause with the "Conditional (-ía)" in the result clause. Never use conditional directly after "si".',
-      codeOrFormulaSnippet: `Structure:
-Si + [Imperfect Subjunctive], [Simple Conditional]
+        'Follow S-v1-T-O-M-P-v2-I. In the past tense, "het" sits at v1 and "ge-" + verb moves to v2, unless the verb starts with an inseparable prefix.',
+      codeOrFormulaSnippet: `STOMPI Formula:
+[Subject] + [v1: het/sal] + [Time] + [Object] + [Manner] + [Place] + [v2: ge-verb]
 
-• Si tuviera (tuviese) más tiempo, viajaría por Sudamérica.
-  (If I had more time, I would travel through South America.)
-
-• Si pudiera elegir, viviría frente al mar.
-  (If I could choose, I would live by the sea.)`,
-      snippetLabel: 'Subjunctive + Conditional Matrix',
+• Present: Lerato skryf vandag haar eksamen by die skool.
+• Past:    Lerato HET vandag haar eksamen by die skool GESKRYF.
+• No "ge-" prefixes: be-, ge-, her-, er-, ont-, ver- (bv. besoek, verstaan, onthou).`,
+      snippetLabel: 'Afrikaans Paper 1 · Taalstrukture',
       memoryTip:
-        'Rhyme cue: "-ra" in the Si-clause unlocks "-ría" in the result clause (tuviera → viajaría).',
+        'Mnemonic for verbs that never take "ge-": "BE-GE-HER-ER-ONT-VER" (e.g., "Hy het die vraag verstaan").',
       colorVar: '--pk',
     },
     {
       id: 'fc-lang-3',
       track: 'lang',
-      topic: 'Por vs. Para Mastery',
+      topic: 'isiZulu Past & Future Tenses',
       difficulty: 'Medium',
-      frontTitle: 'Por (Cause/Exchange) vs. Para (Goal/Deadline)',
+      frontTitle: 'isiZulu Tense Markers (-ya-, -zo-, -ile)',
       frontPrompt:
-        'How do you distinguish between "por" and "para" when describing movement, time, or motivation?',
+        'How do you distinguish between Present Continuous, Definite Future, and Recent Past in isiZulu verb morphology?',
       backDefinition:
-        'Think of PARA as a forward-pointing arrow toward a destination, recipient, goal ("in order to"), or deadline. Think of POR as a scale/bridge representing cause, exchange, duration, or route.',
-      codeOrFormulaSnippet: `PARA (Forward Arrow → Goal / Destination / Deadline):
-• Estudio PARA aprobar el examen. (In order to)
-• Este regalo es PARA ti. (Recipient)
-• La tarea es PARA el lunes. (Deadline)
+        'isiZulu agglutinates tense markers between the subject concord and verb root, or modifies the final vowel for completed past actions.',
+      codeOrFormulaSnippet: `Root: -fund- (study / read) with "si-" (we):
 
-POR (Cause / Exchange / Through / Duration):
-• Pagó veinte euros POR el libro. (Exchange)
-• Caminamos POR el parque. (Route through)
-• Gracias POR tu ayuda. (Cause / Reason)`,
-      snippetLabel: 'Preposition Mental Model',
+• Present (Long form): Si + ya + funda → Siyafunda (We are studying)
+• Definite Future:     Si + zo + funda → Sizofunda (We will study)
+• Recent Past (Full):  Si + fund + ile → Sifundile (We studied)
+• Negative Present:    A + si + fundi  → Asifundi  (We do not study)`,
+      snippetLabel: 'isiZulu Verb Morphology Matrix',
       memoryTip:
-        'PARA looks forward to the finish line; POR looks back at the reason or price paid.',
+        '"-zo-" comes from "ukuza" (to come) — the future is coming towards you!',
       colorVar: '--gr',
     },
     {
       id: 'fc-lang-4',
       track: 'lang',
-      topic: 'Preterite vs. Imperfect',
+      topic: 'Afrikaans Voegwoorde (Groups 1, 2 & 3)',
       difficulty: 'Medium',
-      frontTitle: 'Interrupted Past Actions',
+      frontTitle: 'Afrikaans Conjunctions (Voegwoorde) Groups 1–3',
       frontPrompt:
-        'When one past action is in progress ("I was reading") and another suddenly interrupts it ("when the phone rang"), which tenses do you pair?',
+        'How do Group 1, Group 2, and Group 3 conjunctions affect the position of the verb in the second Afrikaans clause?',
       backDefinition:
-        'Use the Imperfect (-aba / -ía) for the ongoing background scene and the Preterite for the completed interrupting event.',
-      codeOrFormulaSnippet: `[Background Scene: Imperfect] + cuando + [Interruption: Preterite]
-
-• Leía un libro cuando sonó el teléfono.
-  (I was reading a book when the phone rang.)
-
-• Lloviendo / Llovía fuerte cuando salimos de casa.
-  (It was raining hard when we left home.)`,
-      snippetLabel: 'Past Aspect Contrast',
+        'Group 1 leaves word order unchanged; Group 2 pulls the verb immediately after the conjunction; Group 3 pushes the verb to the very end of the clause.',
+      codeOrFormulaSnippet: `• Groep 1 (Normal STOMPI — en, maar, want, of):
+  Hy leer hard, WANT hy wil slaag.
+• Groep 2 (Verb immediately after — daarom, dus, dan, toe):
+  Hy het hard geleer; DAAROM HET hy geslaag.
+• Groep 3 (Verb to the end — omdat, dat, terwyl, as):
+  Hy het geslaag OMDAT hy elke dag geoefen HET.`,
+      snippetLabel: 'Afrikaans Paper 1 · Voegwoorde',
       memoryTip:
-        'Imperfect = movie camera rolling in the background; Preterite = camera flash capturing a single instant.',
+        '"Want" = Groep 1 (normal order); "Omdat" = Groep 3 (verb kicked to the back!).',
       colorVar: '--bl',
     },
   ],
 };
-

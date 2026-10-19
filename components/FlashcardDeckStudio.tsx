@@ -42,6 +42,7 @@ import {
 } from './PhysicsUI';
 import { playSoundCue } from '@/lib/sound-effects';
 import { fireLearnFlowConfetti } from './DailyStudyGoalCard';
+import { MathText } from './MathRenderer';
 
 interface FlashcardDeckStudioProps {
   activeTrack: TrackId;
@@ -640,9 +641,9 @@ export function FlashcardDeckStudio({
                         <h3 className="font-display font-extrabold text-2xl sm:text-4xl leading-[1.08] tracking-tight">
                           {currentCard.frontTitle}
                         </h3>
-                        <p className="text-sm sm:text-[17px] font-semibold leading-relaxed max-w-[92%] opacity-90">
-                          {currentCard.frontPrompt}
-                        </p>
+                        <div className="text-sm sm:text-[17px] font-semibold leading-relaxed max-w-[92%] opacity-90">
+                          <MathText text={currentCard.frontPrompt} />
+                        </div>
                       </div>
 
                       {/* Bottom Flip Hint Footer */}
@@ -690,11 +691,11 @@ export function FlashcardDeckStudio({
 
                       {/* Core Definition */}
                       <div className="space-y-3 my-2">
-                        <p className="text-xs sm:text-sm leading-relaxed font-medium text-[#F8F3E7]/95">
-                          {currentCard.backDefinition}
-                        </p>
+                        <div className="text-xs sm:text-sm leading-relaxed font-medium text-[#F8F3E7]/95">
+                          <MathText text={currentCard.backDefinition} />
+                        </div>
 
-                        {/* Monospace Code Snippet / Formula Box */}
+                        {/* Monospace Code Snippet / KaTeX Formula Box */}
                         <div
                           className="rounded-2xl p-3.5 space-y-2"
                           style={{
@@ -729,9 +730,15 @@ export function FlashcardDeckStudio({
                               )}
                             </button>
                           </div>
-                          <pre className="font-mono-code text-[11px] sm:text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap text-[#EAF0F9]">
-                            {currentCard.codeOrFormulaSnippet}
-                          </pre>
+                          {currentCard.track === 'exam' ? (
+                            <div className="text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap text-[#EAF0F9]">
+                              <MathText text={currentCard.codeOrFormulaSnippet} />
+                            </div>
+                          ) : (
+                            <pre className="font-mono-code text-[11px] sm:text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap text-[#EAF0F9]">
+                              {currentCard.codeOrFormulaSnippet}
+                            </pre>
+                          )}
                         </div>
 
                         {/* Memory Lifehack Callout */}
@@ -744,7 +751,7 @@ export function FlashcardDeckStudio({
                         >
                           <Lightbulb className="w-4 h-4 shrink-0 mt-0.5 text-[var(--yl)]" />
                           <span>
-                            <strong>Lifehack:</strong> {currentCard.memoryTip}
+                            <strong>Lifehack:</strong> <MathText text={currentCard.memoryTip} />
                           </span>
                         </div>
                       </div>

@@ -39,9 +39,11 @@ import {
 import { SpringButton, BouncySurface, SPRING_SNAPPY, SPRING_BOUNCY } from './PhysicsUI';
 import { useSoundSettings, SoundCueType } from '@/lib/sound-effects';
 import { HOMEWORK_ORDER_STORAGE_KEY } from './CatalogAndHomework';
+import { OpenSourceVoicePackList } from './OpenSourceVoiceManager';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 type SettingsTab = 'study' | 'appearance' | 'system';
+type SACurriculumStream = 'CAPS (DBE NSC)' | 'IEB' | 'NBT University Entry';
 
 const GOAL_PRESETS = [3, 5, 10, 15, 20];
 const POMODORO_PRESETS = [
@@ -252,6 +254,7 @@ export function BrandAndNativeStudioModal({
 }) {
   const [activeTab, setActiveTab] = useState<SettingsTab>('study');
   const [pomodoroDefaultMins, setPomodoroDefaultMins] = useState<number>(25);
+  const [saCurriculum, setSaCurriculum] = useState<SACurriculumStream>('CAPS (DBE NSC)');
 
   const { swRegistered, isInstalled } = usePWAInstall();
   const {
@@ -359,9 +362,9 @@ export function BrandAndNativeStudioModal({
             >
               {(
                 [
-                  { id: 'study', label: 'Study & Plan', icon: SlidersHorizontal },
+                  { id: 'study', label: 'Study & SA Stream', icon: SlidersHorizontal },
                   { id: 'appearance', label: 'Theme & Brand', icon: Palette },
-                  { id: 'system', label: 'Audio & PWA', icon: Volume2 },
+                  { id: 'system', label: 'Voices, Audio & PWA', icon: Volume2 },
                 ] as const
               ).map((tab) => {
                 const Icon = tab.icon;
@@ -582,6 +585,63 @@ export function BrandAndNativeStudioModal({
                   </div>
                 </div>
 
+                {/* South African Curriculum Stream Selector */}
+                <div
+                  className="rounded-2xl p-4 sm:p-5 space-y-3"
+                  style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                >
+                  <div>
+                    <h3 className="font-display font-extrabold text-lg">
+                      South African Curriculum Stream
+                    </h3>
+                    <p className="text-xs" style={{ color: 'var(--mute)' }}>
+                      Tailors STEM formulas, marking rubrics, and past-paper style to your SA exam board
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {(
+                      [
+                        {
+                          id: 'CAPS (DBE NSC)' as const,
+                          desc: 'National Senior Certificate Paper 1 & 2',
+                        },
+                        {
+                          id: 'IEB' as const,
+                          desc: 'Independent Examinations Board + AP Maths',
+                        },
+                        {
+                          id: 'NBT University Entry' as const,
+                          desc: 'NBT MAT & AQL for UCT, Wits, UP, Maties',
+                        },
+                      ]
+                    ).map((stream) => {
+                      const active = saCurriculum === stream.id;
+                      return (
+                        <button
+                          key={stream.id}
+                          type="button"
+                          onClick={() => {
+                            playSound('option');
+                            setSaCurriculum(stream.id);
+                            onNotify(`Curriculum stream set to ${stream.id}`);
+                          }}
+                          className="p-3 rounded-xl text-left cursor-pointer transition-transform active:scale-95"
+                          style={{
+                            backgroundColor: active ? 'var(--gr)' : 'var(--bg)',
+                            color: active ? '#2D2D2B' : 'var(--ink)',
+                            border: active ? '2px solid #2D2D2B' : '1px solid var(--line)',
+                          }}
+                        >
+                          <div className="font-display font-extrabold text-xs sm:text-sm">
+                            {stream.id}
+                          </div>
+                          <div className="text-[11px] opacity-80 mt-0.5">{stream.desc}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Homework Priority Queue Reset */}
                 <div
                   className="rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3"
@@ -715,15 +775,23 @@ export function BrandAndNativeStudioModal({
               </motion.div>
             )}
 
-            {/* TAB 3: AUDIO CUES & NATIVE PWA CAPABILITIES */}
+            {/* TAB 3: OPEN-SOURCE NEURAL VOICES, AUDIO CUES & NATIVE PWA CAPABILITIES */}
             {activeTab === 'system' && (
               <motion.div
                 key="tab-system"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={SPRING_SNAPPY}
-                className="space-y-5"
+                className="space-y-6"
               >
+                {/* Open-Source Neural Voice Pack Manager (Download Size, Progress & Preview) */}
+                <div
+                  className="rounded-3xl p-4 sm:p-5"
+                  style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                >
+                  <OpenSourceVoicePackList onNotify={onNotify} compact />
+                </div>
+
                 {/* Subtle Tactile Audio Cues & Mute Toggle */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">

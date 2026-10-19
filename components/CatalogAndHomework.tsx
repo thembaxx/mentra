@@ -47,6 +47,7 @@ import {
   SPRING_BOUNCY,
 } from './PhysicsUI';
 import { playSoundCue } from '@/lib/sound-effects';
+import { MathText } from './MathRenderer';
 
 export const HOMEWORK_ORDER_STORAGE_KEY = 'learnflow-homework-order';
 
@@ -664,9 +665,9 @@ export function HomeworkAndNotesSection({
                     <h4 className="font-display font-extrabold text-xl leading-tight">
                       {note.title}
                     </h4>
-                    <p className="text-xs font-medium opacity-85 line-clamp-2">
-                      {note.summary}
-                    </p>
+                    <div className="text-xs font-medium opacity-85 line-clamp-2">
+                      <MathText text={note.summary} />
+                    </div>
                   </div>
                 </BouncySurface>
               ))}
@@ -757,9 +758,9 @@ export function HomeworkAndNotesSection({
                       <span>Close</span>
                     </SpringButton>
                   </div>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap pt-1">
-                    {selectedNote.content}
-                  </p>
+                  <div className="text-sm leading-relaxed whitespace-pre-wrap pt-1">
+                    <MathText text={selectedNote.content} />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -828,12 +829,13 @@ export function CatalogExplorerView({
   }).sort((a, b) => (sortBy === 'rating' ? b.rating - a.rating : a.pricePerLesson - b.pricePerLesson));
 
   const handleApplyPromo = () => {
-    if (promoCode.trim().toUpperCase() === 'FLOW20' || promoCode.trim().length >= 3) {
+    const code = promoCode.trim().toUpperCase();
+    if (code === 'MATRIC20' || code === 'FLOW20' || code.length >= 3) {
       setPromoApplied(true);
-      onNotify('Promo code applied: $25 discount unlocked!');
+      onNotify('Promo code applied: R250 Matric discount unlocked!');
     } else {
       setPromoShake((k) => k + 1);
-      onNotify('Enter a valid promo code (e.g. FLOW20)');
+      onNotify('Enter a valid promo code (e.g. MATRIC20)');
     }
   };
 
@@ -969,15 +971,15 @@ export function CatalogExplorerView({
                   {prog.title}
                 </h3>
 
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--mute)' }}>
-                  {prog.description}
-                </p>
+                <div className="text-sm leading-relaxed" style={{ color: 'var(--mute)' }}>
+                  <MathText text={prog.description} />
+                </div>
               </div>
 
               <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: 'var(--line)' }}>
                 <div>
                   <span className="font-display font-extrabold text-xl tabular-nums">
-                    ${prog.pricePerLesson} / lesson
+                    R{prog.pricePerLesson} / lesson
                   </span>
                   <span className="text-xs block" style={{ color: 'var(--mute)' }}>
                     {prog.lessonsCount} interactive AI + mentor lessons
@@ -1055,7 +1057,7 @@ export function CatalogExplorerView({
 
               <div className="pt-3 border-t flex items-center justify-between" style={{ borderColor: 'var(--line)' }}>
                 <span className="font-display font-extrabold text-lg tabular-nums">
-                  from ${mentor.pricePerLesson} / session
+                  from R{mentor.pricePerLesson} / session
                 </span>
                 <SpringButton
                   size="sm"
@@ -1072,8 +1074,8 @@ export function CatalogExplorerView({
                       targetTrack === 'code'
                         ? 'Two pointers'
                         : targetTrack === 'lang'
-                          ? 'Conditionals & Subjunctive'
-                          : 'Linear equations'
+                          ? 'Afrikaans Tye & STOMPI'
+                          : 'Quadratic & nature of roots'
                     );
                     onNotify(`Started ${mentor.name}’s AI Twin practice track`);
                   }}
@@ -1123,9 +1125,9 @@ export function CatalogExplorerView({
               </div>
 
               <div className="p-6 space-y-4">
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--mute)' }}>
-                  {selectedProgram.description}
-                </p>
+                <div className="text-sm leading-relaxed" style={{ color: 'var(--mute)' }}>
+                  <MathText text={selectedProgram.description} />
+                </div>
 
                 <div className="space-y-2">
                   <div className="text-xs font-bold" style={{ color: 'var(--mute)' }}>
@@ -1139,20 +1141,22 @@ export function CatalogExplorerView({
                         style={{ backgroundColor: 'var(--card)' }}
                       >
                         <BookOpen className="w-4 h-4 shrink-0" />
-                        <span>{mod}</span>
+                        <span>
+                          <MathText text={mod} />
+                        </span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                {/* Promo code input inspired by IMG_5788.jpeg */}
+                {/* Promo code input */}
                 <ShakeContainer shakeKey={promoShake}>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
-                      placeholder="Promo code (try FLOW20)"
+                      placeholder="Promo code (try MATRIC20)"
                       className="flex-1 rounded-full px-4 py-2.5 text-sm font-medium focus:outline-2 focus:outline-[var(--pk)]"
                       style={{ backgroundColor: 'var(--card)', color: 'var(--ink)' }}
                     />
@@ -1173,13 +1177,13 @@ export function CatalogExplorerView({
                   {promoApplied && (
                     <div className="flex justify-between" style={{ color: 'var(--gr)' }}>
                       <span>Promo discount</span>
-                      <span className="font-bold tabular-nums">−$25</span>
+                      <span className="font-bold tabular-nums">−R250</span>
                     </div>
                   )}
                   <div className="flex justify-between font-display font-extrabold text-lg pt-1 border-t" style={{ borderColor: 'var(--line)' }}>
-                    <span>Total program</span>
+                    <span>Total program (ZAR)</span>
                     <span className="tabular-nums">
-                      ${promoApplied ? selectedProgram.totalPrice - 25 : selectedProgram.totalPrice}
+                      R{promoApplied ? selectedProgram.totalPrice - 250 : selectedProgram.totalPrice}
                     </span>
                   </div>
                 </div>
@@ -1201,8 +1205,8 @@ export function CatalogExplorerView({
                         track === 'code'
                           ? 'Two pointers'
                           : track === 'lang'
-                            ? 'Ongoing actions (Llevar + Gerund)'
-                            : 'Linear equations'
+                            ? 'isiZulu Noun Classes (Amabizo)'
+                            : 'Quadratic & nature of roots'
                       );
                       onNotify(`Enrolled in "${selectedProgram.title}"! Starting Lesson 1.`);
                     }}

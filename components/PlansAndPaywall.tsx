@@ -81,14 +81,14 @@ export function PlansSectionView({
           <div className="space-y-4">
             <h3 className="text-2xl font-display font-extrabold">Free</h3>
             <div className="font-display font-extrabold text-5xl sm:text-6xl tracking-tight tabular-nums">
-              $0
+              R0
             </div>
             <ul className="space-y-3 text-sm sm:text-base font-medium pt-2">
               {[
                 '5 AI-generated questions a day',
-                'Instant grading on every answer',
-                'Quick hints from a fast model',
-                'Exam prep, coding and languages',
+                'Instant grading with KaTeX math rendering',
+                'Offline Open-Source SA Voice Packs (Piper / Kokoro)',
+                'NSC / IEB STEM, CAPS IT & SA Languages',
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2.5">
                   <Check className="w-4 h-4 shrink-0" />
@@ -117,7 +117,7 @@ export function PlansSectionView({
           </span>
 
           <div className="space-y-4">
-            <h3 className="text-2xl font-display font-extrabold">Pro</h3>
+            <h3 className="text-2xl font-display font-extrabold">Pro (SA Learner & Varsity)</h3>
             <div className="font-display font-extrabold text-5xl sm:text-6xl tracking-tight tabular-nums flex items-baseline gap-1">
               <motion.span
                 key={billingCycle}
@@ -125,7 +125,7 @@ export function PlansSectionView({
                 animate={{ opacity: 1, y: 0 }}
                 transition={SPRING_SNAPPY}
               >
-                {billingCycle === 'y' ? '$8' : '$12'}
+                {billingCycle === 'y' ? 'R99' : 'R149'}
               </motion.span>
               <span className="text-base font-medium opacity-75 tracking-normal font-sans">
                 {billingCycle === 'y' ? '/mo, billed yearly' : '/mo'}
@@ -134,10 +134,10 @@ export function PlansSectionView({
 
             <ul className="space-y-3 text-sm sm:text-base font-medium pt-2">
               {[
-                'Unlimited questions at any difficulty',
-                'Step-by-step tutor with full explanations',
-                'Deeper model for tough follow-ups',
-                'Timed mock exams and a weekly study plan',
+                'Unlimited NSC / IEB Paper 1 & 2 STEM questions',
+                'Step-by-step KaTeX derivations & NSC formula sheet',
+                'Full isiZulu, Afrikaans & SA English voice tutoring',
+                '50% off for verified NSFAS & public school learners',
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2.5">
                   <Check className="w-4 h-4 shrink-0" />
@@ -182,11 +182,11 @@ export function PlansSectionView({
           {/* Payment Methods */}
           <div className="space-y-2.5">
             <div className="text-xs font-bold" style={{ color: 'var(--mute)' }}>
-              Payment Method
+              SA Payment Method (PayFast / Ozow / Card)
             </div>
             {[
-              { id: 'mc' as const, label: 'MasterCard ···· 0741', tag: 'Default' },
-              { id: 'visa' as const, label: 'Visa ···· 0378', tag: 'Backup' },
+              { id: 'mc' as const, label: 'Capitec Pay / Ozow Instant EFT', tag: 'Zero Fees' },
+              { id: 'visa' as const, label: 'FNB / Standard Bank Visa ···· 0378', tag: 'Card' },
             ].map((pm) => {
               const active = selectedCard === pm.id;
               return (
@@ -219,7 +219,7 @@ export function PlansSectionView({
           {/* Lesson Bundles */}
           <div className="space-y-2.5">
             <div className="text-xs font-bold" style={{ color: 'var(--mute)' }}>
-              Select Lesson Bundle
+              Select SA Tutor Bundle
             </div>
             <motion.button
               type="button"
@@ -234,11 +234,11 @@ export function PlansSectionView({
             >
               <div>
                 <div className="font-display font-extrabold text-lg tabular-nums">
-                  $14 / lesson · 32 lessons
+                  R180 / lesson · 32 lessons
                 </div>
-                <div className="text-xs opacity-80">Most popular · Save 10%</div>
+                <div className="text-xs opacity-80">Matric & NBT Intensive · Save 10%</div>
               </div>
-              <div className="font-display font-extrabold text-xl tabular-nums">$448</div>
+              <div className="font-display font-extrabold text-xl tabular-nums">R5,760</div>
             </motion.button>
 
             <motion.button
@@ -254,11 +254,11 @@ export function PlansSectionView({
             >
               <div>
                 <div className="font-display font-extrabold text-lg tabular-nums">
-                  $11 / lesson · 128 lessons
+                  R145 / lesson · 128 lessons
                 </div>
-                <div className="text-xs opacity-80">Best value · Save 25%</div>
+                <div className="text-xs opacity-80">Full Year Distinction Pack · Save 25%</div>
               </div>
-              <div className="font-display font-extrabold text-xl tabular-nums">$1,408</div>
+              <div className="font-display font-extrabold text-xl tabular-nums">R18,560</div>
             </motion.button>
           </div>
         </div>
@@ -268,7 +268,7 @@ export function PlansSectionView({
             variant="blue"
             onClick={() =>
               onNotify(
-                `Added ${selectedPack}-lesson bundle via ${selectedCard === 'mc' ? 'MasterCard 0741' : 'Visa 0378'}`
+                `Added ${selectedPack}-lesson bundle via ${selectedCard === 'mc' ? 'Capitec Pay / Ozow EFT' : 'Visa 0378'}`
               )
             }
           >
@@ -278,10 +278,10 @@ export function PlansSectionView({
           <SpringButton
             variant="soft"
             onClick={() =>
-              onNotify('Monthly 0% APR installment plan selected ($37/mo)')
+              onNotify('PayFlex / Float 0% interest-free monthly installment selected')
             }
           >
-            Pay in monthly installments
+            Pay via PayFlex (0% interest)
           </SpringButton>
         </div>
       </div>

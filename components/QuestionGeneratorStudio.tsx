@@ -17,6 +17,9 @@ import {
   CheckCircle2,
   HelpCircle,
   Layers,
+  Sigma,
+  Volume2,
+  Square,
 } from 'lucide-react';
 import {
   TrackId,
@@ -35,14 +38,16 @@ import { playSoundCue } from '@/lib/sound-effects';
 import { FlashcardDeckStudio } from './FlashcardDeckStudio';
 import { PomodoroFocusTimer } from './PomodoroFocusTimer';
 import { VoiceDictationBar, InlineVoiceMicButton } from './VoiceDictationBar';
+import { MathText, NSCFormulaSheetModal } from './MathRenderer';
+import { useOpenSourceVoices } from '@/lib/open-source-voices';
 
 const QUICK_TOPICS: Record<TrackId, string[]> = {
   exam: [
-    'Linear equations',
-    'Quadratic functions',
-    'Word problems',
-    'Probability & combinatorics',
-    'Exponents & radicals',
+    'Quadratic & nature of roots',
+    'Financial maths (Annuities)',
+    'Calculus & cubic graphs',
+    'Physical Sciences (Mechanics & Doppler)',
+    'Analytical & Euclidean geometry',
   ],
   code: [
     'Two pointers',
@@ -52,11 +57,11 @@ const QUICK_TOPICS: Record<TrackId, string[]> = {
     'Dynamic programming',
   ],
   lang: [
-    'Ongoing actions (Llevar + Gerund)',
-    'Conditionals & Subjunctive',
-    'Por vs. Para Mastery',
-    'Preterite vs. Imperfect',
-    'Direct & Indirect Object Pronouns',
+    'isiZulu Noun Classes (Amabizo)',
+    'Afrikaans Tye & STOMPI',
+    'isiZulu Past & Future Tenses',
+    'Afrikaans Voegwoorde (Groups 1, 2 & 3)',
+    'Paper 1 Comprehension & Summary',
   ],
 };
 
@@ -174,6 +179,9 @@ export function QuestionGeneratorStudio({
   const [topicShakeKey, setTopicShakeKey] = useState<number>(0);
   const [answerShakeKey, setAnswerShakeKey] = useState<number>(0);
   const [tutorShakeKey, setTutorShakeKey] = useState<number>(0);
+  const [formulaSheetOpen, setFormulaSheetOpen] = useState<boolean>(false);
+
+  const { activeVoice, speakingVoiceId, speakWithVoice } = useOpenSourceVoices();
 
   const streamRunIdRef = useRef<number>(0);
 
@@ -658,9 +666,9 @@ export function QuestionGeneratorStudio({
   };
 
   const trackMeta: { id: TrackId; label: string; icon: React.ReactNode }[] = [
-    { id: 'exam', label: 'Exam prep', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'code', label: 'Coding interviews', icon: <Code2 className="w-4 h-4" /> },
-    { id: 'lang', label: 'Spanish & Languages', icon: <Languages className="w-4 h-4" /> },
+    { id: 'exam', label: 'NSC / IEB STEM', icon: <BookOpen className="w-4 h-4" /> },
+    { id: 'code', label: 'Coding & IT', icon: <Code2 className="w-4 h-4" /> },
+    { id: 'lang', label: 'isiZulu & Afrikaans', icon: <Languages className="w-4 h-4" /> },
   ];
 
   // Split streamed feedback into paragraphs for subtle layout entrance
@@ -813,9 +821,23 @@ export function QuestionGeneratorStudio({
                   Dynamic AI Question Generator
                 </h3>
               </div>
-              <span className="text-xs" style={{ color: 'var(--mute)' }}>
-                Specify any topic & difficulty to stream a fresh problem
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    playSoundCue('tap');
+                    setFormulaSheetOpen(true);
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 cursor-pointer"
+                  style={{
+                    backgroundColor: 'var(--yl)',
+                    color: '#2D2D2B',
+                  }}
+                >
+                  <Sigma className="w-3.5 h-3.5" />
+                  <span>NSC STEM Formula Sheet (KaTeX)</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
@@ -1139,19 +1161,19 @@ export function QuestionGeneratorStudio({
                   />
                 </motion.div>
               ) : (
-                <motion.p
+                <motion.div
                   layout="position"
                   key={currentQuestion.id}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={SPRING_GENTLE}
-                  className={`font-display font-extrabold text-xl sm:text-[26px] leading-[1.2] tracking-tight ${
+                  className={`font-display font-extrabold text-lg sm:text-[22px] leading-[1.35] tracking-tight ${
                     isStreamingQuestion ? 'stream-cursor' : ''
                   }`}
                   style={{ color: 'var(--ink)' }}
                 >
-                  {displayedQuestionText}
-                </motion.p>
+                  <MathText text={displayedQuestionText} />
+                </motion.div>
               )}
             </motion.div>
 
@@ -1206,7 +1228,9 @@ export function QuestionGeneratorStudio({
                             border: isPicked ? '2px solid var(--pk)' : '1px solid var(--line)',
                           }}
                         >
-                          <span className="leading-snug">{opt}</span>
+                          <span className="leading-snug">
+                            <MathText text={opt} />
+                          </span>
                           <span
                             className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
                             style={{
@@ -1246,10 +1270,11 @@ export function QuestionGeneratorStudio({
                   )}
                 </div>
 
-                {/* Voice-to-Text Verbal Reasoning & Dictation Interface */}
+                {/* Voice-to-Text Verbal Reasoning & Open-Source Voice Interface */}
                 <VoiceDictationBar
                   activeTrack={activeTrack}
                   topic={currentQuestion.topic}
+                  questionPrompt={currentQuestion.prompt}
                   currentAnswer={userAnswer}
                   onAppendTranscript={(spokenText) => {
                     setUserAnswer((prev) =>
@@ -1282,8 +1307,8 @@ export function QuestionGeneratorStudio({
                       activeTrack === 'code'
                         ? 'Explain your two-pointer / hash map invariant or write code here...'
                         : activeTrack === 'lang'
-                          ? 'Type your Spanish translation or grammar explanation...'
-                          : 'Show your algebraic steps or final numeric answer...'
+                          ? 'Type your isiZulu / Afrikaans sentence or grammar explanation...'
+                          : 'Show your algebraic steps, KaTeX formula, or final numeric answer...'
                     }
                     className={`w-full p-4 bg-transparent focus:outline-none resize-y text-[15px] leading-relaxed ${
                       activeTrack === 'code' ? 'font-mono-code text-sm' : ''
@@ -1373,53 +1398,87 @@ export function QuestionGeneratorStudio({
                     </div>
                     <p className="text-xs" style={{ color: '#B9B6AA' }}>
                       {isPro
-                        ? 'Deep reasoning model · Real-time stream'
-                        : 'Fast grading model · Live stream'}
+                        ? `Deep model · Voice: ${activeVoice.name.split(' ')[0]}`
+                        : `Fast grader · Voice: ${activeVoice.name.split(' ')[0]}`}
                     </p>
                   </div>
                 </div>
 
-                {/* Semantic Status Indicator */}
-                <AnimatePresence mode="popLayout">
-                  {score !== null && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.85 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.85 }}
-                      transition={SPRING_BOUNCY}
-                      className="text-right text-xs font-semibold"
-                    >
-                      {score >= 9 ? (
-                        <span
-                          className="inline-flex items-center gap-1"
-                          style={{ color: 'var(--yl)' }}
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                          Mastered
-                        </span>
-                      ) : score >= 6 ? (
-                        <span
-                          className="inline-flex items-center gap-1"
-                          style={{ color: 'var(--bl)' }}
-                        >
-                          <HelpCircle className="w-4 h-4" />
-                          Partial
-                        </span>
-                      ) : (
-                        <span
-                          className="inline-flex items-center gap-1"
-                          style={{ color: 'var(--pk)' }}
-                        >
-                          <AlertCircle className="w-4 h-4" />
-                          Review
-                        </span>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {/* Read Tutor Explanation Aloud + Semantic Status Indicator */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const textToRead = [feedbackText, stepsText]
+                        .filter(Boolean)
+                        .join('. ');
+                      speakWithVoice(activeVoice, textToRead);
+                    }}
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                    style={{
+                      backgroundColor:
+                        speakingVoiceId === activeVoice.id
+                          ? 'var(--pk)'
+                          : 'rgba(255, 252, 245, 0.1)',
+                      color:
+                        speakingVoiceId === activeVoice.id ? '#2D2D2B' : '#F8F3E7',
+                    }}
+                    title={`Listen to AI Tutor with ${activeVoice.name}`}
+                  >
+                    {speakingVoiceId === activeVoice.id ? (
+                      <>
+                        <Square className="w-3 h-3 fill-current" />
+                        <span>Stop</span>
+                      </>
+                    ) : (
+                      <>
+                        <Volume2 className="w-3.5 h-3.5" />
+                        <span>Listen</span>
+                      </>
+                    )}
+                  </button>
+
+                  <AnimatePresence mode="popLayout">
+                    {score !== null && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.85 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.85 }}
+                        transition={SPRING_BOUNCY}
+                        className="text-right text-xs font-semibold"
+                      >
+                        {score >= 9 ? (
+                          <span
+                            className="inline-flex items-center gap-1"
+                            style={{ color: 'var(--yl)' }}
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            Mastered
+                          </span>
+                        ) : score >= 6 ? (
+                          <span
+                            className="inline-flex items-center gap-1"
+                            style={{ color: 'var(--bl)' }}
+                          >
+                            <HelpCircle className="w-4 h-4" />
+                            Partial
+                          </span>
+                        ) : (
+                          <span
+                            className="inline-flex items-center gap-1"
+                            style={{ color: 'var(--pk)' }}
+                          >
+                            <AlertCircle className="w-4 h-4" />
+                            Review
+                          </span>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </motion.div>
 
-              {/* Streaming Instant Feedback Box with Smooth Layout Reflow */}
+              {/* Streaming Instant Feedback Box with Smooth Layout Reflow & KaTeX */}
               <motion.div
                 layout
                 transition={SPRING_GENTLE}
@@ -1434,7 +1493,7 @@ export function QuestionGeneratorStudio({
                 {feedbackParagraphs.map((para, idx) => {
                   const isLastPara = idx === feedbackParagraphs.length - 1;
                   return (
-                    <motion.p
+                    <motion.div
                       layout="position"
                       key={idx}
                       initial={{ opacity: 0, y: 4 }}
@@ -1442,8 +1501,8 @@ export function QuestionGeneratorStudio({
                       transition={SPRING_GENTLE}
                       className={isStreamingFeedback && isLastPara ? 'stream-cursor' : ''}
                     >
-                      {para}
-                    </motion.p>
+                      <MathText text={para} />
+                    </motion.div>
                   );
                 })}
               </motion.div>
@@ -1582,14 +1641,14 @@ export function QuestionGeneratorStudio({
                                   >
                                     {stepCard.title}
                                   </div>
-                                  <p
+                                  <div
                                     className={`text-sm leading-relaxed whitespace-pre-wrap ${
                                       isStreamingSteps && isLastStep ? 'stream-cursor' : ''
                                     }`}
                                     style={{ color: '#F8F3E7' }}
                                   >
-                                    {stepCard.body}
-                                  </p>
+                                    <MathText text={stepCard.body} />
+                                  </div>
                                 </div>
                               </motion.div>
                             </motion.div>
@@ -1657,12 +1716,12 @@ export function QuestionGeneratorStudio({
                           You asked: “{followUpQuestionAsked}”
                         </div>
                       )}
-                      <motion.p
+                      <motion.div
                         layout="position"
                         className={isStreamingFollowUp ? 'stream-cursor' : ''}
                       >
-                        {followUpAnswer || 'Thinking...'}
-                      </motion.p>
+                        <MathText text={followUpAnswer || 'Thinking...'} />
+                      </motion.div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -1672,6 +1731,30 @@ export function QuestionGeneratorStudio({
         </motion.div>
         </>
         )}
+
+        {/* NSC / IEB Grade 12 STEM Formula Sheet Modal */}
+        <NSCFormulaSheetModal
+          open={formulaSheetOpen}
+          onClose={() => setFormulaSheetOpen(false)}
+          onInsertFormula={(plainFormula) => {
+            setUserAnswer((prev) =>
+              prev.trim() ? `${prev.trim()}\n${plainFormula}` : plainFormula
+            );
+          }}
+          onSelectTopic={(topic) => {
+            if (activeTrack !== 'exam') {
+              onSelectTrack('exam');
+            }
+            setCustomTopic(topic);
+            const existingIdx = questionsByTrack.exam.findIndex(
+              (q) => q.topic.toLowerCase() === topic.toLowerCase()
+            );
+            if (existingIdx !== -1) {
+              setQuestionIndex(existingIdx);
+            }
+          }}
+          onNotify={onNotify}
+        />
       </div>
     </LayoutGroup>
   );
