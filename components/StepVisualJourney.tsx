@@ -259,9 +259,10 @@ export function StepVisualJourney({
       </p>
       <motion.div key={model.type+'-'+phase} initial={reduceMotion?false:{opacity:.5,y:7}}
         animate={{opacity:1,y:0}} transition={reduceMotion?{duration:0}:{duration:.22}}>
-        <div className="overflow-x-auto rounded-2xl" aria-label="Diagram viewport: swipe sideways to inspect on a narrow screen" role="region">
+        <div className="tutor-visual-scroll overflow-x-auto rounded-2xl focus-visible:outline-3 focus-visible:outline-[#F7D66E]" aria-label="Diagram viewport: swipe or scroll sideways to inspect on a narrow screen" role="region" tabIndex={0}>
           <VisualScene model={model} phase={phase}/>
         </div>
+        <p className="text-[11px] leading-snug text-[#CFD4DD] sm:hidden">Swipe across the diagram to inspect the full illustration.</p>
         <div className="space-y-1.5 pt-2.5">
           <p className="text-[13px] font-extrabold text-white">{checkpoint.title}</p>
           <p className="text-xs leading-relaxed text-[#CFD4DD]">{checkpoint.detail}</p>
