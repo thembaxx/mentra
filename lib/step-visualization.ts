@@ -1,5 +1,5 @@
 import type { QuestionVisualization } from './visualization-schema';
-import { binomialMass, horizontalAcceleration, triangleHypotenuse } from './visualization-schema';
+import { binomialMass, horizontalAcceleration, triangleHypotenuse } from './visualization-schema.ts';
 
 export type VisualCheckpoint = {
   title: string;
