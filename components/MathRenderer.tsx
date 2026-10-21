@@ -98,7 +98,8 @@ export function MathText({
             displayMode: isDisplay,
             throwOnError: false,
             strict: false,
-            trust: true,
+            // AI-provided LaTeX must not opt into trusted HTML or URLs.
+            trust: false,
           });
 
           if (isDisplay) {

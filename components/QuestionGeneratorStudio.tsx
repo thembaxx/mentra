@@ -39,6 +39,7 @@ import { FlashcardDeckStudio } from './FlashcardDeckStudio';
 import { PomodoroFocusTimer } from './PomodoroFocusTimer';
 import { VoiceDictationBar, InlineVoiceMicButton } from './VoiceDictationBar';
 import { MathText, NSCFormulaSheetModal } from './MathRenderer';
+import { getSuggestedVisualization, InteractiveVisualLab } from './InteractiveVisualLab';
 import { useOpenSourceVoices } from '@/lib/open-source-voices';
 
 const QUICK_TOPICS: Record<TrackId, string[]> = {
@@ -1177,6 +1178,11 @@ export function QuestionGeneratorStudio({
               )}
             </motion.div>
 
+            {/* Visual model matches the study topic; never infer a model from arbitrary AI text. */}
+            {activeTrack === 'exam' && getSuggestedVisualization(currentQuestion.topic) && (
+              <InteractiveVisualLab key={currentQuestion.id} topic={currentQuestion.topic} />
+            )}
+
             {/* Interactive Multiple Choice Options */}
             <AnimatePresence mode="popLayout">
               {currentQuestion.options && currentQuestion.options.length > 0 && (
@@ -1592,7 +1598,17 @@ export function QuestionGeneratorStudio({
                                   prev === stepCard.id ? null : stepCard.id
                                 )
                               }
-                              className="relative rounded-2xl p-4 cursor-pointer overflow-hidden transition-colors"
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.preventDefault();
+                                  setFocusedStepId((prev) => prev === stepCard.id ? null : stepCard.id);
+                                }
+                              }}
+                              role="button"
+                              tabIndex={0}
+                              aria-pressed={isFocused}
+                              aria-label={stepCard.title + ': focus explanation'}
+                              className="relative rounded-2xl p-4 cursor-pointer overflow-hidden transition-colors focus-visible:outline-3 focus-visible:outline-[var(--yl)] focus-visible:outline-offset-2"
                               style={{
                                 backgroundColor: stepCard.isVerification
                                   ? 'rgba(154, 171, 101, 0.16)'

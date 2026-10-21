@@ -6,6 +6,8 @@ import {
   AnimatePresence,
   useMotionValue,
   useTransform,
+  useSpring,
+  useReducedMotion,
   PanInfo,
 } from 'motion/react';
 import {
@@ -67,6 +69,15 @@ export function FlashcardDeckStudio({
     useState<Record<TrackId, FlashcardItem[]>>(INITIAL_FLASHCARDS);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
+  // Synchronize face visibility with angle to prevent mirrored text on WebKit.
+  const reducedMotion = useReducedMotion();
+  const flipRotation = useSpring(0, { stiffness: 290, damping: 29, mass: 0.9 });
+  const frontOpacity = useTransform(flipRotation, [0, 89.9, 90.1, 180], [1, 1, 0, 0]);
+  const backOpacity = useTransform(flipRotation, [0, 89.9, 90.1, 180], [0, 0, 1, 1]);
+  useEffect(() => {
+    if (reducedMotion) flipRotation.jump(isFlipped ? 180 : 0);
+    else flipRotation.set(isFlipped ? 180 : 0);
+  }, [isFlipped, flipRotation, reducedMotion]);
   const [masteredIds, setMasteredIds] = useState<Record<string, boolean>>({});
   const [reviewLaterIds, setReviewLaterIds] = useState<Record<string, boolean>>({});
   const [exitDirection, setExitDirection] = useState<'left' | 'right' | null>(null);
@@ -84,6 +95,12 @@ export function FlashcardDeckStudio({
   const reviewStampScale = useTransform(x, [-25, -115], [0.82, 1.05]);
 
   const isDraggingRef = useRef(false);
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const advancingRef = useRef(false);
+
+  useEffect(() => () => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+  }, []);
 
   const fullTrackDeck = decksByTrack[activeTrack] || INITIAL_FLASHCARDS.exam;
   const visibleDeck =
@@ -106,6 +123,11 @@ export function FlashcardDeckStudio({
 
   // Reset card flip & index when switching track
   useEffect(() => {
+    if (advanceTimerRef.current) {
+      clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+    advancingRef.current = false;
     setActiveIndex(0);
     setIsFlipped(false);
     setExitDirection(null);
@@ -120,42 +142,45 @@ export function FlashcardDeckStudio({
 
   const advanceCard = useCallback(
     (direction: 'left' | 'right') => {
-      if (!currentCard) return;
+      if (!currentCard || advancingRef.current) return;
+      advancingRef.current = true;
+      const cardId = currentCard.id;
       setExitDirection(direction);
 
       if (direction === 'right') {
-        const wasAlreadyMastered = !!masteredIds[currentCard.id];
-        setMasteredIds((prev) => {
-          const updated = { ...prev, [currentCard.id]: true };
-          const newlyMasteredTotal = fullTrackDeck.filter((c) => updated[c.id]).length;
-          if (newlyMasteredTotal === fullTrackDeck.length && !wasAlreadyMastered) {
-            fireLearnFlowConfetti();
-            onNotify(`All ${fullTrackDeck.length} flashcards in this deck mastered!`);
-          }
-          return updated;
-        });
-        setReviewLaterIds((prev) => {
-          const next = { ...prev };
-          delete next[currentCard.id];
-          return next;
-        });
-        playSoundCue('grade_success');
-        if (!wasAlreadyMastered) {
-          onCardMastered?.();
+        const firstMastery = !masteredIds[cardId];
+        if (firstMastery) onCardMastered?.();
+        if (firstMastery && fullTrackDeck.every((card) => card.id === cardId || masteredIds[card.id])) {
+          fireLearnFlowConfetti();
+          onNotify('All ' + fullTrackDeck.length + ' flashcards in this deck mastered!');
         }
+        playSoundCue('grade_success');
       } else {
-        setReviewLaterIds((prev) => ({ ...prev, [currentCard.id]: true }));
         playSoundCue('option');
       }
 
-      setTimeout(() => {
+      // Commit after the exit animation: filtering a mastered card too early
+      // removes it from under the gesture and may skip the following card.
+      advanceTimerRef.current = setTimeout(() => {
+        if (direction === 'right') {
+          setMasteredIds((previous) => ({ ...previous, [cardId]: true }));
+          setReviewLaterIds((previous) => {
+            const next = { ...previous };
+            delete next[cardId];
+            return next;
+          });
+        } else {
+          setReviewLaterIds((previous) => ({ ...previous, [cardId]: true }));
+        }
         setIsFlipped(false);
         x.set(0);
-        setActiveIndex((prev) => prev + 1);
+        setActiveIndex((previous) => previous + (filterMode === 'unmastered' && direction === 'right' ? 0 : 1));
         setExitDirection(null);
+        advancingRef.current = false;
+        advanceTimerRef.current = null;
       }, 180);
     },
-    [currentCard, masteredIds, fullTrackDeck, onCardMastered, onNotify, x]
+    [currentCard, masteredIds, fullTrackDeck, filterMode, onCardMastered, onNotify, x]
   );
 
   const handleDragEnd = (
@@ -452,7 +477,7 @@ export function FlashcardDeckStudio({
 
         {/* 3D Stacked Card Arena */}
         <div
-          className="relative min-h-[430px] sm:min-h-[450px] flex items-center justify-center select-none py-3"
+          className="relative min-h-[472px] sm:min-h-[494px] flex items-center justify-center select-none py-3"
           style={{ perspective: '1400px' }}
         >
           {currentCard ? (
@@ -463,7 +488,7 @@ export function FlashcardDeckStudio({
                   key={`bg2-${nextCard2.id}`}
                   animate={{ scale: 0.91, y: 26, opacity: 0.48 }}
                   transition={SPRING_GENTLE}
-                  className="absolute inset-x-4 sm:inset-x-8 h-[390px] sm:h-[410px] rounded-[32px] pointer-events-none"
+                  className="absolute inset-x-4 sm:inset-x-8 h-[430px] sm:h-[445px] rounded-[32px] pointer-events-none"
                   style={{
                     backgroundColor: `var(${nextCard2.colorVar})`,
                     border: '1px solid rgba(45,45,43,0.14)',
@@ -478,7 +503,7 @@ export function FlashcardDeckStudio({
                   key={`bg1-${nextCard1.id}`}
                   animate={{ scale: 0.955, y: 13, opacity: 0.75 }}
                   transition={SPRING_GENTLE}
-                  className="absolute inset-x-2 sm:inset-x-5 h-[390px] sm:h-[410px] rounded-[32px] pointer-events-none"
+                  className="absolute inset-x-2 sm:inset-x-5 h-[430px] sm:h-[445px] rounded-[32px] pointer-events-none"
                   style={{
                     backgroundColor: `var(${nextCard1.colorVar})`,
                     border: '1px solid rgba(45,45,43,0.16)',
@@ -502,7 +527,6 @@ export function FlashcardDeckStudio({
                     x,
                     rotateZ,
                     zIndex: 10,
-                    transformStyle: 'preserve-3d',
                   }}
                   initial={{ scale: 0.92, opacity: 0, y: 18 }}
                   animate={
@@ -514,10 +538,11 @@ export function FlashcardDeckStudio({
                   }
                   transition={SPRING_SNAPPY}
                   onClick={handleFlipCard}
+                  onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleFlipCard(); } }}
                   role="button"
                   tabIndex={0}
                   aria-label={`Flashcard: ${currentCard.frontTitle}. Click or press Space to flip.`}
-                  className="relative w-full h-[395px] sm:h-[415px] cursor-grab active:cursor-grabbing focus:outline-none"
+                  className="relative w-full h-[430px] sm:h-[445px] cursor-grab active:cursor-grabbing focus-visible:outline-3 focus-visible:outline-[var(--series-blue)] focus-visible:outline-offset-4"
                 >
                   {/* Dynamic Swipe Stamp Overlay: MASTERED (Right Drag) */}
                   <motion.div
@@ -551,24 +576,21 @@ export function FlashcardDeckStudio({
 
                   {/* 3D Inner Flip Container */}
                   <motion.div
-                    animate={{ rotateY: isFlipped ? 180 : 0 }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 290,
-                      damping: 24,
-                      mass: 0.9,
-                    }}
                     className="w-full h-full relative"
-                    style={{ transformStyle: 'preserve-3d' }}
+                    style={{ rotateY: flipRotation, transformStyle: 'preserve-3d' }}
                   >
                     {/* FRONT FACE: Concept / Prompt */}
-                    <div
-                      className="absolute inset-0 w-full h-full rounded-[32px] p-6 sm:p-8 flex flex-col justify-between overflow-hidden shadow-xl"
+                    <motion.div
+                      aria-hidden={isFlipped}
+                      className="absolute inset-0 w-full h-full rounded-[32px] p-5 sm:p-8 flex flex-col justify-between overflow-hidden shadow-xl"
                       style={{
+                        opacity: frontOpacity,
+                        pointerEvents: isFlipped ? 'none' : 'auto',
                         backgroundColor: `var(${currentCard.colorVar})`,
                         color: '#2D2D2B',
                         backfaceVisibility: 'hidden',
                         WebkitBackfaceVisibility: 'hidden',
+                        transform: 'translateZ(1px)',
                         border: '2px solid rgba(45,45,43,0.12)',
                       }}
                     >
@@ -595,7 +617,7 @@ export function FlashcardDeckStudio({
                       <div className="relative z-10 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 text-xs font-extrabold">
                           <span
-                            className="px-3 py-1 rounded-full"
+                            className="max-w-[52vw] sm:max-w-[220px] truncate px-3 py-1 rounded-full"
                             style={{
                               backgroundColor: 'rgba(255, 252, 245, 0.85)',
                               color: '#2D2D2B',
@@ -634,7 +656,7 @@ export function FlashcardDeckStudio({
                       </div>
 
                       {/* Center Concept Title & Recall Question */}
-                      <div className="relative z-10 space-y-3 my-auto py-2">
+                      <div className="relative z-10 min-h-0 flex-1 space-y-3 my-3 overflow-y-auto overscroll-contain py-3 pr-1">
                         <div className="text-xs font-extrabold uppercase tracking-wider opacity-70">
                           Concept Recall Prompt
                         </div>
@@ -656,25 +678,28 @@ export function FlashcardDeckStudio({
                           ← Review · Master →
                         </span>
                       </div>
-                    </div>
+                    </motion.div>
 
                     {/* BACK FACE: Definition + Code/Formula Snippet + Memory Tip */}
-                    <div
-                      className="absolute inset-0 w-full h-full rounded-[32px] p-6 sm:p-7 flex flex-col justify-between overflow-y-auto shadow-2xl"
+                    <motion.div
+                      aria-hidden={!isFlipped}
+                      className="absolute inset-0 w-full h-full rounded-[32px] p-5 sm:p-7 flex flex-col overflow-hidden shadow-xl"
                       style={{
+                        opacity: backOpacity,
+                        pointerEvents: isFlipped ? 'auto' : 'none',
                         backgroundColor: '#2D2D2B',
                         color: '#F8F3E7',
                         backfaceVisibility: 'hidden',
                         WebkitBackfaceVisibility: 'hidden',
-                        transform: 'rotateY(180deg)',
+                        transform: 'rotateY(180deg) translateZ(1px)',
                         border: '2px solid var(--pk)',
                       }}
                     >
                       {/* Top Header */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
+                      <div className="flex shrink-0 items-center justify-between gap-2 min-w-0">
+                        <div className="flex min-w-0 items-center gap-2">
                           <span
-                            className="px-3 py-1 rounded-full text-xs font-extrabold"
+                            className="max-w-[50vw] sm:max-w-[240px] truncate px-3 py-1 rounded-full text-xs font-extrabold"
                             style={{ backgroundColor: 'var(--pk)', color: '#2D2D2B' }}
                           >
                             {currentCard.frontTitle}
@@ -690,7 +715,7 @@ export function FlashcardDeckStudio({
                       </div>
 
                       {/* Core Definition */}
-                      <div className="space-y-3 my-2">
+                      <div className="min-h-0 flex-1 space-y-3 my-3 overflow-y-auto overscroll-contain pr-1">
                         <div className="text-xs sm:text-sm leading-relaxed font-medium text-[#F8F3E7]/95">
                           <MathText text={currentCard.backDefinition} />
                         </div>
@@ -714,6 +739,8 @@ export function FlashcardDeckStudio({
                             <button
                               type="button"
                               onClick={(e) => handleCopySnippet(e, currentCard)}
+                              tabIndex={isFlipped ? 0 : -1}
+                              aria-label="Copy flashcard code or formula"
                               className="px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer hover:bg-white/10 transition-colors"
                               style={{ color: '#F8F3E7' }}
                             >
@@ -731,11 +758,11 @@ export function FlashcardDeckStudio({
                             </button>
                           </div>
                           {currentCard.track === 'exam' ? (
-                            <div className="text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap text-[#EAF0F9]">
+                            <div className="min-w-0 text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap break-words text-[#EAF0F9]">
                               <MathText text={currentCard.codeOrFormulaSnippet} />
                             </div>
                           ) : (
-                            <pre className="font-mono-code text-[11px] sm:text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap text-[#EAF0F9]">
+                            <pre className="font-mono-code min-w-0 text-[11px] sm:text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap break-words text-[#EAF0F9]">
                               {currentCard.codeOrFormulaSnippet}
                             </pre>
                           )}
@@ -757,11 +784,11 @@ export function FlashcardDeckStudio({
                       </div>
 
                       {/* Back Footer */}
-                      <div className="flex items-center justify-between text-[11px] font-bold pt-1 border-t border-white/10 text-[#B9B6AA]">
+                      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 text-[11px] font-bold pt-2 border-t border-white/10 text-[#B9B6AA]">
                         <span>Swipe Left: Review Later</span>
                         <span>Swipe Right: Mark Mastered ✓</span>
                       </div>
-                    </div>
+                    </motion.div>
                   </motion.div>
                 </motion.div>
               </AnimatePresence>
