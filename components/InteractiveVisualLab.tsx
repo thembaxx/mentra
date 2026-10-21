@@ -10,21 +10,17 @@ import { MathText } from './MathRenderer';
 export type VisualizationMode = QuestionVisualization['type'];
 
 export function getSuggestedVisualization(topic: string): VisualizationMode | null {
-  if (/\b(geometry|right[- ]angled|pythagoras|triangle)\b/i.test(topic)) return 'right_triangle';
-  if (/\b(forces?|free[- ]body|newton|friction|mechanics)\b/i.test(topic)) return 'forces';
-  if (/\b(probability|binomial|distributions?)\b/i.test(topic)) return 'binomial';
+  // Specific science topics must take priority over broader shared words
+  // such as "geometry" and "mechanics".
   if (/\b(molecules?|molecular|chemical bonding|bond angles?)\b/i.test(topic)) return 'molecule';
-  if (/\b(trigonometry|trigonometric|sine|cosine|unit circle|sin|cos)\b/i.test(topic)) {
-    return 'trigonometry';
-  }
-  if (/\b(atom|atomic|electron|nucleus|proton|chemical element)\b/i.test(topic)) {
-    return 'atom';
-  }
   if (/\b(doppler|sound wave|ambulance)\b/i.test(topic)) return 'doppler';
+  if (/\b(probability|binomial|distributions?)\b/i.test(topic)) return 'binomial';
+  if (/\b(forces?|free[- ]body|newton|friction|mechanics)\b/i.test(topic)) return 'forces';
+  if (/\b(geometry|right[- ]angled|pythagoras|triangle)\b/i.test(topic)) return 'right_triangle';
+  if (/\b(trigonometry|trigonometric|sine|cosine|unit circle|sin|cos)\b/i.test(topic)) return 'trigonometry';
+  if (/\b(atom|atomic|electron|nucleus|proton|chemical element)\b/i.test(topic)) return 'atom';
   if (/\b(linear|straight line|linear equations)\b/i.test(topic)) return 'linear';
-  if (/\b(quadratic|parabola|nature of roots)\b/i.test(topic)) {
-    return 'quadratic';
-  }
+  if (/\b(quadratic|parabola|nature of roots)\b/i.test(topic)) return 'quadratic';
   return null;
 }
 
