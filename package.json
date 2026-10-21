@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test:visualizations": "node --experimental-strip-types --test tests/visualization-schema.test.mjs",
+    "test:visualizations": "node --experimental-strip-types --test tests/*.test.mjs",
     "clean": "next clean"
   },
   "dependencies": {
