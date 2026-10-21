@@ -95,6 +95,12 @@ export function FlashcardDeckStudio({
   const reviewStampScale = useTransform(x, [-25, -115], [0.82, 1.05]);
 
   const isDraggingRef = useRef(false);
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const advancingRef = useRef(false);
+
+  useEffect(() => () => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+  }, []);
 
   const fullTrackDeck = decksByTrack[activeTrack] || INITIAL_FLASHCARDS.exam;
   const visibleDeck =
@@ -117,6 +123,11 @@ export function FlashcardDeckStudio({
 
   // Reset card flip & index when switching track
   useEffect(() => {
+    if (advanceTimerRef.current) {
+      clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+    advancingRef.current = false;
     setActiveIndex(0);
     setIsFlipped(false);
     setExitDirection(null);
@@ -131,42 +142,45 @@ export function FlashcardDeckStudio({
 
   const advanceCard = useCallback(
     (direction: 'left' | 'right') => {
-      if (!currentCard) return;
+      if (!currentCard || advancingRef.current) return;
+      advancingRef.current = true;
+      const cardId = currentCard.id;
       setExitDirection(direction);
 
       if (direction === 'right') {
-        const wasAlreadyMastered = !!masteredIds[currentCard.id];
-        setMasteredIds((prev) => {
-          const updated = { ...prev, [currentCard.id]: true };
-          const newlyMasteredTotal = fullTrackDeck.filter((c) => updated[c.id]).length;
-          if (newlyMasteredTotal === fullTrackDeck.length && !wasAlreadyMastered) {
-            fireLearnFlowConfetti();
-            onNotify(`All ${fullTrackDeck.length} flashcards in this deck mastered!`);
-          }
-          return updated;
-        });
-        setReviewLaterIds((prev) => {
-          const next = { ...prev };
-          delete next[currentCard.id];
-          return next;
-        });
-        playSoundCue('grade_success');
-        if (!wasAlreadyMastered) {
-          onCardMastered?.();
+        const firstMastery = !masteredIds[cardId];
+        if (firstMastery) onCardMastered?.();
+        if (firstMastery && fullTrackDeck.every((card) => card.id === cardId || masteredIds[card.id])) {
+          fireLearnFlowConfetti();
+          onNotify('All ' + fullTrackDeck.length + ' flashcards in this deck mastered!');
         }
+        playSoundCue('grade_success');
       } else {
-        setReviewLaterIds((prev) => ({ ...prev, [currentCard.id]: true }));
         playSoundCue('option');
       }
 
-      setTimeout(() => {
+      // Commit after the exit animation: filtering a mastered card too early
+      // removes it from under the gesture and may skip the following card.
+      advanceTimerRef.current = setTimeout(() => {
+        if (direction === 'right') {
+          setMasteredIds((previous) => ({ ...previous, [cardId]: true }));
+          setReviewLaterIds((previous) => {
+            const next = { ...previous };
+            delete next[cardId];
+            return next;
+          });
+        } else {
+          setReviewLaterIds((previous) => ({ ...previous, [cardId]: true }));
+        }
         setIsFlipped(false);
         x.set(0);
-        setActiveIndex((prev) => prev + 1);
+        setActiveIndex((previous) => previous + (filterMode === 'unmastered' && direction === 'right' ? 0 : 1));
         setExitDirection(null);
+        advancingRef.current = false;
+        advanceTimerRef.current = null;
       }, 180);
     },
-    [currentCard, masteredIds, fullTrackDeck, onCardMastered, onNotify, x]
+    [currentCard, masteredIds, fullTrackDeck, filterMode, onCardMastered, onNotify, x]
   );
 
   const handleDragEnd = (
