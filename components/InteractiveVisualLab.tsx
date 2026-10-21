@@ -293,9 +293,150 @@ function AtomModel({ data }: { data: Extract<QuestionVisualization, { type: 'ato
   );
 }
 
-export function InteractiveVisualLab({ topic }: { topic: string }) {
+
+function LinearModel({ data }: { data: Extract<QuestionVisualization, { type: 'linear' }> | null }) {
+  const initialSlope = data?.slope ?? 4.5;
+  const initialIntercept = data?.intercept ?? 18;
+  const variable = data?.variable ?? 't';
+  const [slope, setSlope] = useState(initialSlope);
+  const [intercept, setIntercept] = useState(initialIntercept);
+  const xMin = variable === 't' ? 0 : -6;
+  const xMax = variable === 't' ? 12 : 6;
+  const [probe, setProbe] = useState((xMin + xMax) / 2);
+  const lowValue = Math.min(intercept + slope * xMin, intercept + slope * xMax, 0);
+  const highValue = Math.max(intercept + slope * xMin, intercept + slope * xMax, 0);
+  const padding = Math.max(1, (highValue - lowValue) * 0.1);
+  const bottom = lowValue - padding;
+  const top = highValue + padding;
+  const px = (x: number) => 52 + (x - xMin) / (xMax - xMin) * 450;
+  const py = (value: number) => 224 - (value - bottom) / (top - bottom) * 182;
+  const value = intercept + slope * probe;
+  const fmt = (v: number) => Number(v.toFixed(2)).toLocaleString('en-ZA', { maximumFractionDigits: 2 });
+
+  return (
+    <div className="space-y-4">
+      <div className="visual-lab-plot rounded-2xl p-2.5 sm:p-4">
+        <p className="mb-2 text-xs font-semibold visual-lab-muted">Follow the straight line: y = mx + c</p>
+        <svg viewBox="0 0 550 290" className="h-auto w-full" role="img" aria-label={'Linear graph slope ' + slope + ', intercept ' + intercept + ', current value ' + fmt(value)}>
+          {Array.from({ length: 6 }, (_, i) => (
+            <g key={i}>
+              <line x1={52 + i * 90} x2={52 + i * 90} y1="32" y2="224" stroke="var(--chart-grid)" />
+              <line x1="52" x2="502" y1={42 + i * 36.4} y2={42 + i * 36.4} stroke="var(--chart-grid)" />
+            </g>
+          ))}
+          <line x1="52" x2="502" y1={py(0)} y2={py(0)} stroke="var(--mute)" strokeWidth="1.4" />
+          <line x1={px(Math.max(xMin, 0))} x2={px(Math.max(xMin, 0))} y1="32" y2="224" stroke="var(--mute)" strokeWidth="1.4" />
+          <path d={'M' + px(xMin) + ',' + py(intercept + slope * xMin) + ' L' + px(xMax) + ',' + py(intercept + slope * xMax)} stroke="var(--series-blue)" strokeWidth="4" strokeLinecap="round" fill="none" />
+          <line x1={px(probe)} x2={px(probe)} y1="32" y2="224" stroke="var(--series-pink)" strokeDasharray="5 5" strokeWidth="2" />
+          <circle cx={px(probe)} cy={py(value)} r="7" fill="var(--series-pink)" stroke="var(--bg)" strokeWidth="2.5" />
+          <text x="52" y="261" fill="var(--mute)" fontSize="12">{xMin}</text>
+          <text x="502" y="261" fill="var(--mute)" textAnchor="end" fontSize="12">{xMax} {variable}</text>
+          <text x="52" y="25" fill="var(--mute)" fontSize="12">y</text>
+          <text x="502" y="284" textAnchor="end" fill="var(--mute)" fontSize="12">Move the marker to inspect values</text>
+        </svg>
+      </div>
+      <div className="visual-lab-insight rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2 text-sm">
+        <strong>{'f(' + variable + ') = ' + slope + variable + (intercept >= 0 ? ' + ' : ' − ') + Math.abs(intercept)}</strong>
+        <span>{variable} = {fmt(probe)} → <strong>{fmt(value)}</strong></span>
+      </div>
+      <RangeControl id="visual-linear-probe" label="Inspect input" min={xMin} max={xMax} step={0.1} value={probe} display={variable + ' = ' + fmt(probe)} onChange={setProbe} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <RangeControl id="visual-linear-slope" label="Rate of change" min={-25} max={25} step={0.1} value={slope} display={'m = ' + fmt(slope)} onChange={setSlope} />
+        <RangeControl id="visual-linear-intercept" label="Starting amount" min={-1000} max={1000} step={1} value={intercept} display={'c = ' + fmt(intercept)} onChange={setIntercept} />
+      </div>
+      <button type="button" className="visual-lab-reset inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold" onClick={() => { setSlope(initialSlope); setIntercept(initialIntercept); setProbe((xMin + xMax) / 2); }}>
+        <RotateCcw size={14} /> Reset to {data ? 'question' : 'example'}
+      </button>
+    </div>
+  );
+}
+
+function DopplerModel({ data }: { data: Extract<QuestionVisualization, { type: 'doppler' }> | null }) {
+  const initial = data ?? {
+    type: 'doppler' as const, speedOfSound: 340, sourceSpeed: 30,
+    emittedFrequency: 850, direction: 'toward' as const,
+  };
+  const [speed, setSpeed] = useState(initial.sourceSpeed);
+  const [direction, setDirection] = useState<'toward' | 'away'>(initial.direction);
+  const [frequency, setFrequency] = useState(initial.emittedFrequency);
+  const [playing, setPlaying] = useState(false);
+  const [phase, setPhase] = useState(0);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!playing || reduceMotion) return;
+    const interval = window.setInterval(() => {
+      if (!document.hidden) setPhase((previous) => (previous + 0.045) % 1);
+    }, 45);
+    return () => clearInterval(interval);
+  }, [playing, reduceMotion]);
+
+  // The listener is stationary. v/(v-vs) when approaching and
+  // v/(v+vs) when receding.
+  const denominator = initial.speedOfSound + (direction === 'toward' ? -speed : speed);
+  const heardFrequency = frequency * initial.speedOfSound / denominator;
+  const fmt = (v: number) => v.toLocaleString('en-ZA', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+
+  return (
+    <div className="space-y-4">
+      <div className="visual-lab-plot rounded-2xl p-2.5 sm:p-4">
+        <p className="mb-2 text-xs font-semibold visual-lab-muted">Wavefront spacing changes with motion</p>
+        <svg viewBox="0 0 550 240" className="h-auto w-full" role="img" aria-label={'Stationary listener, source moving ' + direction + ', observed frequency ' + fmt(heardFrequency) + ' hertz'}>
+          <defs><clipPath id="doppler-viewport"><rect x="16" y="20" width="518" height="195" rx="8" /></clipPath></defs>
+          <g clipPath="url(#doppler-viewport)">
+            {Array.from({ length: 9 }, (_, i) => {
+              const radius = 22 + ((i + phase) / 9) * 375;
+              const shift = (direction === 'toward' ? -1 : 1) * radius * (speed / initial.speedOfSound) * 0.65;
+              return <circle key={i} cx={245 + shift} cy="119" r={radius} stroke="var(--series-blue)" strokeWidth="2" opacity={0.25 + 0.5 * (1 - radius / 410)} fill="none" />;
+            })}
+            <path d="M35 185 H520" stroke="var(--chart-grid)" strokeWidth="3" strokeLinecap="round" />
+          </g>
+          <rect x="224" y="102" width="44" height="32" rx="12" fill="var(--series-pink)" />
+          <text x="246" y="123" textAnchor="middle" fontSize="15" fontWeight="800" fill="var(--bg)">S</text>
+          <circle cx="476" cy="117" r="16" fill="var(--series-green)" />
+          <text x="476" y="122" textAnchor="middle" fontSize="14" fontWeight="800" fill="var(--bg)">L</text>
+          <text x="246" y="156" textAnchor="middle" fontSize="13" fill="var(--ink)">Source</text>
+          <text x="476" y="156" textAnchor="middle" fontSize="13" fill="var(--ink)">Listener</text>
+          <text x="275" y="63" fontSize="14" fontWeight="700" fill="var(--series-pink)">{direction === 'toward' ? 'Moving toward →' : '← Moving away'}</text>
+          <text x="24" y="229" fontSize="12" fill="var(--mute)">Diagram is conceptual; wavefront spacing is not to scale.</text>
+        </svg>
+      </div>
+      <div className="visual-lab-insight flex flex-wrap items-center justify-between gap-3 rounded-xl p-3.5 text-sm">
+        <span>Emitted: <strong>{fmt(frequency)} Hz</strong></span>
+        <span>Heard: <strong className="font-mono-code">{fmt(heardFrequency)} Hz</strong></span>
+      </div>
+      <RangeControl id="doppler-speed" label="Source speed" min={0} max={Math.min(150, initial.speedOfSound - 1)} step={1} value={speed} display={speed + ' m/s'} onChange={setSpeed} />
+      <RangeControl id="doppler-frequency" label="Emitted pitch" min={50} max={3000} step={10} value={frequency} display={Math.round(frequency) + ' Hz'} onChange={setFrequency} />
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div role="group" aria-label="Source direction" className="visual-lab-tabs flex rounded-full p-1">
+          {(['toward', 'away'] as const).map((value) => (
+            <button key={value} type="button" aria-pressed={direction === value} onClick={() => setDirection(value)} className="visual-lab-tab rounded-full px-3 py-2 text-xs font-bold">
+              {value === 'toward' ? 'Toward listener' : 'Away'}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <button type="button" disabled={Boolean(reduceMotion)} onClick={() => setPlaying((prev) => !prev)} className="visual-lab-play inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-bold disabled:opacity-40">
+            {playing ? <Pause size={14} /> : <Play size={14} />} {playing ? 'Pause' : 'Animate'}
+          </button>
+          <button type="button" onClick={() => { setSpeed(initial.sourceSpeed); setFrequency(initial.emittedFrequency); setDirection(initial.direction); setPhase(0); }} className="visual-lab-reset inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold">
+            <RotateCcw size={14} /> Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function InteractiveVisualLab({
+  topic, visualization = null,
+}: {
+  topic: string;
+  visualization?: QuestionVisualization | null;
+}) {
   const suggested = getSuggestedVisualization(topic);
-  const [mode, setMode] = useState<VisualizationMode>(suggested ?? 'quadratic');
+  const [mode, setMode] = useState<VisualizationMode>(visualization?.type ?? suggested ?? 'quadratic');
+  const exact = visualization?.type === mode ? visualization : null;
   const reduceMotion = useReducedMotion();
 
   return (
@@ -308,9 +449,9 @@ export function InteractiveVisualLab({ topic }: { topic: string }) {
             <p className="mt-1 text-xs leading-relaxed visual-lab-muted">Move the controls to explore the concept.</p>
           </div>
         </div>
-        <span className="visual-lab-tag rounded-full px-3 py-1.5 text-[11px] font-extrabold">Interactive lab</span>
+        <span className="visual-lab-tag rounded-full px-3 py-1.5 text-[11px] font-extrabold">{exact ? 'Question-matched' : 'Concept example'}</span>
       </div>
-      <div role="group" aria-label="Choose a visual model" className="visual-lab-tabs grid grid-cols-3 gap-1 rounded-2xl p-1">
+      <div role="group" aria-label="Choose a visual model" className="visual-lab-tabs grid grid-cols-3 gap-1 rounded-2xl p-1 sm:grid-cols-5">
         {MODES.map(({ id, label, icon: Icon }) => (
           <button key={id} type="button" aria-pressed={mode === id} onClick={() => setMode(id)} className="visual-lab-tab inline-flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 text-[11px] font-bold transition-colors sm:flex-row sm:gap-2 sm:px-3 sm:text-xs">
             <Icon size={15} aria-hidden="true" />
@@ -320,11 +461,11 @@ export function InteractiveVisualLab({ topic }: { topic: string }) {
       </div>
       <AnimatePresence mode="wait" initial={false}>
         <motion.div key={mode} initial={reduceMotion ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={reduceMotion ? undefined : { opacity: 0, y: -5 }} transition={{ duration: 0.2 }}>
-          {mode === 'quadratic' ? <QuadraticModel /> : mode === 'trigonometry' ? <TrigModel /> : <AtomModel />}
+          {mode === 'quadratic' ? <QuadraticModel data={exact?.type === 'quadratic' ? exact : null} /> : mode === 'trigonometry' ? <TrigModel data={exact?.type === 'trigonometry' ? exact : null} /> : mode === 'atom' ? <AtomModel data={exact?.type === 'atom' ? exact : null} /> : mode === 'linear' ? <LinearModel data={exact?.type === 'linear' ? exact : null} /> : <DopplerModel data={exact?.type === 'doppler' ? exact : null} />}
         </motion.div>
       </AnimatePresence>
       <p className="border-t pt-3 text-[11px] leading-relaxed visual-lab-muted" style={{ borderColor: 'var(--line)' }}>
-        Concept explorer · Values are illustrative and may not match the exact question above.
+        {exact ? 'Initially uses verified numbers from this question. Changing controls explores what-if scenarios.' : 'Concept explorer only — these example values are not derived from the question above.'}
       </p>
     </section>
   );
