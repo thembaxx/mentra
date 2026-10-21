@@ -119,6 +119,38 @@ select {
   font-size: 16px;
 }
 
+
+/* Interactive visual learning: uses Mentra's existing light/dark palette. */
+.visual-lab-shell {
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+.visual-lab-muted { color: var(--mute); }
+.visual-lab-icon { background: var(--bls); color: var(--ink); }
+.visual-lab-tag { background: var(--grs); color: var(--ink); }
+.visual-lab-tabs { background: var(--card); border: 1px solid var(--line); }
+.visual-lab-tab { color: var(--mute); }
+.visual-lab-tab[aria-pressed="true"] {
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+}
+.visual-lab-plot { background: var(--card); border: 1px solid var(--line); }
+.visual-lab-insight { background: var(--bls); color: var(--ink); }
+.visual-lab-output { background: var(--card); border: 1px solid var(--line); }
+.visual-lab-range { accent-color: var(--series-blue); min-height: 24px; }
+.visual-lab-check { accent-color: var(--series-blue); width: 17px; height: 17px; }
+.visual-lab-reset { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
+.visual-lab-play { background: var(--yl); color: #2D2D2B; }
+.visual-lab-tab:focus-visible,
+.visual-lab-play:focus-visible,
+.visual-lab-reset:focus-visible,
+.visual-lab-range:focus-visible,
+.visual-lab-check:focus-visible {
+  outline: 3px solid var(--series-blue);
+  outline-offset: 3px;
+}
+
 /* Custom scrollbar hiding for horizontal pill/tile rows */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
