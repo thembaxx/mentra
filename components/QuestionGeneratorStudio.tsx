@@ -1598,7 +1598,17 @@ export function QuestionGeneratorStudio({
                                   prev === stepCard.id ? null : stepCard.id
                                 )
                               }
-                              className="relative rounded-2xl p-4 cursor-pointer overflow-hidden transition-colors"
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.preventDefault();
+                                  setFocusedStepId((prev) => prev === stepCard.id ? null : stepCard.id);
+                                }
+                              }}
+                              role="button"
+                              tabIndex={0}
+                              aria-pressed={isFocused}
+                              aria-label={stepCard.title + ': focus explanation'}
+                              className="relative rounded-2xl p-4 cursor-pointer overflow-hidden transition-colors focus-visible:outline-3 focus-visible:outline-[var(--yl)] focus-visible:outline-offset-2"
                               style={{
                                 backgroundColor: stepCard.isVerification
                                   ? 'rgba(154, 171, 101, 0.16)'
