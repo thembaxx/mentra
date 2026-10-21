@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Eye, ShieldCheck } from 'lucide-react';
 import type { QuestionVisualization } from '@/lib/visualization-schema';
@@ -126,7 +126,7 @@ function VisualScene({ model, phase }: { model: QuestionVisualization; phase: 0 
         <Label x={430} y={157} color={INK} size={12}>Listener</Label>
         {reveal(2)&&<><path d={approaching?'M225 186 H371 l-12 -8 M371 186 l-12 8':'M371 186 H225 l12 -8 M225 186 l12 8'} stroke={YELLOW} strokeWidth="2.5" fill="none"/>
           <Label x={302} y={210} color={YELLOW} size={12}>{approaching?'Approaching':'Receding'} · vₛ/v={Number(ratio.toFixed(2))}</Label></>}
-        {reveal(3)&&<Label x={405} y={32} color={GREEN}>{approaching?'↑ pitch':'↓ pitch'}</Label>}
+        {reveal(3)&&<Label x={405} y={32} color={GREEN}>{model.sourceSpeed === 0 ? 'Same pitch' : approaching ? '↑ pitch' : '↓ pitch'}</Label>}
       </>;
       break;
     }
@@ -185,7 +185,10 @@ function VisualScene({ model, phase }: { model: QuestionVisualization; phase: 0 
     }
     case 'molecule': {
       const water=model.formula==='H2O';
-      const atoms=water?[[193,56],[327,56]]:[[123,112],[397,112]];
+      const halfAngle = 104.5 / 2 * Math.PI / 180;
+      const xOffset = Math.sin(halfAngle) * 90;
+      const yOffset = Math.cos(halfAngle) * 90;
+      const atoms=water?[[260-xOffset,112-yOffset],[260+xOffset,112-yOffset]]:[[123,112],[397,112]];
       drawing = <>
         {reveal(1)&&atoms.map(([x,y],i)=>water
           ? <path key={i} d={'M260 136 L'+x+' '+y} stroke={YELLOW} strokeWidth="8" />
@@ -203,8 +206,7 @@ function VisualScene({ model, phase }: { model: QuestionVisualization; phase: 0 
   }
 
   return (
-    <svg className="h-auto w-full" viewBox="0 0 520 225" role="img"
-      aria-label={model.type.replace('_',' ')+' diagram, visual checkpoint '+(phase+1)}>
+    <svg className="block h-auto w-full min-w-[420px] overflow-hidden" viewBox="0 0 520 225" aria-hidden="true" focusable="false">
       <rect width="520" height="225" rx="16" fill="#20252D"/>
       <g>{drawing}</g>
     </svg>
@@ -216,21 +218,23 @@ export function StepVisualJourney({
 }: Props) {
   const reduceMotion=useReducedMotion();
   const index=Math.max(0,Math.min(Math.max(0,stepCount-1),stepIndex));
-  const phase=phaseForStep(index,isVerification);
+  const phase=phaseForStep(index,isVerification,stepCount);
   const checkpoints=getVisualCheckpoints(model);
   const checkpoint=checkpoints[phase];
+  const titleId=useId();
+  const statusId=useId();
   const canPrevious=index>0;
   const canNext=index<stepCount-1;
 
   return (
-    <section aria-label="Visual guide to the explanation" className="rounded-2xl border border-white/20 bg-[#24282D] p-3 sm:p-4 space-y-3">
+    <section aria-labelledby={titleId} aria-describedby={statusId} className="min-w-0 rounded-2xl border border-white/20 bg-[#24282D] p-3 sm:p-4 space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-xs font-extrabold text-[#F7D66E]">
           <Eye aria-hidden="true" size={15}/>
-          Visual checkpoints
+          <span id={titleId}>Visual checkpoints</span>
         </div>
         <span className="rounded-full border border-white/15 px-2.5 py-1 text-[11px] font-bold text-[#C3D9FC]">
-          Step {index+1} / {stepCount}
+          Step {index+1} of {stepCount}
         </span>
       </div>
       <div className="flex gap-1" aria-hidden="true">
@@ -239,9 +243,11 @@ export function StepVisualJourney({
         }}/>)}
       </div>
       <motion.div key={model.type+'-'+phase} initial={reduceMotion?false:{opacity:.5,y:7}}
-        animate={{opacity:1,y:0}} transition={{duration:.22}}>
-        <VisualScene model={model} phase={phase}/>
-        <div className="space-y-1.5 pt-2.5" aria-live="polite" aria-atomic="true">
+        animate={{opacity:1,y:0}} transition={reduceMotion?{duration:0}:{duration:.22}}>
+        <div className="overflow-x-auto rounded-2xl" role="group" aria-label="Visual diagram; scroll horizontally on small screens">
+          <VisualScene model={model} phase={phase}/>
+        </div>
+        <div className="space-y-1.5 pt-2.5">
           <p className="text-[13px] font-extrabold text-white">{checkpoint.title}</p>
           <p className="text-xs leading-relaxed text-[#CFD4DD]">{checkpoint.detail}</p>
           <p className="rounded-lg border border-[#F7D66E]/35 bg-[#F7D66E]/10 px-3 py-2 font-mono-code text-xs font-bold text-[#F7D66E] break-words">
@@ -250,11 +256,11 @@ export function StepVisualJourney({
         </div>
       </motion.div>
       <div className="flex items-center justify-between gap-2">
-        <button type="button" disabled={!canPrevious} onClick={()=>onSelectStep(index-1)}
+        <button type="button" aria-label="Previous explanation step" disabled={!canPrevious} onClick={()=>onSelectStep(index-1)}
           className="inline-flex items-center gap-1.5 rounded-full border border-white/25 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-35 focus-visible:outline-3 focus-visible:outline-[#F7D66E]">
           <ArrowLeft size={14}/> Previous
         </button>
-        <button type="button" disabled={!canNext} onClick={()=>onSelectStep(index+1)}
+        <button type="button" aria-label="Next explanation step" disabled={!canNext} onClick={()=>onSelectStep(index+1)}
           className="inline-flex items-center gap-1.5 rounded-full bg-[#F7D66E] px-3 py-2 text-xs font-extrabold text-[#202225] disabled:cursor-not-allowed disabled:opacity-35 focus-visible:outline-3 focus-visible:outline-white">
           Next step <ArrowRight size={14}/>
         </button>
