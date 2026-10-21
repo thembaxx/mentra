@@ -71,7 +71,7 @@ STEPS:
 Step 1: [First step of the solution with $...$ or $$...$$ LaTeX]
 Step 2: [Second step of the solution with $...$ or $$...$$ LaTeX]
 Step 3: [Final step and verification]
-VISUALIZATION_JSON: [On ONE line, return null unless the question explicitly includes all numbers required by one of the following safe shapes. Allowed exact JSON only: {"type":"quadratic","a":1,"b":-6,"c":13}; {"type":"linear","slope":4.5,"intercept":18,"variable":"t"}; {"type":"trigonometry","function":"cos","angleDegrees":60}; {"type":"atom","atomicNumber":6}; {"type":"doppler","speedOfSound":340,"sourceSpeed":30,"emittedFrequency":850,"direction":"toward"}. Output the selected shape with ACTUAL question-specific values, not the sample numbers. Do not invent missing coefficients or infer an unknown k. If unrelated coding/languages or numbers are implicit, output null. The JSON is validated against the question by the application.]
+VISUALIZATION_JSON: [On ONE line, return null unless the question explicitly includes all numbers required by one of the following safe shapes. Allowed exact JSON only: {"type":"quadratic","a":1,"b":-6,"c":13}; {"type":"linear","slope":4.5,"intercept":18,"variable":"t"}; {"type":"trigonometry","function":"cos","angleDegrees":60}; {"type":"atom","atomicNumber":6}; {"type":"doppler","speedOfSound":340,"sourceSpeed":30,"emittedFrequency":850,"direction":"toward"}. Output the selected shape with ACTUAL question-specific values, not the sample numbers. Do not invent missing coefficients or infer an unknown k. If unrelated coding/languages or numbers are implicit, output null. The JSON is validated against the question by the application.]`;
 
       if (ai) {
         try {
