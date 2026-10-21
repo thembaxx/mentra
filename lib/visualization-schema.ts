@@ -150,7 +150,8 @@ export function inferVisualizationFromQuestion(question: string): QuestionVisual
   if (/\bdoppler\b/i.test(question) || /\b(ambulance|siren)\b/i.test(question)) {
     const sourceSpeed = /v_?\{?S\}?\s*=\s*(\d+(?:\.\d+)?)/i.exec(question)?.[1];
     const frequency = /f_?\{?S\}?\s*=\s*(\d+(?:\.\d+)?)/i.exec(question)?.[1];
-    const soundSpeed = /(?:\bv\s*=|speed of sound[^.\n]*?\b(?:is|as|=)\s*)(\d+(?:\.\d+)?)/i.exec(question)?.[1];
+    const soundSpeed = /\bv\s*=\s*(\d+(?:\.\d+)?)/i.exec(question)?.[1]
+      ?? /\bspeed of sound[^.\n]*?(?:is|as|=)\s*\$?\s*(\d+(?:\.\d+)?)/i.exec(question)?.[1];
     const direction = /\b(approach(?:es|ing)?|towards?|closing in)\b/i.test(question)
       ? 'toward'
       : /\b(away|reced(?:es|ing)|depart(?:s|ing))\b/i.test(question) ? 'away' : null;
@@ -164,7 +165,7 @@ export function inferVisualizationFromQuestion(question: string): QuestionVisual
 
   // A specific angle tied to sin/cos is unambiguous; do not assume other
   // identities or functions whose parameters have not been provided.
-  const trig = /\b(sin|cos)\s*\(?\s*(\d{1,3})(?:°|\\circ|degrees?)\s*\)?/i.exec(question);
+  const trig = /\b(sin|cos)\s*\(?\s*(\d{1,3})(?:°|\^?\\circ|degrees?)\s*\)?/i.exec(question);
   if (trig) return validateVisualization({
     type: 'trigonometry', function: trig[1].toLowerCase(),
     angleDegrees: Number(trig[2]),
