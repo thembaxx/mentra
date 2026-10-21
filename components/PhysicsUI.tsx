@@ -182,6 +182,15 @@ export function BouncySurface({
   return (
     <motion.div
       onClick={onClick ? handleSurfaceClick : undefined}
+      onKeyDown={onClick ? (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleSurfaceClick();
+        }
+      } : undefined}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-disabled={onClick ? false : undefined}
       whileHover={onClick ? { y: -hoverLift, scale: 1.012 } : undefined}
       whileTap={onClick ? { scale: 0.975, y: 0 } : undefined}
       transition={SPRING_BOUNCY}
