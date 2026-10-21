@@ -344,7 +344,11 @@ export function GlobalSearchBar({
               onKeyDown={handleInputKeyDown}
               placeholder="Search topics, flashcards, curriculum..."
               aria-label="Global search for topics, flashcards, and curriculum"
+              role="combobox"
               aria-expanded={isOpen}
+              aria-controls="mentra-global-search-popover"
+              aria-haspopup="dialog"
+              aria-autocomplete="list"
               className="w-full bg-transparent text-base font-medium focus:outline-none truncate"
               style={{ color: 'var(--ink)' }}
             />
@@ -393,8 +397,9 @@ export function GlobalSearchBar({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.97 }}
             transition={SPRING_BOUNCY}
-            role="listbox"
-            aria-label="Search results"
+            role="dialog"
+            id="mentra-global-search-popover"
+            aria-label="Search suggestions and filters"
             className="fixed inset-x-3 top-[64px] sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2.5 sm:w-[460px] z-50 rounded-3xl p-4 shadow-2xl space-y-3"
             style={{
               backgroundColor: 'var(--bg)',
