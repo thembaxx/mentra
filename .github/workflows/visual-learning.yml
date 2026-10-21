@@ -3,6 +3,12 @@ on:
   pull_request:
     paths:
       - 'components/InteractiveVisualLab.tsx'
+      - 'components/ExpandedVisualModels.tsx'
+      - 'lib/visualization-schema.ts'
+      - 'tests/visualization-schema.test.mjs'
+      - 'app/api/visualization/route.ts'
+      - 'app/api/tutor/route.ts'
+      - 'lib/study-data.ts'
       - 'components/FlashcardDeckStudio.tsx'
       - 'components/MathRenderer.tsx'
       - 'components/PhysicsUI.tsx'
