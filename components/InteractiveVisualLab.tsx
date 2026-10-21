@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
+import type { QuestionVisualization } from '@/lib/visualization-schema';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { Atom, ChartLine, Hand, Pause, Play, RotateCcw, Waves } from 'lucide-react';
+import { Atom, ChartLine, Hand, Pause, Play, RotateCcw, Waves, Activity, ArrowLeftRight } from 'lucide-react';
 import { MathText } from './MathRenderer';
 
-export type VisualizationMode = 'quadratic' | 'trigonometry' | 'atom';
+export type VisualizationMode = QuestionVisualization['type'];
 
 export function getSuggestedVisualization(topic: string): VisualizationMode | null {
   if (/\b(trigonometry|trigonometric|sine|cosine|unit circle|sin|cos)\b/i.test(topic)) {
@@ -14,6 +15,8 @@ export function getSuggestedVisualization(topic: string): VisualizationMode | nu
   if (/\b(atom|atomic|electron|nucleus|proton|chemical element)\b/i.test(topic)) {
     return 'atom';
   }
+  if (/\b(doppler|sound wave|ambulance)\b/i.test(topic)) return 'doppler';
+  if (/\b(linear|straight line|linear equations)\b/i.test(topic)) return 'linear';
   if (/\b(quadratic|parabola|nature of roots)\b/i.test(topic)) {
     return 'quadratic';
   }
@@ -24,6 +27,8 @@ const MODES: { id: VisualizationMode; label: string; icon: typeof ChartLine }[] 
   { id: 'quadratic', label: 'Functions', icon: ChartLine },
   { id: 'trigonometry', label: 'Unit circle', icon: Waves },
   { id: 'atom', label: 'Atom', icon: Atom },
+  { id: 'linear', label: 'Linear', icon: Activity },
+  { id: 'doppler', label: 'Doppler', icon: ArrowLeftRight },
 ];
 
 const X_MIN = -12;
@@ -31,17 +36,17 @@ const X_MAX = 12;
 const plotX = (x: number) => 280 + x * 21;
 const plotY = (y: number) => 152 - y * 16;
 
-function quadraticPath(h: number, k: number, reflected: boolean): string {
+function quadraticPath(h: number, k: number, curvature: number): string {
   const points: string[] = [];
   for (let step = 0; step <= 240; step++) {
     const x = X_MIN + (step / 240) * (X_MAX - X_MIN);
-    const y = (reflected ? -1 : 1) * (x - h) ** 2 + k;
+    const y = curvature * (x - h) ** 2 + k;
     points.push((step === 0 ? 'M' : 'L') + plotX(x).toFixed(2) + ',' + plotY(y).toFixed(2));
   }
   return points.join(' ');
 }
 
-const PARENT_PATH = quadraticPath(0, 0, false);
+const PARENT_PATH = quadraticPath(0, 0, 1);
 const GRID_X = Array.from({ length: 23 }, (_, i) => i - 11);
 const GRID_Y = Array.from({ length: 17 }, (_, i) => i - 8);
 
@@ -86,15 +91,21 @@ function RangeControl({
   );
 }
 
-function QuadraticModel() {
-  const [h, setH] = useState(3);
-  const [k, setK] = useState(4);
-  const [reflected, setReflected] = useState(false);
-  const hasTwoRoots = k !== 0 && (reflected ? k > 0 : k < 0);
-  const roots = k === 0 ? 'One repeated real root' : hasTwoRoots ? 'Two distinct real roots' : 'No real roots';
-  const equation = '$$f(x) = ' + (reflected ? '-' : '') + '(x ' +
-    (h < 0 ? '+ ' + Math.abs(h) : '- ' + h) + ')^2 ' +
-    (k < 0 ? '- ' + Math.abs(k) : '+ ' + k) + '$$';
+function QuadraticModel({ data }: { data: Extract<QuestionVisualization, { type: 'quadratic' }> | null }) {
+  const initialA = data?.a ?? 1;
+  const initialH = data ? -data.b / (2 * data.a) : 3;
+  const initialK = data ? data.c - data.b ** 2 / (4 * data.a) : 4;
+  const [h, setH] = useState(initialH);
+  const [k, setK] = useState(initialK);
+  const [a, setA] = useState(initialA);
+  const clipId = useId().replace(/:/g, '-');
+  const diff = -k / a;
+  const roots = Math.abs(k) < 0.001 ? 'One repeated real root'
+    : diff > 0 ? 'Two distinct real roots' : 'No real roots';
+  const fmt = (value: number) => Number(value.toFixed(2)).toString();
+  const equation = '$$f(x) = ' + fmt(a) + '(x ' +
+    (h < 0 ? '+ ' + fmt(Math.abs(h)) : '- ' + fmt(h)) + ')^2 ' +
+    (k < 0 ? '- ' + fmt(Math.abs(k)) : '+ ' + fmt(k)) + '$$';
 
   return (
     <div className="space-y-4">
@@ -103,24 +114,22 @@ function QuadraticModel() {
           <span>Explore turning points and roots</span>
           <span className="visual-lab-muted">Dashed: parent function</span>
         </div>
-        <svg viewBox="0 0 560 310" role="img" aria-label={'Parabola with turning point at (' + h + ', ' + k + '). ' + roots} className="h-auto w-full">
-          <defs>
-            <clipPath id="mentra-quadratic-clip"><rect x="18" y="8" width="524" height="281" rx="6" /></clipPath>
-          </defs>
-          <g clipPath="url(#mentra-quadratic-clip)">
+        <svg viewBox="0 0 560 310" role="img" aria-label={'Parabola with turning point at (' + fmt(h) + ', ' + fmt(k) + '). ' + roots} className="h-auto w-full">
+          <defs><clipPath id={clipId}><rect x="18" y="8" width="524" height="281" rx="6" /></clipPath></defs>
+          <g clipPath={'url(#' + clipId + ')'}>
             {GRID_X.map((x) => <line key={'x' + x} x1={plotX(x)} y1="8" x2={plotX(x)} y2="289" stroke="var(--chart-grid)" />)}
             {GRID_Y.map((y) => <line key={'y' + y} x1="18" y1={plotY(y)} x2="542" y2={plotY(y)} stroke="var(--chart-grid)" />)}
             <line x1="18" y1={plotY(0)} x2="542" y2={plotY(0)} stroke="var(--mute)" strokeWidth="1.5" />
             <line x1={plotX(0)} y1="8" x2={plotX(0)} y2="289" stroke="var(--mute)" strokeWidth="1.5" />
             <path d={PARENT_PATH} stroke="var(--mute)" strokeWidth="2.5" opacity=".45" strokeDasharray="6 7" fill="none" />
-            <path d={quadraticPath(h, k, reflected)} stroke="var(--series-blue)" strokeWidth="4" strokeLinecap="round" fill="none" />
+            <path d={quadraticPath(h, k, a)} stroke="var(--series-blue)" strokeWidth="4" strokeLinecap="round" fill="none" />
             <line x1={plotX(h)} y1="8" x2={plotX(h)} y2="289" stroke="var(--series-pink)" strokeWidth="1.5" strokeDasharray="4 5" />
             <circle cx={plotX(h)} cy={plotY(k)} r="7" fill="var(--series-pink)" stroke="var(--bg)" strokeWidth="2.5" />
           </g>
           <text x="532" y={plotY(0) - 7} fontSize="12" textAnchor="end" fill="var(--mute)">x</text>
           <text x={plotX(0) + 9} y="19" fontSize="12" fill="var(--mute)">y</text>
           <text x={Math.min(506, Math.max(55, plotX(h) + 12))} y={Math.max(22, Math.min(278, plotY(k) - 13))} fontSize="14" fontWeight="700" fill="var(--series-pink)">
-            ({h}, {k})
+            ({fmt(h)}, {fmt(k)})
           </text>
           <text x="280" y="307" textAnchor="middle" fontSize="11" fill="var(--mute)">Move the sliders to reshape the graph</text>
         </svg>
@@ -129,17 +138,18 @@ function QuadraticModel() {
         <div className="min-w-0 text-sm font-semibold"><MathText text={equation} /></div>
         <span className="text-xs font-bold">{roots}</span>
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <RangeControl id="visual-shift" label="Horizontal shift" value={h} min={-5} max={5} display={'h = ' + h} onChange={setH} />
-        <RangeControl id="visual-height" label="Vertical shift" value={k} min={-5} max={5} display={'k = ' + k} onChange={setK} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <RangeControl id="visual-shift" label="Horizontal shift" value={h} min={-5} max={5} step={0.1} display={'h = ' + fmt(h)} onChange={setH} />
+        <RangeControl id="visual-height" label="Vertical shift" value={k} min={-8} max={8} step={0.1} display={'k = ' + fmt(k)} onChange={setK} />
+        <RangeControl id="visual-curvature" label="Curve strength" value={Math.abs(a)} min={0.1} max={5} step={0.1} display={'|a| = ' + fmt(Math.abs(a))} onChange={(value) => setA(Math.sign(a) * value)} />
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <label className="flex cursor-pointer items-center gap-2.5 text-sm font-semibold">
-          <input className="visual-lab-check" type="checkbox" checked={reflected} onChange={(event) => setReflected(event.target.checked)} />
-          Reflect across the x-axis
+          <input className="visual-lab-check" type="checkbox" checked={a < 0} onChange={(event) => setA(Math.abs(a) * (event.target.checked ? -1 : 1))} />
+          Open downwards
         </label>
-        <button type="button" className="visual-lab-reset inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold" onClick={() => { setH(3); setK(4); setReflected(false); }}>
-          <RotateCcw size={14} /> Reset
+        <button type="button" className="visual-lab-reset inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold" onClick={() => { setH(initialH); setK(initialK); setA(initialA); }}>
+          <RotateCcw size={14} /> Reset to {data ? 'question' : 'example'}
         </button>
       </div>
     </div>
