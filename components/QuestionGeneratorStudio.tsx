@@ -277,7 +277,7 @@ export function QuestionGeneratorStudio({
     const idxMatch = raw.match(/CORRECT_INDEX:\s*(\d+)/i);
     const hintMatch = raw.match(/HINT:\s*([^\n]+)/i);
     // Model suggestions are data, not a part of the teacher's explanation.
-    const cleanRaw = raw.replace(/\nVISUALIZATION_JSON:\s*(?:\{[^\n]*\}|null)[^\n]*/i, '');
+    const cleanRaw = raw.split(/\nVISUALIZATION_JSON:/i)[0];
     const stepsMatch = cleanRaw.match(/STEPS:\s*([\s\S]*)$/i);
 
     const promptText = (qMatch?.[1] || raw).trim();
