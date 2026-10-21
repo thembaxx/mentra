@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Eye, ShieldCheck } from 'lucide-react';
 import type { QuestionVisualization } from '@/lib/visualization-schema';
@@ -21,7 +22,7 @@ const GREEN = '#A8D38B';
 const INK = '#F8F3E7';
 
 function Label({ x, y, children, color = INK, size = 13 }: {
-  x: number; y: number; children: React.ReactNode; color?: string; size?: number;
+  x: number; y: number; children: ReactNode; color?: string; size?: number;
 }) {
   return <text x={x} y={y} fill={color} fontSize={size} fontWeight="650" textAnchor="middle">{children}</text>;
 }
@@ -29,7 +30,7 @@ function Label({ x, y, children, color = INK, size = 13 }: {
 /** All geometry comes from bounded, typed numerical data, never model-authored markup. */
 function VisualScene({ model, phase }: { model: QuestionVisualization; phase: 0 | 1 | 2 | 3 }) {
   const reveal = (at: number) => phase >= at;
-  let drawing: React.ReactNode;
+  let drawing: ReactNode;
 
   switch (model.type) {
     case 'quadratic': {
