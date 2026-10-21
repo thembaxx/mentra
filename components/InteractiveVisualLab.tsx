@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
+import type { QuestionVisualization } from '@/lib/visualization-schema';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { Atom, ChartLine, Hand, Pause, Play, RotateCcw, Waves } from 'lucide-react';
+import { Atom, ChartLine, Hand, Pause, Play, RotateCcw, Waves, Activity, ArrowLeftRight } from 'lucide-react';
 import { MathText } from './MathRenderer';
 
-export type VisualizationMode = 'quadratic' | 'trigonometry' | 'atom';
+export type VisualizationMode = QuestionVisualization['type'];
 
 export function getSuggestedVisualization(topic: string): VisualizationMode | null {
   if (/\b(trigonometry|trigonometric|sine|cosine|unit circle|sin|cos)\b/i.test(topic)) {
@@ -14,6 +15,8 @@ export function getSuggestedVisualization(topic: string): VisualizationMode | nu
   if (/\b(atom|atomic|electron|nucleus|proton|chemical element)\b/i.test(topic)) {
     return 'atom';
   }
+  if (/\b(doppler|sound wave|ambulance)\b/i.test(topic)) return 'doppler';
+  if (/\b(linear|straight line|linear equations)\b/i.test(topic)) return 'linear';
   if (/\b(quadratic|parabola|nature of roots)\b/i.test(topic)) {
     return 'quadratic';
   }
@@ -24,6 +27,8 @@ const MODES: { id: VisualizationMode; label: string; icon: typeof ChartLine }[] 
   { id: 'quadratic', label: 'Functions', icon: ChartLine },
   { id: 'trigonometry', label: 'Unit circle', icon: Waves },
   { id: 'atom', label: 'Atom', icon: Atom },
+  { id: 'linear', label: 'Linear', icon: Activity },
+  { id: 'doppler', label: 'Doppler', icon: ArrowLeftRight },
 ];
 
 const X_MIN = -12;
@@ -31,17 +36,17 @@ const X_MAX = 12;
 const plotX = (x: number) => 280 + x * 21;
 const plotY = (y: number) => 152 - y * 16;
 
-function quadraticPath(h: number, k: number, reflected: boolean): string {
+function quadraticPath(h: number, k: number, curvature: number): string {
   const points: string[] = [];
   for (let step = 0; step <= 240; step++) {
     const x = X_MIN + (step / 240) * (X_MAX - X_MIN);
-    const y = (reflected ? -1 : 1) * (x - h) ** 2 + k;
+    const y = curvature * (x - h) ** 2 + k;
     points.push((step === 0 ? 'M' : 'L') + plotX(x).toFixed(2) + ',' + plotY(y).toFixed(2));
   }
   return points.join(' ');
 }
 
-const PARENT_PATH = quadraticPath(0, 0, false);
+const PARENT_PATH = quadraticPath(0, 0, 1);
 const GRID_X = Array.from({ length: 23 }, (_, i) => i - 11);
 const GRID_Y = Array.from({ length: 17 }, (_, i) => i - 8);
 
@@ -86,15 +91,21 @@ function RangeControl({
   );
 }
 
-function QuadraticModel() {
-  const [h, setH] = useState(3);
-  const [k, setK] = useState(4);
-  const [reflected, setReflected] = useState(false);
-  const hasTwoRoots = k !== 0 && (reflected ? k > 0 : k < 0);
-  const roots = k === 0 ? 'One repeated real root' : hasTwoRoots ? 'Two distinct real roots' : 'No real roots';
-  const equation = '$$f(x) = ' + (reflected ? '-' : '') + '(x ' +
-    (h < 0 ? '+ ' + Math.abs(h) : '- ' + h) + ')^2 ' +
-    (k < 0 ? '- ' + Math.abs(k) : '+ ' + k) + '$$';
+function QuadraticModel({ data }: { data: Extract<QuestionVisualization, { type: 'quadratic' }> | null }) {
+  const initialA = data?.a ?? 1;
+  const initialH = data ? -data.b / (2 * data.a) : 3;
+  const initialK = data ? data.c - data.b ** 2 / (4 * data.a) : 4;
+  const [h, setH] = useState(initialH);
+  const [k, setK] = useState(initialK);
+  const [a, setA] = useState(initialA);
+  const clipId = useId().replace(/:/g, '-');
+  const diff = -k / a;
+  const roots = Math.abs(k) < 0.001 ? 'One repeated real root'
+    : diff > 0 ? 'Two distinct real roots' : 'No real roots';
+  const fmt = (value: number) => Number(value.toFixed(2)).toString();
+  const equation = '$$f(x) = ' + fmt(a) + '(x ' +
+    (h < 0 ? '+ ' + fmt(Math.abs(h)) : '- ' + fmt(h)) + ')^2 ' +
+    (k < 0 ? '- ' + fmt(Math.abs(k)) : '+ ' + fmt(k)) + '$$';
 
   return (
     <div className="space-y-4">
@@ -103,24 +114,22 @@ function QuadraticModel() {
           <span>Explore turning points and roots</span>
           <span className="visual-lab-muted">Dashed: parent function</span>
         </div>
-        <svg viewBox="0 0 560 310" role="img" aria-label={'Parabola with turning point at (' + h + ', ' + k + '). ' + roots} className="h-auto w-full">
-          <defs>
-            <clipPath id="mentra-quadratic-clip"><rect x="18" y="8" width="524" height="281" rx="6" /></clipPath>
-          </defs>
-          <g clipPath="url(#mentra-quadratic-clip)">
+        <svg viewBox="0 0 560 310" role="img" aria-label={'Parabola with turning point at (' + fmt(h) + ', ' + fmt(k) + '). ' + roots} className="h-auto w-full">
+          <defs><clipPath id={clipId}><rect x="18" y="8" width="524" height="281" rx="6" /></clipPath></defs>
+          <g clipPath={'url(#' + clipId + ')'}>
             {GRID_X.map((x) => <line key={'x' + x} x1={plotX(x)} y1="8" x2={plotX(x)} y2="289" stroke="var(--chart-grid)" />)}
             {GRID_Y.map((y) => <line key={'y' + y} x1="18" y1={plotY(y)} x2="542" y2={plotY(y)} stroke="var(--chart-grid)" />)}
             <line x1="18" y1={plotY(0)} x2="542" y2={plotY(0)} stroke="var(--mute)" strokeWidth="1.5" />
             <line x1={plotX(0)} y1="8" x2={plotX(0)} y2="289" stroke="var(--mute)" strokeWidth="1.5" />
             <path d={PARENT_PATH} stroke="var(--mute)" strokeWidth="2.5" opacity=".45" strokeDasharray="6 7" fill="none" />
-            <path d={quadraticPath(h, k, reflected)} stroke="var(--series-blue)" strokeWidth="4" strokeLinecap="round" fill="none" />
+            <path d={quadraticPath(h, k, a)} stroke="var(--series-blue)" strokeWidth="4" strokeLinecap="round" fill="none" />
             <line x1={plotX(h)} y1="8" x2={plotX(h)} y2="289" stroke="var(--series-pink)" strokeWidth="1.5" strokeDasharray="4 5" />
             <circle cx={plotX(h)} cy={plotY(k)} r="7" fill="var(--series-pink)" stroke="var(--bg)" strokeWidth="2.5" />
           </g>
           <text x="532" y={plotY(0) - 7} fontSize="12" textAnchor="end" fill="var(--mute)">x</text>
           <text x={plotX(0) + 9} y="19" fontSize="12" fill="var(--mute)">y</text>
           <text x={Math.min(506, Math.max(55, plotX(h) + 12))} y={Math.max(22, Math.min(278, plotY(k) - 13))} fontSize="14" fontWeight="700" fill="var(--series-pink)">
-            ({h}, {k})
+            ({fmt(h)}, {fmt(k)})
           </text>
           <text x="280" y="307" textAnchor="middle" fontSize="11" fill="var(--mute)">Move the sliders to reshape the graph</text>
         </svg>
@@ -129,17 +138,18 @@ function QuadraticModel() {
         <div className="min-w-0 text-sm font-semibold"><MathText text={equation} /></div>
         <span className="text-xs font-bold">{roots}</span>
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <RangeControl id="visual-shift" label="Horizontal shift" value={h} min={-5} max={5} display={'h = ' + h} onChange={setH} />
-        <RangeControl id="visual-height" label="Vertical shift" value={k} min={-5} max={5} display={'k = ' + k} onChange={setK} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <RangeControl id="visual-shift" label="Horizontal shift" value={h} min={-5} max={5} step={0.1} display={'h = ' + fmt(h)} onChange={setH} />
+        <RangeControl id="visual-height" label="Vertical shift" value={k} min={-8} max={8} step={0.1} display={'k = ' + fmt(k)} onChange={setK} />
+        <RangeControl id="visual-curvature" label="Curve strength" value={Math.abs(a)} min={0.1} max={5} step={0.1} display={'|a| = ' + fmt(Math.abs(a))} onChange={(value) => setA(Math.sign(a) * value)} />
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <label className="flex cursor-pointer items-center gap-2.5 text-sm font-semibold">
-          <input className="visual-lab-check" type="checkbox" checked={reflected} onChange={(event) => setReflected(event.target.checked)} />
-          Reflect across the x-axis
+          <input className="visual-lab-check" type="checkbox" checked={a < 0} onChange={(event) => setA(Math.abs(a) * (event.target.checked ? -1 : 1))} />
+          Open downwards
         </label>
-        <button type="button" className="visual-lab-reset inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold" onClick={() => { setH(3); setK(4); setReflected(false); }}>
-          <RotateCcw size={14} /> Reset
+        <button type="button" className="visual-lab-reset inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold" onClick={() => { setH(initialH); setK(initialK); setA(initialA); }}>
+          <RotateCcw size={14} /> Reset to {data ? 'question' : 'example'}
         </button>
       </div>
     </div>
@@ -148,13 +158,14 @@ function QuadraticModel() {
 
 const TAU = Math.PI * 2;
 const MAX_ANGLE = TAU * 2;
-const WAVE_PATH = Array.from({ length: 241 }, (_, i) => {
-  const angle = (i / 240) * MAX_ANGLE;
-  return (i === 0 ? 'M' : 'L') + (42 + (angle / MAX_ANGLE) * 317).toFixed(2) + ',' + (105 - Math.cos(angle) * 65).toFixed(2);
-}).join(' ');
-
-function TrigModel() {
-  const [angle, setAngle] = useState(Math.PI / 3);
+function TrigModel({ data }: { data: Extract<QuestionVisualization, { type: 'trigonometry' }> | null }) {
+  const initialAngle = data ? data.angleDegrees * Math.PI / 180 : Math.PI / 3;
+  const fn = data?.function ?? 'cos';
+  const [angle, setAngle] = useState(initialAngle);
+  const wavePath = Array.from({ length: 241 }, (_, i) => {
+    const t = (i / 240) * MAX_ANGLE;
+    return (i === 0 ? 'M' : 'L') + (42 + (t / MAX_ANGLE) * 317).toFixed(2) + ',' + (105 - Math[fn](t) * 65).toFixed(2);
+  }).join(' ');
   const [playing, setPlaying] = useState(false);
   const reduceMotion = useReducedMotion();
 
@@ -169,14 +180,14 @@ function TrigModel() {
   const cosine = Math.cos(angle);
   const sine = Math.sin(angle);
   const waveX = 42 + (angle / MAX_ANGLE) * 317;
-  const waveY = 105 - cosine * 65;
+  const waveY = 105 - Math[fn](angle) * 65;
   const circleX = 451 + cosine * 62;
   const circleY = 105 - sine * 62;
 
   return (
     <div className="space-y-4">
       <div className="visual-lab-plot rounded-2xl p-2.5 sm:p-4">
-        <p className="mb-3 text-xs font-semibold visual-lab-muted">One angle, two connected views · f(θ) = cos(θ)</p>
+        <p className="mb-3 text-xs font-semibold visual-lab-muted">One angle, two connected views · f(θ) = {fn}(θ)</p>
         <svg viewBox="0 0 550 222" className="h-auto w-full" role="img" aria-label={'Cosine graph and unit circle at ' + Math.round(angle * 180 / Math.PI) + ' degrees; cosine is ' + cosine.toFixed(2)}>
           {[0, 1, 2, 3, 4].map((i) => (
             <g key={i}>
@@ -188,14 +199,18 @@ function TrigModel() {
           <line x1="42" y1="27" x2="42" y2="182" stroke="var(--mute)" strokeWidth="1.5" />
           <text x="32" y="44" fontSize="12" fill="var(--mute)">1</text>
           <text x="24" y="175" fontSize="12" fill="var(--mute)">−1</text>
-          <path d={WAVE_PATH} fill="none" stroke="var(--series-blue)" strokeWidth="3.5" strokeLinecap="round" />
+          <path d={wavePath} fill="none" stroke="var(--series-blue)" strokeWidth="3.5" strokeLinecap="round" />
           <line x1={waveX} x2={waveX} y1="30" y2="182" stroke="var(--series-pink)" strokeWidth="2" strokeDasharray="4 4" />
           <circle cx={waveX} cy={waveY} r="7" fill="var(--series-pink)" stroke="var(--bg)" strokeWidth="2" />
           <circle cx="451" cy="105" r="62" fill="none" stroke="var(--series-green)" strokeWidth="3.5" />
           <line x1="380" x2="522" y1="105" y2="105" stroke="var(--mute)" />
           <line x1="451" x2="451" y1="33" y2="177" stroke="var(--mute)" />
           <line x1="451" y1="105" x2={circleX} y2={circleY} stroke="var(--series-pink)" strokeWidth="3.5" />
-          <line x1={circleX} y1={circleY} x2={circleX} y2="105" stroke="var(--series-blue)" strokeDasharray="4 4" strokeWidth="2" />
+          {fn === 'cos' ? (
+            <line x1={circleX} y1={circleY} x2={circleX} y2="105" stroke="var(--series-blue)" strokeDasharray="4 4" strokeWidth="2" />
+          ) : (
+            <line x1={circleX} y1={circleY} x2="451" y2={circleY} stroke="var(--series-blue)" strokeDasharray="4 4" strokeWidth="2" />
+          )}
           <circle cx={circleX} cy={circleY} r="6.5" fill="var(--series-blue)" stroke="var(--bg)" strokeWidth="2" />
           <text x="451" y="205" textAnchor="middle" fontSize="12" fill="var(--mute)">Unit circle</text>
         </svg>
@@ -207,8 +222,8 @@ function TrigModel() {
       </div>
       <RangeControl id="visual-angle" label="Angle θ" min={0} max={MAX_ANGLE} step={0.01} value={angle} display={Math.round(angle * 180 / Math.PI) + '°'} onChange={(value) => { setPlaying(false); setAngle(value); }} />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-sm text-xs leading-relaxed visual-lab-muted">The unit circle’s horizontal coordinate is cos θ; the moving point shows the same value on the graph.</p>
-        <button type="button" disabled={Boolean(reduceMotion)} onClick={() => setPlaying((previous) => !previous)} className="visual-lab-play inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" aria-label={playing ? 'Pause cosine animation' : 'Play cosine animation'}>
+        <p className="max-w-sm text-xs leading-relaxed visual-lab-muted">The {fn === 'cos' ? 'horizontal' : 'vertical'} coordinate on the unit circle gives {fn}(θ), synchronized with the wave.</p>
+        <button type="button" disabled={Boolean(reduceMotion)} onClick={() => setPlaying((previous) => !previous)} className="visual-lab-play inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" aria-label={playing ? 'Pause trigonometry animation' : 'Play trigonometry animation'}>
           {playing ? <Pause size={14} /> : <Play size={14} />} {playing ? 'Pause' : 'Animate'}
         </button>
       </div>
@@ -218,8 +233,8 @@ function TrigModel() {
 
 const ELEMENTS = ['', 'Hydrogen', 'Helium', 'Lithium', 'Beryllium', 'Boron', 'Carbon', 'Nitrogen', 'Oxygen', 'Fluorine', 'Neon'];
 
-function AtomModel() {
-  const [atomicNumber, setAtomicNumber] = useState(6);
+function AtomModel({ data }: { data: Extract<QuestionVisualization, { type: 'atom' }> | null }) {
+  const [atomicNumber, setAtomicNumber] = useState(data?.atomicNumber ?? 6);
   const [phase, setPhase] = useState(0);
   const [playing, setPlaying] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -278,9 +293,150 @@ function AtomModel() {
   );
 }
 
-export function InteractiveVisualLab({ topic }: { topic: string }) {
+
+function LinearModel({ data }: { data: Extract<QuestionVisualization, { type: 'linear' }> | null }) {
+  const initialSlope = data?.slope ?? 4.5;
+  const initialIntercept = data?.intercept ?? 18;
+  const variable = data?.variable ?? 't';
+  const [slope, setSlope] = useState(initialSlope);
+  const [intercept, setIntercept] = useState(initialIntercept);
+  const xMin = variable === 't' ? 0 : -6;
+  const xMax = variable === 't' ? 12 : 6;
+  const [probe, setProbe] = useState((xMin + xMax) / 2);
+  const lowValue = Math.min(intercept + slope * xMin, intercept + slope * xMax, 0);
+  const highValue = Math.max(intercept + slope * xMin, intercept + slope * xMax, 0);
+  const padding = Math.max(1, (highValue - lowValue) * 0.1);
+  const bottom = lowValue - padding;
+  const top = highValue + padding;
+  const px = (x: number) => 52 + (x - xMin) / (xMax - xMin) * 450;
+  const py = (value: number) => 224 - (value - bottom) / (top - bottom) * 182;
+  const value = intercept + slope * probe;
+  const fmt = (v: number) => Number(v.toFixed(2)).toLocaleString('en-ZA', { maximumFractionDigits: 2 });
+
+  return (
+    <div className="space-y-4">
+      <div className="visual-lab-plot rounded-2xl p-2.5 sm:p-4">
+        <p className="mb-2 text-xs font-semibold visual-lab-muted">Follow the straight line: y = mx + c</p>
+        <svg viewBox="0 0 550 290" className="h-auto w-full" role="img" aria-label={'Linear graph slope ' + slope + ', intercept ' + intercept + ', current value ' + fmt(value)}>
+          {Array.from({ length: 6 }, (_, i) => (
+            <g key={i}>
+              <line x1={52 + i * 90} x2={52 + i * 90} y1="32" y2="224" stroke="var(--chart-grid)" />
+              <line x1="52" x2="502" y1={42 + i * 36.4} y2={42 + i * 36.4} stroke="var(--chart-grid)" />
+            </g>
+          ))}
+          <line x1="52" x2="502" y1={py(0)} y2={py(0)} stroke="var(--mute)" strokeWidth="1.4" />
+          <line x1={px(Math.max(xMin, 0))} x2={px(Math.max(xMin, 0))} y1="32" y2="224" stroke="var(--mute)" strokeWidth="1.4" />
+          <path d={'M' + px(xMin) + ',' + py(intercept + slope * xMin) + ' L' + px(xMax) + ',' + py(intercept + slope * xMax)} stroke="var(--series-blue)" strokeWidth="4" strokeLinecap="round" fill="none" />
+          <line x1={px(probe)} x2={px(probe)} y1="32" y2="224" stroke="var(--series-pink)" strokeDasharray="5 5" strokeWidth="2" />
+          <circle cx={px(probe)} cy={py(value)} r="7" fill="var(--series-pink)" stroke="var(--bg)" strokeWidth="2.5" />
+          <text x="52" y="261" fill="var(--mute)" fontSize="12">{xMin}</text>
+          <text x="502" y="261" fill="var(--mute)" textAnchor="end" fontSize="12">{xMax} {variable}</text>
+          <text x="52" y="25" fill="var(--mute)" fontSize="12">y</text>
+          <text x="502" y="284" textAnchor="end" fill="var(--mute)" fontSize="12">Move the marker to inspect values</text>
+        </svg>
+      </div>
+      <div className="visual-lab-insight rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2 text-sm">
+        <strong>{'f(' + variable + ') = ' + slope + variable + (intercept >= 0 ? ' + ' : ' − ') + Math.abs(intercept)}</strong>
+        <span>{variable} = {fmt(probe)} → <strong>{fmt(value)}</strong></span>
+      </div>
+      <RangeControl id="visual-linear-probe" label="Inspect input" min={xMin} max={xMax} step={0.1} value={probe} display={variable + ' = ' + fmt(probe)} onChange={setProbe} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <RangeControl id="visual-linear-slope" label="Rate of change" min={-25} max={25} step={0.1} value={slope} display={'m = ' + fmt(slope)} onChange={setSlope} />
+        <RangeControl id="visual-linear-intercept" label="Starting amount" min={-1000} max={1000} step={1} value={intercept} display={'c = ' + fmt(intercept)} onChange={setIntercept} />
+      </div>
+      <button type="button" className="visual-lab-reset inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold" onClick={() => { setSlope(initialSlope); setIntercept(initialIntercept); setProbe((xMin + xMax) / 2); }}>
+        <RotateCcw size={14} /> Reset to {data ? 'question' : 'example'}
+      </button>
+    </div>
+  );
+}
+
+function DopplerModel({ data }: { data: Extract<QuestionVisualization, { type: 'doppler' }> | null }) {
+  const initial = data ?? {
+    type: 'doppler' as const, speedOfSound: 340, sourceSpeed: 30,
+    emittedFrequency: 850, direction: 'toward' as const,
+  };
+  const [speed, setSpeed] = useState(initial.sourceSpeed);
+  const [direction, setDirection] = useState<'toward' | 'away'>(initial.direction);
+  const [frequency, setFrequency] = useState(initial.emittedFrequency);
+  const [playing, setPlaying] = useState(false);
+  const [phase, setPhase] = useState(0);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!playing || reduceMotion) return;
+    const interval = window.setInterval(() => {
+      if (!document.hidden) setPhase((previous) => (previous + 0.045) % 1);
+    }, 45);
+    return () => clearInterval(interval);
+  }, [playing, reduceMotion]);
+
+  // The listener is stationary. v/(v-vs) when approaching and
+  // v/(v+vs) when receding.
+  const denominator = initial.speedOfSound + (direction === 'toward' ? -speed : speed);
+  const heardFrequency = frequency * initial.speedOfSound / denominator;
+  const fmt = (v: number) => v.toLocaleString('en-ZA', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+
+  return (
+    <div className="space-y-4">
+      <div className="visual-lab-plot rounded-2xl p-2.5 sm:p-4">
+        <p className="mb-2 text-xs font-semibold visual-lab-muted">Wavefront spacing changes with motion</p>
+        <svg viewBox="0 0 550 240" className="h-auto w-full" role="img" aria-label={'Stationary listener, source moving ' + direction + ', observed frequency ' + fmt(heardFrequency) + ' hertz'}>
+          <defs><clipPath id="doppler-viewport"><rect x="16" y="20" width="518" height="195" rx="8" /></clipPath></defs>
+          <g clipPath="url(#doppler-viewport)">
+            {Array.from({ length: 9 }, (_, i) => {
+              const radius = 22 + ((i + phase) / 9) * 375;
+              const shift = (direction === 'toward' ? -1 : 1) * radius * (speed / initial.speedOfSound) * 0.65;
+              return <circle key={i} cx={245 + shift} cy="119" r={radius} stroke="var(--series-blue)" strokeWidth="2" opacity={0.25 + 0.5 * (1 - radius / 410)} fill="none" />;
+            })}
+            <path d="M35 185 H520" stroke="var(--chart-grid)" strokeWidth="3" strokeLinecap="round" />
+          </g>
+          <rect x="224" y="102" width="44" height="32" rx="12" fill="var(--series-pink)" />
+          <text x="246" y="123" textAnchor="middle" fontSize="15" fontWeight="800" fill="var(--bg)">S</text>
+          <circle cx="476" cy="117" r="16" fill="var(--series-green)" />
+          <text x="476" y="122" textAnchor="middle" fontSize="14" fontWeight="800" fill="var(--bg)">L</text>
+          <text x="246" y="156" textAnchor="middle" fontSize="13" fill="var(--ink)">Source</text>
+          <text x="476" y="156" textAnchor="middle" fontSize="13" fill="var(--ink)">Listener</text>
+          <text x="275" y="63" fontSize="14" fontWeight="700" fill="var(--series-pink)">{direction === 'toward' ? 'Moving toward →' : '← Moving away'}</text>
+          <text x="24" y="229" fontSize="12" fill="var(--mute)">Diagram is conceptual; wavefront spacing is not to scale.</text>
+        </svg>
+      </div>
+      <div className="visual-lab-insight flex flex-wrap items-center justify-between gap-3 rounded-xl p-3.5 text-sm">
+        <span>Emitted: <strong>{fmt(frequency)} Hz</strong></span>
+        <span>Heard: <strong className="font-mono-code">{fmt(heardFrequency)} Hz</strong></span>
+      </div>
+      <RangeControl id="doppler-speed" label="Source speed" min={0} max={Math.min(150, initial.speedOfSound - 1)} step={1} value={speed} display={speed + ' m/s'} onChange={setSpeed} />
+      <RangeControl id="doppler-frequency" label="Emitted pitch" min={50} max={3000} step={10} value={frequency} display={Math.round(frequency) + ' Hz'} onChange={setFrequency} />
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div role="group" aria-label="Source direction" className="visual-lab-tabs flex rounded-full p-1">
+          {(['toward', 'away'] as const).map((value) => (
+            <button key={value} type="button" aria-pressed={direction === value} onClick={() => setDirection(value)} className="visual-lab-tab rounded-full px-3 py-2 text-xs font-bold">
+              {value === 'toward' ? 'Toward listener' : 'Away'}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <button type="button" disabled={Boolean(reduceMotion)} onClick={() => setPlaying((prev) => !prev)} className="visual-lab-play inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-bold disabled:opacity-40">
+            {playing ? <Pause size={14} /> : <Play size={14} />} {playing ? 'Pause' : 'Animate'}
+          </button>
+          <button type="button" onClick={() => { setSpeed(initial.sourceSpeed); setFrequency(initial.emittedFrequency); setDirection(initial.direction); setPhase(0); }} className="visual-lab-reset inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold">
+            <RotateCcw size={14} /> Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function InteractiveVisualLab({
+  topic, visualization = null,
+}: {
+  topic: string;
+  visualization?: QuestionVisualization | null;
+}) {
   const suggested = getSuggestedVisualization(topic);
-  const [mode, setMode] = useState<VisualizationMode>(suggested ?? 'quadratic');
+  const [mode, setMode] = useState<VisualizationMode>(visualization?.type ?? suggested ?? 'quadratic');
+  const exact = visualization?.type === mode ? visualization : null;
   const reduceMotion = useReducedMotion();
 
   return (
@@ -293,9 +449,9 @@ export function InteractiveVisualLab({ topic }: { topic: string }) {
             <p className="mt-1 text-xs leading-relaxed visual-lab-muted">Move the controls to explore the concept.</p>
           </div>
         </div>
-        <span className="visual-lab-tag rounded-full px-3 py-1.5 text-[11px] font-extrabold">Interactive lab</span>
+        <span className="visual-lab-tag rounded-full px-3 py-1.5 text-[11px] font-extrabold">{exact ? 'Question-matched' : 'Concept example'}</span>
       </div>
-      <div role="group" aria-label="Choose a visual model" className="visual-lab-tabs grid grid-cols-3 gap-1 rounded-2xl p-1">
+      <div role="group" aria-label="Choose a visual model" className="visual-lab-tabs grid grid-cols-3 gap-1 rounded-2xl p-1 sm:grid-cols-5">
         {MODES.map(({ id, label, icon: Icon }) => (
           <button key={id} type="button" aria-pressed={mode === id} onClick={() => setMode(id)} className="visual-lab-tab inline-flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 text-[11px] font-bold transition-colors sm:flex-row sm:gap-2 sm:px-3 sm:text-xs">
             <Icon size={15} aria-hidden="true" />
@@ -305,11 +461,11 @@ export function InteractiveVisualLab({ topic }: { topic: string }) {
       </div>
       <AnimatePresence mode="wait" initial={false}>
         <motion.div key={mode} initial={reduceMotion ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={reduceMotion ? undefined : { opacity: 0, y: -5 }} transition={{ duration: 0.2 }}>
-          {mode === 'quadratic' ? <QuadraticModel /> : mode === 'trigonometry' ? <TrigModel /> : <AtomModel />}
+          {mode === 'quadratic' ? <QuadraticModel data={exact?.type === 'quadratic' ? exact : null} /> : mode === 'trigonometry' ? <TrigModel data={exact?.type === 'trigonometry' ? exact : null} /> : mode === 'atom' ? <AtomModel data={exact?.type === 'atom' ? exact : null} /> : mode === 'linear' ? <LinearModel data={exact?.type === 'linear' ? exact : null} /> : <DopplerModel data={exact?.type === 'doppler' ? exact : null} />}
         </motion.div>
       </AnimatePresence>
       <p className="border-t pt-3 text-[11px] leading-relaxed visual-lab-muted" style={{ borderColor: 'var(--line)' }}>
-        Concept explorer · Values are illustrative and may not match the exact question above.
+        {exact ? 'Initially uses verified numbers from this question. Changing controls explores what-if scenarios.' : 'Concept explorer only — these example values are not derived from the question above.'}
       </p>
     </section>
   );

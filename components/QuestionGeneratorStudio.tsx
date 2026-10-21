@@ -40,6 +40,7 @@ import { PomodoroFocusTimer } from './PomodoroFocusTimer';
 import { VoiceDictationBar, InlineVoiceMicButton } from './VoiceDictationBar';
 import { MathText, NSCFormulaSheetModal } from './MathRenderer';
 import { getSuggestedVisualization, InteractiveVisualLab } from './InteractiveVisualLab';
+import { validateVisualization } from '@/lib/visualization-schema';
 import { useOpenSourceVoices } from '@/lib/open-source-voices';
 
 const QUICK_TOPICS: Record<TrackId, string[]> = {
@@ -275,7 +276,9 @@ export function QuestionGeneratorStudio({
     const optMatch = raw.match(/OPTIONS:\s*([^\n]+)/i);
     const idxMatch = raw.match(/CORRECT_INDEX:\s*(\d+)/i);
     const hintMatch = raw.match(/HINT:\s*([^\n]+)/i);
-    const stepsMatch = raw.match(/STEPS:\s*([\s\S]*)$/i);
+    // Model suggestions are data, not a part of the teacher's explanation.
+    const cleanRaw = raw.split(/\nVISUALIZATION_JSON:/i)[0];
+    const stepsMatch = cleanRaw.match(/STEPS:\s*([\s\S]*)$/i);
 
     const promptText = (qMatch?.[1] || raw).trim();
     const parsedOptions = optMatch?.[1]
@@ -387,6 +390,40 @@ export function QuestionGeneratorStudio({
       if (streamRunIdRef.current !== runId) return;
 
       const newQuestionObj = parseStreamedQuestion(rawAccumulated, topicToUse, difficulty);
+      // An AI model may propose a visual shape, but only the server can
+      // validate it against the exact question before it is marked "exact".
+      if (activeTrack === 'exam') {
+        let proposal: unknown = null;
+        const match = /\nVISUALIZATION_JSON:\s*(\{[^\n]*\}|null)/i.exec(rawAccumulated);
+        if (match) {
+          try {
+            proposal = JSON.parse(match[1]);
+          } catch {
+            // Ignore malformed free-form model data.
+          }
+        }
+        try {
+          const checked = await fetch('/api/visualization', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              track: activeTrack,
+              question: newQuestionObj.prompt,
+              candidate: proposal,
+            }),
+          });
+          if (checked.ok) {
+            const checkedData: unknown = await checked.json();
+            if (checkedData && typeof checkedData === 'object'
+              && 'visualization' in checkedData) {
+              newQuestionObj.visualization = validateVisualization(checkedData.visualization);
+            }
+          }
+        } catch {
+          // A failed validation request should not lose the generated question.
+        }
+      }
+      if (streamRunIdRef.current !== runId) return;
       setDisplayedQuestionText(newQuestionObj.prompt);
       setIsStreamingQuestion(false);
       setIsGeneratingFromAI(false);
@@ -1178,9 +1215,14 @@ export function QuestionGeneratorStudio({
               )}
             </motion.div>
 
-            {/* Visual model matches the study topic; never infer a model from arbitrary AI text. */}
-            {activeTrack === 'exam' && getSuggestedVisualization(currentQuestion.topic) && (
-              <InteractiveVisualLab key={currentQuestion.id} topic={currentQuestion.topic} />
+            {/* Exact models use independently checked numbers. Otherwise, explain that
+                any available concept explorer is illustrative, never question-specific. */}
+            {activeTrack === 'exam' && (currentQuestion.visualization || getSuggestedVisualization(currentQuestion.topic)) && (
+              <InteractiveVisualLab
+                key={currentQuestion.id}
+                topic={currentQuestion.topic}
+                visualization={currentQuestion.visualization}
+              />
             )}
 
             {/* Interactive Multiple Choice Options */}
