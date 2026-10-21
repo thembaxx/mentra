@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Atom, ChartLine, Hand, Pause, Play, RotateCcw, Waves } from 'lucide-react';
 import { MathText } from './MathRenderer';
