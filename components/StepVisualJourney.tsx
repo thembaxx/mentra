@@ -225,6 +225,9 @@ export function StepVisualJourney({
   const statusId=useId();
   const canPrevious=index>0;
   const canNext=index<stepCount-1;
+  const visibleCount=Math.min(stepCount,9);
+  const visibleStart=Math.max(0,Math.min(index-4,stepCount-visibleCount));
+  const visibleIndices=Array.from({length:visibleCount},(_,i)=>visibleStart+i);
 
   return (
     <section aria-labelledby={titleId} aria-describedby={statusId} className="min-w-0 rounded-2xl border border-white/20 bg-[#24282D] p-3 sm:p-4 space-y-3">
@@ -242,9 +245,24 @@ export function StepVisualJourney({
           backgroundColor:i<=phase?YELLOW:'rgba(255,255,255,0.16)'
         }}/>)}
       </div>
+      <div role="group" aria-label="Jump to explanation step"
+        className="flex min-w-0 gap-1.5 overflow-x-auto pb-1">
+        {visibleIndices.map((target) => (
+          <button type="button" key={target} aria-label={'Show explanation step ' + (target+1)}
+            aria-current={target===index ? 'step' : undefined}
+            onClick={()=>onSelectStep(target)}
+            className={'min-h-11 min-w-11 shrink-0 rounded-xl border text-xs font-extrabold focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#F7D66E] ' +
+              (target===index ? 'border-[#F7D66E] bg-[#F7D66E] text-[#25272C]' : 'border-white/20 bg-white/5 text-white')}>
+            {target+1}
+          </button>
+        ))}
+      </div>
+      <p id={statusId} className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        Step {index+1} of {stepCount}. {checkpoint.title}. {checkpoint.metric}.
+      </p>
       <motion.div key={model.type+'-'+phase} initial={reduceMotion?false:{opacity:.5,y:7}}
         animate={{opacity:1,y:0}} transition={reduceMotion?{duration:0}:{duration:.22}}>
-        <div className="overflow-x-auto rounded-2xl" role="group" aria-label="Visual diagram; scroll horizontally on small screens">
+        <div className="overflow-x-auto rounded-2xl" aria-label="Diagram viewport: swipe sideways to inspect on a narrow screen" role="region">
           <VisualScene model={model} phase={phase}/>
         </div>
         <div className="space-y-1.5 pt-2.5">
@@ -257,11 +275,11 @@ export function StepVisualJourney({
       </motion.div>
       <div className="flex items-center justify-between gap-2">
         <button type="button" aria-label="Previous explanation step" disabled={!canPrevious} onClick={()=>onSelectStep(index-1)}
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/25 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-35 focus-visible:outline-3 focus-visible:outline-[#F7D66E]">
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/25 px-3 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-35 focus-visible:outline-3 focus-visible:outline-[#F7D66E]">
           <ArrowLeft size={14}/> Previous
         </button>
         <button type="button" aria-label="Next explanation step" disabled={!canNext} onClick={()=>onSelectStep(index+1)}
-          className="inline-flex items-center gap-1.5 rounded-full bg-[#F7D66E] px-3 py-2 text-xs font-extrabold text-[#202225] disabled:cursor-not-allowed disabled:opacity-35 focus-visible:outline-3 focus-visible:outline-white">
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-[#F7D66E] px-3 py-2 text-xs font-extrabold text-[#202225] disabled:cursor-not-allowed disabled:opacity-35 focus-visible:outline-3 focus-visible:outline-white">
           Next step <ArrowRight size={14}/>
         </button>
       </div>
