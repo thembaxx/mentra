@@ -195,7 +195,7 @@ export function BouncySurface({
       whileTap={onClick ? { scale: 0.975, y: 0 } : undefined}
       transition={SPRING_BOUNCY}
       style={style}
-      className={className}
+      className={onClick ? className + ' cursor-pointer focus-visible:outline-3 focus-visible:outline-[var(--series-blue)] focus-visible:outline-offset-2' : className}
     >
       {children}
     </motion.div>
