@@ -38,7 +38,8 @@ export function validateVisualization(value: unknown): QuestionVisualization | n
         || !numeric(value.b, -30, 30) || !numeric(value.c, -100, 100)) return null;
       const h = -value.b / (2 * value.a);
       const k = value.c - value.b ** 2 / (4 * value.a);
-      if (Math.abs(h) > 9 || Math.abs(k) > 60) return null;
+      // Keep verified graphs inside the existing legible mobile SVG viewport.
+      if (Math.abs(h) > 5 || Math.abs(k) > 8) return null;
       return { type: 'quadratic', a: value.a, b: value.b, c: value.c };
     }
     case 'linear':
