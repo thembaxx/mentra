@@ -92,7 +92,9 @@ export function inferVisualizationFromQuestion(question: string): QuestionVisual
     .replace(/\s+/g, '')
     .replace(/\^\{2\}/g, '^2')
     .replace(/\u2212/g, '-')
-    .replace(/\$/g, '');
+    // Preserve LaTeX delimiters as boundaries, otherwise adjoining prose
+    // can be mistaken for part of the mathematical expression.
+    .replace(/\$/g, ';');
 
   // We only parse trusted numeric subsets. Unknown symbols (k, fractions,
   // arbitrary functions) are rejected instead of being interpreted as zero.
@@ -186,9 +188,9 @@ export function resolveQuestionVisualization(
   if (!inferred) return null;
   const candidate = validateVisualization(aiCandidate);
   if (!candidate || candidate.type !== inferred.type) return inferred;
-  for (const key of Object.keys(inferred) as (keyof QuestionVisualization)[]) {
-    const actual = inferred[key];
-    const predicted = candidate[key as keyof typeof candidate];
+  for (const key of Object.keys(inferred)) {
+    const actual = (inferred as unknown as Data)[key];
+    const predicted = (candidate as unknown as Data)[key];
     if (typeof actual === 'number' && typeof predicted === 'number') {
       if (Math.abs(actual - predicted) > 1e-6) return inferred;
     } else if (actual !== predicted) return inferred;
