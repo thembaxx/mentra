@@ -39,6 +39,7 @@ import { FlashcardDeckStudio } from './FlashcardDeckStudio';
 import { PomodoroFocusTimer } from './PomodoroFocusTimer';
 import { VoiceDictationBar, InlineVoiceMicButton } from './VoiceDictationBar';
 import { MathText, NSCFormulaSheetModal } from './MathRenderer';
+import { getSuggestedVisualization, InteractiveVisualLab } from './InteractiveVisualLab';
 import { useOpenSourceVoices } from '@/lib/open-source-voices';
 
 const QUICK_TOPICS: Record<TrackId, string[]> = {
@@ -1176,6 +1177,11 @@ export function QuestionGeneratorStudio({
                 </motion.div>
               )}
             </motion.div>
+
+            {/* Visual model matches the study topic; never infer a model from arbitrary AI text. */}
+            {activeTrack === 'exam' && getSuggestedVisualization(currentQuestion.topic) && (
+              <InteractiveVisualLab key={currentQuestion.id} topic={currentQuestion.topic} />
+            )}
 
             {/* Interactive Multiple Choice Options */}
             <AnimatePresence mode="popLayout">
