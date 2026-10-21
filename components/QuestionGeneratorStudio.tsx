@@ -41,6 +41,8 @@ import { VoiceDictationBar, InlineVoiceMicButton } from './VoiceDictationBar';
 import { MathText, NSCFormulaSheetModal } from './MathRenderer';
 import { getSuggestedVisualization, InteractiveVisualLab } from './InteractiveVisualLab';
 import { validateVisualization } from '@/lib/visualization-schema';
+import { StepVisualJourney } from './StepVisualJourney';
+import { parseTutorStepsIntoCards } from '@/lib/tutor-step-parser';
 import { useOpenSourceVoices } from '@/lib/open-source-voices';
 
 const QUICK_TOPICS: Record<TrackId, string[]> = {
@@ -68,50 +70,6 @@ const QUICK_TOPICS: Record<TrackId, string[]> = {
 };
 
 const DIFFICULTIES: DifficultyLevel[] = ['Easy', 'Medium', 'Hard', 'Adaptive'];
-
-interface ParsedStepItem {
-  id: string;
-  badge: string;
-  title: string;
-  body: string;
-  isVerification: boolean;
-}
-
-function parseStreamedStepsIntoCards(rawSteps: string): ParsedStepItem[] {
-  if (!rawSteps.trim()) return [];
-
-  const blocks = rawSteps
-    .split(/\n{2,}|(?=\n(?:Step\s*\d+|Verification|Check|Final\s+Answer|Answer)\s*:)/i)
-    .map((b) => b.trim())
-    .filter(Boolean);
-
-  return blocks.map((block, idx) => {
-    const headerMatch = block.match(
-      /^(Step\s*(\d+)|Verification|Check|Final\s+Answer|Answer)\s*:\s*([\s\S]*)$/i
-    );
-    if (headerMatch) {
-      const labelRaw = headerMatch[1].trim();
-      const stepNum = headerMatch[2];
-      const rest = headerMatch[3].trim();
-      const isVerif = /verification|check|answer/i.test(labelRaw);
-      return {
-        id: `step-${idx}-${labelRaw.toLowerCase().replace(/\s+/g, '-')}`,
-        badge: stepNum ? `0${stepNum}` : '✓',
-        title: isVerif ? labelRaw : `Step ${stepNum}`,
-        body: rest,
-        isVerification: isVerif,
-      };
-    }
-
-    return {
-      id: `step-${idx}`,
-      badge: `0${idx + 1}`,
-      title: `Step ${idx + 1}`,
-      body: block,
-      isVerification: false,
-    };
-  });
-}
 
 interface QuestionGeneratorStudioProps {
   activeTrack: TrackId;
@@ -192,9 +150,19 @@ export function QuestionGeneratorStudio({
     trackQuestions[questionIndex % trackQuestions.length] || trackQuestions[0];
 
   const parsedStepCards = useMemo(
-    () => parseStreamedStepsIntoCards(stepsText),
+    () => parseTutorStepsIntoCards(stepsText),
     [stepsText]
   );
+
+  // A selected step changes the illustration's checkpoint. We map to the
+  // displayed parser output, not any untrusted "diagram commands" from AI.
+  const focusedStepIndex = parsedStepCards.findIndex((step) => step.id === focusedStepId);
+  const activeVisualStepIndex = focusedStepIndex >= 0 ? focusedStepIndex : 0;
+  const activeVisualStep = parsedStepCards[activeVisualStepIndex];
+  const selectVisualStep = (index: number) => {
+    const step = parsedStepCards[index];
+    if (step) setFocusedStepId(step.id);
+  };
 
   // Local token streamer for smooth preset transitions
   const streamTextLocally = useCallback(
@@ -1604,6 +1572,16 @@ export function QuestionGeneratorStudio({
                             : `${parsedStepCards.length} steps · Click any step to focus`}
                         </span>
                       </div>
+
+                      {activeTrack === 'exam' && currentQuestion.visualization && parsedStepCards.length > 0 && (
+                        <StepVisualJourney
+                          model={currentQuestion.visualization}
+                          stepIndex={activeVisualStepIndex}
+                          stepCount={parsedStepCards.length}
+                          isVerification={activeVisualStep?.isVerification ?? false}
+                          onSelectStep={selectVisualStep}
+                        />
+                      )}
 
                       {parsedStepCards.length === 0 && isStreamingSteps ? (
                         <motion.div
