@@ -6,6 +6,8 @@ import {
   AnimatePresence,
   useMotionValue,
   useTransform,
+  useSpring,
+  useReducedMotion,
   PanInfo,
 } from 'motion/react';
 import {
@@ -67,6 +69,15 @@ export function FlashcardDeckStudio({
     useState<Record<TrackId, FlashcardItem[]>>(INITIAL_FLASHCARDS);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
+  // Synchronize face visibility with angle to prevent mirrored text on WebKit.
+  const reducedMotion = useReducedMotion();
+  const flipRotation = useSpring(0, { stiffness: 290, damping: 29, mass: 0.9 });
+  const frontOpacity = useTransform(flipRotation, [0, 89.9, 90.1, 180], [1, 1, 0, 0]);
+  const backOpacity = useTransform(flipRotation, [0, 89.9, 90.1, 180], [0, 0, 1, 1]);
+  useEffect(() => {
+    if (reducedMotion) flipRotation.jump(isFlipped ? 180 : 0);
+    else flipRotation.set(isFlipped ? 180 : 0);
+  }, [isFlipped, flipRotation, reducedMotion]);
   const [masteredIds, setMasteredIds] = useState<Record<string, boolean>>({});
   const [reviewLaterIds, setReviewLaterIds] = useState<Record<string, boolean>>({});
   const [exitDirection, setExitDirection] = useState<'left' | 'right' | null>(null);
@@ -502,7 +513,6 @@ export function FlashcardDeckStudio({
                     x,
                     rotateZ,
                     zIndex: 10,
-                    transformStyle: 'preserve-3d',
                   }}
                   initial={{ scale: 0.92, opacity: 0, y: 18 }}
                   animate={
@@ -551,24 +561,21 @@ export function FlashcardDeckStudio({
 
                   {/* 3D Inner Flip Container */}
                   <motion.div
-                    animate={{ rotateY: isFlipped ? 180 : 0 }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 290,
-                      damping: 24,
-                      mass: 0.9,
-                    }}
                     className="w-full h-full relative"
-                    style={{ transformStyle: 'preserve-3d' }}
+                    style={{ rotateY: flipRotation, transformStyle: 'preserve-3d' }}
                   >
                     {/* FRONT FACE: Concept / Prompt */}
-                    <div
-                      className="absolute inset-0 w-full h-full rounded-[32px] p-6 sm:p-8 flex flex-col justify-between overflow-hidden shadow-xl"
+                    <motion.div
+                      aria-hidden={isFlipped}
+                      className="absolute inset-0 w-full h-full rounded-[32px] p-5 sm:p-8 flex flex-col justify-between overflow-hidden shadow-xl"
                       style={{
+                        opacity: frontOpacity,
+                        pointerEvents: isFlipped ? 'none' : 'auto',
                         backgroundColor: `var(${currentCard.colorVar})`,
                         color: '#2D2D2B',
                         backfaceVisibility: 'hidden',
                         WebkitBackfaceVisibility: 'hidden',
+                        transform: 'translateZ(1px)',
                         border: '2px solid rgba(45,45,43,0.12)',
                       }}
                     >
@@ -634,7 +641,7 @@ export function FlashcardDeckStudio({
                       </div>
 
                       {/* Center Concept Title & Recall Question */}
-                      <div className="relative z-10 space-y-3 my-auto py-2">
+                      <div className="relative z-10 min-h-0 flex-1 space-y-3 my-3 overflow-y-auto overscroll-contain py-3 pr-1">
                         <div className="text-xs font-extrabold uppercase tracking-wider opacity-70">
                           Concept Recall Prompt
                         </div>
@@ -656,17 +663,20 @@ export function FlashcardDeckStudio({
                           ← Review · Master →
                         </span>
                       </div>
-                    </div>
+                    </motion.div>
 
                     {/* BACK FACE: Definition + Code/Formula Snippet + Memory Tip */}
-                    <div
-                      className="absolute inset-0 w-full h-full rounded-[32px] p-6 sm:p-7 flex flex-col justify-between overflow-y-auto shadow-2xl"
+                    <motion.div
+                      aria-hidden={!isFlipped}
+                      className="absolute inset-0 w-full h-full rounded-[32px] p-5 sm:p-7 flex flex-col overflow-hidden shadow-xl"
                       style={{
+                        opacity: backOpacity,
+                        pointerEvents: isFlipped ? 'auto' : 'none',
                         backgroundColor: '#2D2D2B',
                         color: '#F8F3E7',
                         backfaceVisibility: 'hidden',
                         WebkitBackfaceVisibility: 'hidden',
-                        transform: 'rotateY(180deg)',
+                        transform: 'rotateY(180deg) translateZ(1px)',
                         border: '2px solid var(--pk)',
                       }}
                     >
@@ -690,7 +700,7 @@ export function FlashcardDeckStudio({
                       </div>
 
                       {/* Core Definition */}
-                      <div className="space-y-3 my-2">
+                      <div className="min-h-0 flex-1 space-y-3 my-3 overflow-y-auto overscroll-contain pr-1">
                         <div className="text-xs sm:text-sm leading-relaxed font-medium text-[#F8F3E7]/95">
                           <MathText text={currentCard.backDefinition} />
                         </div>
@@ -761,7 +771,7 @@ export function FlashcardDeckStudio({
                         <span>Swipe Left: Review Later</span>
                         <span>Swipe Right: Mark Mastered ✓</span>
                       </div>
-                    </div>
+                    </motion.div>
                   </motion.div>
                 </motion.div>
               </AnimatePresence>
