@@ -14,7 +14,7 @@ export function getSuggestedVisualization(topic: string): VisualizationMode | nu
   if (/\b(atom|atomic|electron|nucleus|proton|chemical element)\b/i.test(topic)) {
     return 'atom';
   }
-  if (/\b(quadratic|parabola|roots|polynomial|graphs?|functions?|calculus)\b/i.test(topic)) {
+  if (/\b(quadratic|parabola|nature of roots)\b/i.test(topic)) {
     return 'quadratic';
   }
   return null;
