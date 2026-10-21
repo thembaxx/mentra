@@ -199,7 +199,8 @@ export function MoleculeModel({ data }: { data: Molecule | null }) {
   const [inspect, setInspect] = useState<InspectAtom>('central');
   const reducedMotion = useReducedMotion();
   const water = formula==='H2O';
-  const outerPositions = water ? [[172,91],[348,91]] : [[130,150],[410,150]];
+  // The H–O–H vectors form ~104.5°; the O–C–O vectors form 180°.
+  const outerPositions = water ? [[177,93],[363,93]] : [[130,165],[410,165]];
   const center = {x:270,y:165};
   const centralElement = water ? 'O':'C';
   const outerElement = water ? 'H':'O';
@@ -215,8 +216,14 @@ export function MoleculeModel({ data }: { data: Molecule | null }) {
             transition={{duration:0.22}} className="h-auto w-full">
             {outerPositions.map(([x,y],i)=>(
               <g key={i}>
-                <line x1={center.x} y1={center.y} x2={x} y2={y} stroke="var(--mute)" strokeWidth="10" strokeLinecap="round"/>
-                {!water && <line x1={center.x} y1={center.y+11} x2={x} y2={y+11} stroke="var(--mute)" strokeWidth="3" strokeLinecap="round"/>}
+                {water ? (
+                  <line x1={center.x} y1={center.y} x2={x} y2={y} stroke="var(--mute)" strokeWidth="10" strokeLinecap="round"/>
+                ) : (
+                  <>
+                    <line x1={center.x} y1={center.y-6} x2={x} y2={y-6} stroke="var(--mute)" strokeWidth="4.5" strokeLinecap="round"/>
+                    <line x1={center.x} y1={center.y+6} x2={x} y2={y+6} stroke="var(--mute)" strokeWidth="4.5" strokeLinecap="round"/>
+                  </>
+                )}
                 <circle cx={x} cy={y} r={water?24:29} fill={water?'var(--bl)':'var(--series-pink)'} stroke="var(--ink)" strokeWidth="1" />
                 <text x={x} y={y+6} textAnchor="middle" fontWeight="800" fontSize="21" fill={water?'var(--ink)':'var(--bg)'}>{outerElement}</text>
               </g>
