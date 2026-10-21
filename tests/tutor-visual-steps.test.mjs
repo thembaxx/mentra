@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseTutorStepsIntoCards } from '../lib/tutor-step-parser.ts';
-import { getVisualCheckpoints, phaseForStep } from '../lib/step-visualization.ts';
+import { getVisualCheckpoints, phaseForStep, moleculeDiagramPoints, dopplerPitchLabel } from '../lib/step-visualization.ts';
 import { validateVisualization } from '../lib/visualization-schema.ts';
 
 test('numbered steps retain multiple paragraphs and a later verification card',()=>{
@@ -43,7 +43,7 @@ test('visual stage mapping does not trust arbitrary AI step text',()=>{
   assert.equal(phaseForStep(0,false),0);
   assert.equal(phaseForStep(1,false),1);
   assert.equal(phaseForStep(2,false),2);
-  assert.equal(phaseForStep(21,false),2);
+  assert.equal(phaseForStep(21,false),3);
   assert.equal(phaseForStep(2,true),3);
   assert.equal(phaseForStep(-1,false),0);
   assert.equal(phaseForStep(NaN,false),0);
@@ -106,4 +106,38 @@ test('all supported verified models produce four safe nonempty checkpoints',()=>
       assert.ok(!step.metric.includes('Infinity'),raw.type);
     }
   }
+});
+
+
+test('final explanation step shows full model without a verification card',()=>{
+  assert.equal(phaseForStep(0,false,3),0);
+  assert.equal(phaseForStep(1,false,3),2);
+  assert.equal(phaseForStep(2,false,3),3);
+  assert.equal(phaseForStep(3,false,4),3);
+  assert.equal(phaseForStep(3,true,4),3);
+  assert.equal(phaseForStep(1,false,4),1);
+  assert.equal(phaseForStep(4,false,5),3);
+  assert.equal(phaseForStep(2,false,5),2);
+  assert.equal(phaseForStep(0,false,1),0);
+  assert.equal(phaseForStep(99,false,1),0);
+  assert.equal(phaseForStep(Infinity,false,4),0);
+});
+
+test('the illustrated water bond angle is 104.5 degrees',()=>{
+  const [[x1,y1],[x2,y2]]=moleculeDiagramPoints('H2O');
+  const ux=x1-260,uy=y1-112,vx=x2-260,vy=y2-112;
+  const dot=ux*vx+uy*vy;
+  const cross=ux*vy-uy*vx;
+  const angle=Math.atan2(Math.abs(cross),dot)*180/Math.PI;
+  assert.ok(Math.abs(angle-104.5)<1e-8);
+  const [[a,b],[c,d]]=moleculeDiagramPoints('CO2');
+  assert.equal(b,d);
+  assert.ok(a<260&&c>260);
+});
+
+test('stationary Doppler sources do not imply a frequency shift',()=>{
+  assert.equal(dopplerPitchLabel(0,'toward'),'Same pitch');
+  assert.equal(dopplerPitchLabel(0,'away'),'Same pitch');
+  assert.equal(dopplerPitchLabel(30,'toward'),'↑ pitch');
+  assert.equal(dopplerPitchLabel(30,'away'),'↓ pitch');
 });
