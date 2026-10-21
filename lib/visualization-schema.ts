@@ -112,7 +112,8 @@ export function inferVisualizationFromQuestion(question: string): QuestionVisual
     }
   }
 
-  const linear = /(?:E\(t\)|f\(t\)|y|f\(x\))=([+\-.\dtx]+)/g;
+  // Do not capture a truncated 'x' prefix from x^2 (or other powers).
+  const linear = /(?:E\(t\)|f\(t\)|y|f\(x\))=([+\-.\dtx]+)(?!\^)/g;
   for (const match of text.matchAll(linear)) {
     const variable = match[0].includes('(x)') || match[0].startsWith('y=') ? 'x' : 't';
     const variableSymbol = variable;
