@@ -463,7 +463,7 @@ export function FlashcardDeckStudio({
 
         {/* 3D Stacked Card Arena */}
         <div
-          className="relative min-h-[430px] sm:min-h-[450px] flex items-center justify-center select-none py-3"
+          className="relative min-h-[472px] sm:min-h-[494px] flex items-center justify-center select-none py-3"
           style={{ perspective: '1400px' }}
         >
           {currentCard ? (
@@ -474,7 +474,7 @@ export function FlashcardDeckStudio({
                   key={`bg2-${nextCard2.id}`}
                   animate={{ scale: 0.91, y: 26, opacity: 0.48 }}
                   transition={SPRING_GENTLE}
-                  className="absolute inset-x-4 sm:inset-x-8 h-[390px] sm:h-[410px] rounded-[32px] pointer-events-none"
+                  className="absolute inset-x-4 sm:inset-x-8 h-[430px] sm:h-[445px] rounded-[32px] pointer-events-none"
                   style={{
                     backgroundColor: `var(${nextCard2.colorVar})`,
                     border: '1px solid rgba(45,45,43,0.14)',
@@ -489,7 +489,7 @@ export function FlashcardDeckStudio({
                   key={`bg1-${nextCard1.id}`}
                   animate={{ scale: 0.955, y: 13, opacity: 0.75 }}
                   transition={SPRING_GENTLE}
-                  className="absolute inset-x-2 sm:inset-x-5 h-[390px] sm:h-[410px] rounded-[32px] pointer-events-none"
+                  className="absolute inset-x-2 sm:inset-x-5 h-[430px] sm:h-[445px] rounded-[32px] pointer-events-none"
                   style={{
                     backgroundColor: `var(${nextCard1.colorVar})`,
                     border: '1px solid rgba(45,45,43,0.16)',
@@ -524,10 +524,11 @@ export function FlashcardDeckStudio({
                   }
                   transition={SPRING_SNAPPY}
                   onClick={handleFlipCard}
+                  onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleFlipCard(); } }}
                   role="button"
                   tabIndex={0}
                   aria-label={`Flashcard: ${currentCard.frontTitle}. Click or press Space to flip.`}
-                  className="relative w-full h-[395px] sm:h-[415px] cursor-grab active:cursor-grabbing focus:outline-none"
+                  className="relative w-full h-[430px] sm:h-[445px] cursor-grab active:cursor-grabbing focus-visible:outline-3 focus-visible:outline-[var(--series-blue)] focus-visible:outline-offset-4"
                 >
                   {/* Dynamic Swipe Stamp Overlay: MASTERED (Right Drag) */}
                   <motion.div
@@ -602,7 +603,7 @@ export function FlashcardDeckStudio({
                       <div className="relative z-10 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 text-xs font-extrabold">
                           <span
-                            className="px-3 py-1 rounded-full"
+                            className="max-w-[52vw] sm:max-w-[220px] truncate px-3 py-1 rounded-full"
                             style={{
                               backgroundColor: 'rgba(255, 252, 245, 0.85)',
                               color: '#2D2D2B',
@@ -681,10 +682,10 @@ export function FlashcardDeckStudio({
                       }}
                     >
                       {/* Top Header */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
+                      <div className="flex shrink-0 items-center justify-between gap-2 min-w-0">
+                        <div className="flex min-w-0 items-center gap-2">
                           <span
-                            className="px-3 py-1 rounded-full text-xs font-extrabold"
+                            className="max-w-[50vw] sm:max-w-[240px] truncate px-3 py-1 rounded-full text-xs font-extrabold"
                             style={{ backgroundColor: 'var(--pk)', color: '#2D2D2B' }}
                           >
                             {currentCard.frontTitle}
@@ -724,6 +725,8 @@ export function FlashcardDeckStudio({
                             <button
                               type="button"
                               onClick={(e) => handleCopySnippet(e, currentCard)}
+                              tabIndex={isFlipped ? 0 : -1}
+                              aria-label="Copy flashcard code or formula"
                               className="px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer hover:bg-white/10 transition-colors"
                               style={{ color: '#F8F3E7' }}
                             >
@@ -741,11 +744,11 @@ export function FlashcardDeckStudio({
                             </button>
                           </div>
                           {currentCard.track === 'exam' ? (
-                            <div className="text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap text-[#EAF0F9]">
+                            <div className="min-w-0 text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap break-words text-[#EAF0F9]">
                               <MathText text={currentCard.codeOrFormulaSnippet} />
                             </div>
                           ) : (
-                            <pre className="font-mono-code text-[11px] sm:text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap text-[#EAF0F9]">
+                            <pre className="font-mono-code min-w-0 text-[11px] sm:text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap break-words text-[#EAF0F9]">
                               {currentCard.codeOrFormulaSnippet}
                             </pre>
                           )}
@@ -767,7 +770,7 @@ export function FlashcardDeckStudio({
                       </div>
 
                       {/* Back Footer */}
-                      <div className="flex items-center justify-between text-[11px] font-bold pt-1 border-t border-white/10 text-[#B9B6AA]">
+                      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 text-[11px] font-bold pt-2 border-t border-white/10 text-[#B9B6AA]">
                         <span>Swipe Left: Review Later</span>
                         <span>Swipe Right: Mark Mastered ✓</span>
                       </div>
