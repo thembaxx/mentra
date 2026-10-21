@@ -3,6 +3,10 @@ on:
   pull_request:
     paths:
       - 'components/InteractiveVisualLab.tsx'
+      - 'components/StepVisualJourney.tsx'
+      - 'lib/step-visualization.ts'
+      - 'lib/tutor-step-parser.ts'
+      - 'tests/tutor-visual-steps.test.mjs'
       - 'components/ExpandedVisualModels.tsx'
       - 'lib/visualization-schema.ts'
       - 'tests/visualization-schema.test.mjs'
