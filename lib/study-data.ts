@@ -1,3 +1,5 @@
+import type { QuestionVisualization } from './visualization-schema';
+
 export type TrackId = 'exam' | 'code' | 'lang';
 export type DifficultyLevel = 'Easy' | 'Medium' | 'Hard' | 'Adaptive';
 
@@ -14,6 +16,8 @@ export interface PracticeQuestion {
   hint: string;
   steps: string;
   starterCode?: string;
+  /** Server-validated numeric model based on the question itself. */
+  visualization?: QuestionVisualization | null;
 }
 
 export interface PracticeSetItem {
@@ -76,6 +80,7 @@ export const INITIAL_QUESTIONS: Record<TrackId, PracticeQuestion[]> = {
     {
       id: 'exam-1',
       track: 'exam',
+      visualization: { type: 'quadratic', a: 1, b: -6, c: 13 },
       topic: 'Quadratic & nature of roots',
       difficulty: 'Medium',
       prompt:
@@ -136,6 +141,7 @@ export const INITIAL_QUESTIONS: Record<TrackId, PracticeQuestion[]> = {
     {
       id: 'exam-4',
       track: 'exam',
+      visualization: { type: 'doppler', speedOfSound: 340, sourceSpeed: 30, emittedFrequency: 850, direction: 'toward' },
       topic: 'Physical Sciences (Mechanics & Doppler)',
       difficulty: 'Hard',
       prompt:
