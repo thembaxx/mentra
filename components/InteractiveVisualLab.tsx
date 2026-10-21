@@ -3,23 +3,24 @@
 import { useEffect, useId, useState } from 'react';
 import type { QuestionVisualization } from '@/lib/visualization-schema';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { Atom, ChartLine, Hand, Pause, Play, RotateCcw, Waves, Activity, ArrowLeftRight } from 'lucide-react';
+import { Atom, ChartLine, Hand, Pause, Play, RotateCcw, Waves, Activity, ArrowLeftRight, Triangle, Sigma, FlaskConical, MoveHorizontal } from 'lucide-react';
+import { RightTriangleModel, ForcesModel, BinomialModel, MoleculeModel } from './ExpandedVisualModels';
 import { MathText } from './MathRenderer';
 
 export type VisualizationMode = QuestionVisualization['type'];
 
 export function getSuggestedVisualization(topic: string): VisualizationMode | null {
-  if (/\b(trigonometry|trigonometric|sine|cosine|unit circle|sin|cos)\b/i.test(topic)) {
-    return 'trigonometry';
-  }
-  if (/\b(atom|atomic|electron|nucleus|proton|chemical element)\b/i.test(topic)) {
-    return 'atom';
-  }
+  // Specific science topics must take priority over broader shared words
+  // such as "geometry" and "mechanics".
+  if (/\b(molecules?|molecular|chemical bonding|bond angles?)\b/i.test(topic)) return 'molecule';
   if (/\b(doppler|sound wave|ambulance)\b/i.test(topic)) return 'doppler';
+  if (/\b(probability|binomial|distributions?)\b/i.test(topic)) return 'binomial';
+  if (/\b(forces?|free[- ]body|newton|friction|mechanics)\b/i.test(topic)) return 'forces';
+  if (/\b(geometry|right[- ]angled|pythagoras|triangle)\b/i.test(topic)) return 'right_triangle';
+  if (/\b(trigonometry|trigonometric|sine|cosine|unit circle|sin|cos)\b/i.test(topic)) return 'trigonometry';
+  if (/\b(atom|atomic|electron|nucleus|proton|chemical element)\b/i.test(topic)) return 'atom';
   if (/\b(linear|straight line|linear equations)\b/i.test(topic)) return 'linear';
-  if (/\b(quadratic|parabola|nature of roots)\b/i.test(topic)) {
-    return 'quadratic';
-  }
+  if (/\b(quadratic|parabola|nature of roots)\b/i.test(topic)) return 'quadratic';
   return null;
 }
 
@@ -29,6 +30,10 @@ const MODES: { id: VisualizationMode; label: string; icon: typeof ChartLine }[] 
   { id: 'atom', label: 'Atom', icon: Atom },
   { id: 'linear', label: 'Linear', icon: Activity },
   { id: 'doppler', label: 'Doppler', icon: ArrowLeftRight },
+  { id: 'right_triangle', label: 'Geometry', icon: Triangle },
+  { id: 'forces', label: 'Forces', icon: MoveHorizontal },
+  { id: 'binomial', label: 'Probability', icon: Sigma },
+  { id: 'molecule', label: 'Molecules', icon: FlaskConical },
 ];
 
 const X_MIN = -12;
@@ -461,7 +466,15 @@ export function InteractiveVisualLab({
       </div>
       <AnimatePresence mode="wait" initial={false}>
         <motion.div key={mode} initial={reduceMotion ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={reduceMotion ? undefined : { opacity: 0, y: -5 }} transition={{ duration: 0.2 }}>
-          {mode === 'quadratic' ? <QuadraticModel data={exact?.type === 'quadratic' ? exact : null} /> : mode === 'trigonometry' ? <TrigModel data={exact?.type === 'trigonometry' ? exact : null} /> : mode === 'atom' ? <AtomModel data={exact?.type === 'atom' ? exact : null} /> : mode === 'linear' ? <LinearModel data={exact?.type === 'linear' ? exact : null} /> : <DopplerModel data={exact?.type === 'doppler' ? exact : null} />}
+          {mode === 'quadratic' ? <QuadraticModel data={exact?.type === 'quadratic' ? exact : null} />
+          : mode === 'trigonometry' ? <TrigModel data={exact?.type === 'trigonometry' ? exact : null} />
+          : mode === 'atom' ? <AtomModel data={exact?.type === 'atom' ? exact : null} />
+          : mode === 'linear' ? <LinearModel data={exact?.type === 'linear' ? exact : null} />
+          : mode === 'doppler' ? <DopplerModel data={exact?.type === 'doppler' ? exact : null} />
+          : mode === 'right_triangle' ? <RightTriangleModel data={exact?.type === 'right_triangle' ? exact : null} />
+          : mode === 'forces' ? <ForcesModel data={exact?.type === 'forces' ? exact : null} />
+          : mode === 'binomial' ? <BinomialModel data={exact?.type === 'binomial' ? exact : null} />
+          : <MoleculeModel data={exact?.type === 'molecule' ? exact : null} />}
         </motion.div>
       </AnimatePresence>
       <p className="border-t pt-3 text-[11px] leading-relaxed visual-lab-muted" style={{ borderColor: 'var(--line)' }}>

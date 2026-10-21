@@ -7,6 +7,10 @@ export type QuestionVisualization =
   | { type: 'linear'; slope: number; intercept: number; variable: 'x' | 't' }
   | { type: 'trigonometry'; function: 'sin' | 'cos'; angleDegrees: number }
   | { type: 'atom'; atomicNumber: number }
+  | { type: 'right_triangle'; legA: number; legB: number; unit: 'cm' }
+  | { type: 'forces'; mass: number; appliedForce: number; frictionForce: number }
+  | { type: 'binomial'; trials: number; probability: number }
+  | { type: 'molecule'; formula: 'H2O' | 'CO2' }
   | {
       type: 'doppler';
       speedOfSound: number;
@@ -58,6 +62,30 @@ export function validateVisualization(value: unknown): QuestionVisualization | n
       return keysMatch(value, ['type', 'atomicNumber'])
         && numeric(value.atomicNumber, 1, 10) && Number.isInteger(value.atomicNumber)
         ? { type: 'atom', atomicNumber: value.atomicNumber }
+        : null;
+    case 'right_triangle':
+      return keysMatch(value, ['type', 'legA', 'legB', 'unit'])
+        && numeric(value.legA, 0.5, 20) && numeric(value.legB, 0.5, 20)
+        && value.unit === 'cm'
+        ? { type: 'right_triangle', legA: value.legA, legB: value.legB, unit: 'cm' }
+        : null;
+    case 'forces':
+      return keysMatch(value, ['type', 'mass', 'appliedForce', 'frictionForce'])
+        && numeric(value.mass, 0.1, 100)
+        && numeric(value.appliedForce, 0, 500)
+        && numeric(value.frictionForce, 0, 500)
+        ? { type: 'forces', mass: value.mass, appliedForce: value.appliedForce, frictionForce: value.frictionForce }
+        : null;
+    case 'binomial':
+      return keysMatch(value, ['type', 'trials', 'probability'])
+        && numeric(value.trials, 1, 20) && Number.isInteger(value.trials)
+        && numeric(value.probability, 0, 1)
+        ? { type: 'binomial', trials: value.trials, probability: value.probability }
+        : null;
+    case 'molecule':
+      return keysMatch(value, ['type', 'formula'])
+        && (value.formula === 'H2O' || value.formula === 'CO2')
+        ? { type: 'molecule', formula: value.formula }
         : null;
     case 'doppler':
       return keysMatch(value, ['type', 'speedOfSound', 'sourceSpeed', 'emittedFrequency', 'direction'])
@@ -164,6 +192,53 @@ export function inferVisualizationFromQuestion(question: string): QuestionVisual
     }
   }
 
+  // Accept only the explicit, canonical numeric wording below. Geometry
+  // lengths must have the same unit; forces require an opposing horizontal
+  // friction force. Partial or ambiguous stories are illustrative only.
+  if (/\bright[- ]angled triangle\b/i.test(question)) {
+    const rightTriangle = /\blegs?\s+a\s*=\s*(\d+(?:\.\d+)?)\s*cm\s+and\s+b\s*=\s*(\d+(?:\.\d+)?)\s*cm\b/i.exec(question);
+    if (rightTriangle) {
+      const result = validateVisualization({
+        type: 'right_triangle',
+        legA: Number(rightTriangle[1]),
+        legB: Number(rightTriangle[2]),
+        unit: 'cm',
+      });
+      if (result) return result;
+    }
+  }
+
+  if (/\bhorizontal\b/i.test(question)) {
+    const mass = /\bmass\s*=\s*(\d+(?:\.\d+)?)\s*kg\b/i.exec(question)?.[1];
+    const applied = /\bapplied force\s*=\s*(\d+(?:\.\d+)?)\s*N\b/i.exec(question)?.[1];
+    const friction = /\bopposing friction\s*=\s*(\d+(?:\.\d+)?)\s*N\b/i.exec(question)?.[1];
+    if (mass && applied && friction) {
+      const result = validateVisualization({
+        type: 'forces',
+        mass: Number(mass),
+        appliedForce: Number(applied),
+        frictionForce: Number(friction),
+      });
+      if (result) return result;
+    }
+  }
+
+  const distribution = /\bX\s*(?:~|\\sim)\s*(?:\\mathrm\{)?Bin\}?\s*\(\s*(\d{1,2})\s*,\s*(0(?:\.\d+)?|1(?:\.0+)?)\s*\)/i.exec(question);
+  if (distribution) {
+    const result = validateVisualization({
+      type: 'binomial', trials: Number(distribution[1]), probability: Number(distribution[2]),
+    });
+    if (result) return result;
+  }
+
+  if (/\b(molecular|molecule|bonding|bond angle)\b/i.test(question)) {
+    const formulas = Array.from(question.matchAll(/\b(H2O|CO2)\b/gi), (m) => m[1].toUpperCase());
+    if (formulas.length === 1) {
+      const result = validateVisualization({ type: 'molecule', formula: formulas[0] });
+      if (result) return result;
+    }
+  }
+
   // A specific angle tied to sin/cos is unambiguous; do not assume other
   // identities or functions whose parameters have not been provided.
   const trig = /\b(sin|cos)\s*\(?\s*(\d{1,3})(?:°|\^?\\circ|degrees?)\s*\)?/i.exec(question);
@@ -199,4 +274,24 @@ export function resolveQuestionVisualization(
     } else if (actual !== predicted) return inferred;
   }
   return candidate;
+}
+
+/** Small pure maths functions shared by the models and regression tests. */
+export function triangleHypotenuse(legA: number, legB: number): number {
+  return Math.hypot(legA, legB);
+}
+
+export function horizontalAcceleration(
+  mass: number, appliedForce: number, frictionForce: number,
+): number {
+  return (appliedForce - frictionForce) / mass;
+}
+
+export function binomialMass(trials: number, probability: number, successes: number): number {
+  if (!Number.isInteger(trials) || !Number.isInteger(successes)
+    || trials < 0 || successes < 0 || successes > trials
+    || !Number.isFinite(probability) || probability < 0 || probability > 1) return 0;
+  let choose = 1;
+  for (let i = 1; i <= successes; i++) choose = choose * (trials - i + 1) / i;
+  return choose * probability ** successes * (1 - probability) ** (trials - successes);
 }
