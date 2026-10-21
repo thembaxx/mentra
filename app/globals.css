@@ -187,3 +187,16 @@ select {
     scroll-behavior: auto !important;
   }
 }
+
+/* Safari-friendly horizontal scrolling for scaled lesson diagrams.
+   The SVG retains legible labels instead of shrinking to 8px on phones. */
+.tutor-visual-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+  scrollbar-width: thin;
+}
+.tutor-visual-scroll svg {
+  display: block;
+  max-width: none;
+}

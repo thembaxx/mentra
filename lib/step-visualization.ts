@@ -113,9 +113,34 @@ export function getVisualCheckpoints(model: QuestionVisualization): VisualCheckp
   }
 }
 
-export function phaseForStep(index: number, verification: boolean): 0 | 1 | 2 | 3 {
+/**
+ * Spread four concept milestones across the available explanation steps.
+ * Most explanations have 3 numbered steps plus a verification; others have
+ * only 2 or 3 total, or considerably more. The last step must still show
+ * the completed model rather than leaving the final milestone inaccessible.
+ * Fewer than four steps may skip intermediate milestones by design.
+ */
+export function phaseForStep(
+  index: number,
+  verification: boolean,
+  totalSteps = 4,
+): 0 | 1 | 2 | 3 {
   if (verification) return 3;
-  if (!Number.isFinite(index) || index <= 0) return 0;
-  if (index === 1) return 1;
-  return 2;
+  if (!Number.isFinite(index) || index <= 0 || !Number.isFinite(totalSteps) || totalSteps <= 1) return 0;
+  const normalized = Math.round(Math.min(index, totalSteps - 1) / (totalSteps - 1) * 3);
+  return Math.max(0, Math.min(3, normalized)) as 0 | 1 | 2 | 3;
+}
+
+
+/** Reference coordinates for the simplified ball-and-stick explainer. */
+export function moleculeDiagramPoints(formula: 'H2O' | 'CO2'): readonly [readonly [number, number], readonly [number, number]] {
+  if (formula === 'CO2') return [[123, 112], [397, 112]];
+  const halfBondAngle = 104.5 / 2 * Math.PI / 180;
+  const horizontal = Math.sin(halfBondAngle) * 90;
+  const vertical = Math.cos(halfBondAngle) * 90;
+  return [[260 - horizontal, 112 - vertical], [260 + horizontal, 112 - vertical]];
+}
+
+export function dopplerPitchLabel(sourceSpeed: number, direction: 'toward' | 'away'): string {
+  return sourceSpeed === 0 ? 'Same pitch' : direction === 'toward' ? '↑ pitch' : '↓ pitch';
 }

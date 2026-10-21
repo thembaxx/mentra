@@ -1600,7 +1600,7 @@ export function QuestionGeneratorStudio({
                       ) : (
                         parsedStepCards.map((stepCard, sIdx) => {
                           const isLastStep = sIdx === parsedStepCards.length - 1;
-                          const isFocused = focusedStepId === stepCard.id;
+                          const isFocused = focusedStepId === stepCard.id || (focusedStepIndex < 0 && sIdx === 0);
 
                           return (
                             <motion.div
@@ -1613,21 +1613,17 @@ export function QuestionGeneratorStudio({
                                 ...SPRING_SNAPPY,
                                 delay: isStreamingSteps ? 0 : sIdx * 0.04,
                               }}
-                              onClick={() =>
-                                setFocusedStepId((prev) =>
-                                  prev === stepCard.id ? null : stepCard.id
-                                )
-                              }
+                              onClick={() => setFocusedStepId(stepCard.id)}
                               onKeyDown={(event) => {
                                 if (event.key === 'Enter' || event.key === ' ') {
                                   event.preventDefault();
-                                  setFocusedStepId((prev) => prev === stepCard.id ? null : stepCard.id);
+                                  setFocusedStepId(stepCard.id);
                                 }
                               }}
                               role="button"
                               tabIndex={0}
-                              aria-pressed={isFocused}
-                              aria-label={stepCard.title + ': focus explanation'}
+                              aria-current={isFocused ? 'step' : undefined}
+                              aria-label={stepCard.title + ': show corresponding visual checkpoint'}
                               className="relative rounded-2xl p-4 cursor-pointer overflow-hidden transition-colors focus-visible:outline-3 focus-visible:outline-[var(--yl)] focus-visible:outline-offset-2"
                               style={{
                                 backgroundColor: stepCard.isVerification
