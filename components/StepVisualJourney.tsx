@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { ArrowLeft, ArrowRight, Eye, ShieldCheck } from 'lucide-react';
 import type { QuestionVisualization } from '@/lib/visualization-schema';
 import { binomialMass, triangleHypotenuse } from '@/lib/visualization-schema';
-import { getVisualCheckpoints, phaseForStep } from '@/lib/step-visualization';
+import { dopplerPitchLabel, getVisualCheckpoints, moleculeDiagramPoints, phaseForStep } from '@/lib/step-visualization';
 
 type Props = {
   model: QuestionVisualization;
@@ -126,7 +126,7 @@ function VisualScene({ model, phase }: { model: QuestionVisualization; phase: 0 
         <Label x={430} y={157} color={INK} size={12}>Listener</Label>
         {reveal(2)&&<><path d={approaching?'M225 186 H371 l-12 -8 M371 186 l-12 8':'M371 186 H225 l12 -8 M225 186 l12 8'} stroke={YELLOW} strokeWidth="2.5" fill="none"/>
           <Label x={302} y={210} color={YELLOW} size={12}>{approaching?'Approaching':'Receding'} · vₛ/v={Number(ratio.toFixed(2))}</Label></>}
-        {reveal(3)&&<Label x={405} y={32} color={GREEN}>{model.sourceSpeed === 0 ? 'Same pitch' : approaching ? '↑ pitch' : '↓ pitch'}</Label>}
+        {reveal(3)&&<Label x={405} y={32} color={GREEN}>{dopplerPitchLabel(model.sourceSpeed, model.direction)}</Label>}
       </>;
       break;
     }
@@ -185,10 +185,7 @@ function VisualScene({ model, phase }: { model: QuestionVisualization; phase: 0 
     }
     case 'molecule': {
       const water=model.formula==='H2O';
-      const halfAngle = 104.5 / 2 * Math.PI / 180;
-      const xOffset = Math.sin(halfAngle) * 90;
-      const yOffset = Math.cos(halfAngle) * 90;
-      const atoms=water?[[260-xOffset,112-yOffset],[260+xOffset,112-yOffset]]:[[123,112],[397,112]];
+      const atoms=moleculeDiagramPoints(model.formula);
       drawing = <>
         {reveal(1)&&atoms.map(([x,y],i)=>water
           ? <path key={i} d={'M260 136 L'+x+' '+y} stroke={YELLOW} strokeWidth="8" />
