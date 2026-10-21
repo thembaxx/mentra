@@ -4,6 +4,7 @@ import {
   validateVisualization,
   inferVisualizationFromQuestion,
   resolveQuestionVisualization,
+  triangleHypotenuse, horizontalAcceleration, binomialMass,
 } from '../lib/visualization-schema.ts';
 
 test('extracts an exact numeric quadratic from LaTeX without swallowing prose', () => {
@@ -80,4 +81,53 @@ test('a wrong model prediction cannot replace coefficients verified from the pro
 test('oversized and arbitrary input cannot create a diagram', () => {
   assert.equal(inferVisualizationFromQuestion('x'.repeat(12001)), null);
   assert.equal(validateVisualization({ type: 'unknown', src: '<svg onload=alert(1) />' }), null);
+});
+
+
+test('exact right-angle geometry requires two named centimetre legs', () => {
+  const q = 'A right-angled triangle with legs a = 6 cm and b = 8 cm has hypotenuse c.';
+  assert.deepEqual(inferVisualizationFromQuestion(q),
+    { type:'right_triangle', legA:6, legB:8, unit:'cm' });
+  assert.equal(triangleHypotenuse(6,8),10);
+  assert.equal(inferVisualizationFromQuestion('A right-angled triangle has sides 6 cm and 8 m.'),null);
+  assert.equal(validateVisualization({type:'right_triangle',legA:-2,legB:5,unit:'cm'}),null);
+});
+
+test('horizontal force model requires explicit opposing friction and mass', () => {
+  const q = 'An object in horizontal motion: mass = 5 kg, applied force = 30 N, opposing friction = 10 N.';
+  assert.deepEqual(inferVisualizationFromQuestion(q),
+    { type:'forces', mass:5, appliedForce:30, frictionForce:10 });
+  assert.equal(horizontalAcceleration(5,30,10),4);
+  assert.equal(horizontalAcceleration(5,10,30),-4);
+  assert.equal(inferVisualizationFromQuestion('A horizontal object of 5 kg is pushed 30 N with some friction.'),null);
+  assert.equal(validateVisualization({type:'forces',mass:0,appliedForce:30,frictionForce:10}),null);
+});
+
+test('binomial distribution matches an explicit n and probability only', () => {
+  const q = 'Let X ~ Bin(10, 0.3) represent successes in independent trials. Find P(X=3).';
+  assert.deepEqual(inferVisualizationFromQuestion(q), {type:'binomial',trials:10,probability:0.3});
+  assert.ok(Math.abs(binomialMass(10,0.3,3)-0.266827932) < 1e-8);
+  assert.ok(Math.abs(Array.from({length:11},(_,k)=>binomialMass(10,0.3,k)).reduce((a,b)=>a+b,0)-1)<1e-12);
+  assert.equal(binomialMass(10,0.3,11),0);
+  assert.equal(inferVisualizationFromQuestion('A random variable X follows an unspecified binomial distribution.'),null);
+  assert.equal(validateVisualization({type:'binomial',trials:1000000,probability:0.3}),null);
+  assert.equal(validateVisualization({type:'binomial',trials:10,probability:1.3}),null);
+});
+
+test('molecular geometry recognizes only supported unambiguous formulas', () => {
+  assert.deepEqual(inferVisualizationFromQuestion('What is the bond angle in the H2O molecule?'),
+    {type:'molecule',formula:'H2O'});
+  assert.deepEqual(inferVisualizationFromQuestion('Explain bonding in molecule CO2.'),
+    {type:'molecule',formula:'CO2'});
+  assert.equal(inferVisualizationFromQuestion('Compare H2O and CO2 molecular geometry.'),null);
+  assert.equal(validateVisualization({type:'molecule',formula:'CH4'}),null);
+});
+
+test('an AI candidate cannot replace verified science and probability parameters', () => {
+  const q = 'Horizontal force question: mass = 5 kg, applied force = 30 N, opposing friction = 10 N.';
+  assert.deepEqual(resolveQuestionVisualization(q,{type:'forces',mass:20,appliedForce:30,frictionForce:10}),
+    {type:'forces',mass:5,appliedForce:30,frictionForce:10});
+  assert.deepEqual(resolveQuestionVisualization('X ~ Bin(10, 0.3)',{type:'binomial',trials:10,probability:0.4}),
+    {type:'binomial',trials:10,probability:0.3});
+  assert.equal(resolveQuestionVisualization('What is the molecular geometry of methane?',{type:'molecule',formula:'H2O'}),null);
 });
