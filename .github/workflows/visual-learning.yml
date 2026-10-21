@@ -28,5 +28,7 @@ jobs:
         run: npx tsc --noEmit
       - name: ESLint
         run: npm run lint
+      - name: Visualization schema tests
+        run: npm run test:visualizations
       - name: Production build
         run: npm run build
