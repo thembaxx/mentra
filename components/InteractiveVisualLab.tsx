@@ -158,13 +158,14 @@ function QuadraticModel({ data }: { data: Extract<QuestionVisualization, { type:
 
 const TAU = Math.PI * 2;
 const MAX_ANGLE = TAU * 2;
-const WAVE_PATH = Array.from({ length: 241 }, (_, i) => {
-  const angle = (i / 240) * MAX_ANGLE;
-  return (i === 0 ? 'M' : 'L') + (42 + (angle / MAX_ANGLE) * 317).toFixed(2) + ',' + (105 - Math.cos(angle) * 65).toFixed(2);
-}).join(' ');
-
-function TrigModel() {
-  const [angle, setAngle] = useState(Math.PI / 3);
+function TrigModel({ data }: { data: Extract<QuestionVisualization, { type: 'trigonometry' }> | null }) {
+  const initialAngle = data ? data.angleDegrees * Math.PI / 180 : Math.PI / 3;
+  const fn = data?.function ?? 'cos';
+  const [angle, setAngle] = useState(initialAngle);
+  const wavePath = Array.from({ length: 241 }, (_, i) => {
+    const t = (i / 240) * MAX_ANGLE;
+    return (i === 0 ? 'M' : 'L') + (42 + (t / MAX_ANGLE) * 317).toFixed(2) + ',' + (105 - Math[fn](t) * 65).toFixed(2);
+  }).join(' ');
   const [playing, setPlaying] = useState(false);
   const reduceMotion = useReducedMotion();
 
@@ -179,14 +180,14 @@ function TrigModel() {
   const cosine = Math.cos(angle);
   const sine = Math.sin(angle);
   const waveX = 42 + (angle / MAX_ANGLE) * 317;
-  const waveY = 105 - cosine * 65;
+  const waveY = 105 - Math[fn](angle) * 65;
   const circleX = 451 + cosine * 62;
   const circleY = 105 - sine * 62;
 
   return (
     <div className="space-y-4">
       <div className="visual-lab-plot rounded-2xl p-2.5 sm:p-4">
-        <p className="mb-3 text-xs font-semibold visual-lab-muted">One angle, two connected views · f(θ) = cos(θ)</p>
+        <p className="mb-3 text-xs font-semibold visual-lab-muted">One angle, two connected views · f(θ) = {fn}(θ)</p>
         <svg viewBox="0 0 550 222" className="h-auto w-full" role="img" aria-label={'Cosine graph and unit circle at ' + Math.round(angle * 180 / Math.PI) + ' degrees; cosine is ' + cosine.toFixed(2)}>
           {[0, 1, 2, 3, 4].map((i) => (
             <g key={i}>
@@ -198,14 +199,18 @@ function TrigModel() {
           <line x1="42" y1="27" x2="42" y2="182" stroke="var(--mute)" strokeWidth="1.5" />
           <text x="32" y="44" fontSize="12" fill="var(--mute)">1</text>
           <text x="24" y="175" fontSize="12" fill="var(--mute)">−1</text>
-          <path d={WAVE_PATH} fill="none" stroke="var(--series-blue)" strokeWidth="3.5" strokeLinecap="round" />
+          <path d={wavePath} fill="none" stroke="var(--series-blue)" strokeWidth="3.5" strokeLinecap="round" />
           <line x1={waveX} x2={waveX} y1="30" y2="182" stroke="var(--series-pink)" strokeWidth="2" strokeDasharray="4 4" />
           <circle cx={waveX} cy={waveY} r="7" fill="var(--series-pink)" stroke="var(--bg)" strokeWidth="2" />
           <circle cx="451" cy="105" r="62" fill="none" stroke="var(--series-green)" strokeWidth="3.5" />
           <line x1="380" x2="522" y1="105" y2="105" stroke="var(--mute)" />
           <line x1="451" x2="451" y1="33" y2="177" stroke="var(--mute)" />
           <line x1="451" y1="105" x2={circleX} y2={circleY} stroke="var(--series-pink)" strokeWidth="3.5" />
-          <line x1={circleX} y1={circleY} x2={circleX} y2="105" stroke="var(--series-blue)" strokeDasharray="4 4" strokeWidth="2" />
+          {fn === 'cos' ? (
+            <line x1={circleX} y1={circleY} x2={circleX} y2="105" stroke="var(--series-blue)" strokeDasharray="4 4" strokeWidth="2" />
+          ) : (
+            <line x1={circleX} y1={circleY} x2="451" y2={circleY} stroke="var(--series-blue)" strokeDasharray="4 4" strokeWidth="2" />
+          )}
           <circle cx={circleX} cy={circleY} r="6.5" fill="var(--series-blue)" stroke="var(--bg)" strokeWidth="2" />
           <text x="451" y="205" textAnchor="middle" fontSize="12" fill="var(--mute)">Unit circle</text>
         </svg>
@@ -217,8 +222,8 @@ function TrigModel() {
       </div>
       <RangeControl id="visual-angle" label="Angle θ" min={0} max={MAX_ANGLE} step={0.01} value={angle} display={Math.round(angle * 180 / Math.PI) + '°'} onChange={(value) => { setPlaying(false); setAngle(value); }} />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-sm text-xs leading-relaxed visual-lab-muted">The unit circle’s horizontal coordinate is cos θ; the moving point shows the same value on the graph.</p>
-        <button type="button" disabled={Boolean(reduceMotion)} onClick={() => setPlaying((previous) => !previous)} className="visual-lab-play inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" aria-label={playing ? 'Pause cosine animation' : 'Play cosine animation'}>
+        <p className="max-w-sm text-xs leading-relaxed visual-lab-muted">The {fn === 'cos' ? 'horizontal' : 'vertical'} coordinate on the unit circle gives {fn}(θ), synchronized with the wave.</p>
+        <button type="button" disabled={Boolean(reduceMotion)} onClick={() => setPlaying((previous) => !previous)} className="visual-lab-play inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" aria-label={playing ? 'Pause trigonometry animation' : 'Play trigonometry animation'}>
           {playing ? <Pause size={14} /> : <Play size={14} />} {playing ? 'Pause' : 'Animate'}
         </button>
       </div>
@@ -228,8 +233,8 @@ function TrigModel() {
 
 const ELEMENTS = ['', 'Hydrogen', 'Helium', 'Lithium', 'Beryllium', 'Boron', 'Carbon', 'Nitrogen', 'Oxygen', 'Fluorine', 'Neon'];
 
-function AtomModel() {
-  const [atomicNumber, setAtomicNumber] = useState(6);
+function AtomModel({ data }: { data: Extract<QuestionVisualization, { type: 'atom' }> | null }) {
+  const [atomicNumber, setAtomicNumber] = useState(data?.atomicNumber ?? 6);
   const [phase, setPhase] = useState(0);
   const [playing, setPlaying] = useState(false);
   const reduceMotion = useReducedMotion();
