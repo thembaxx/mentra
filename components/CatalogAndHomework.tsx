@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, Reorder, PanInfo } from 'motion/react';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence, Reorder, PanInfo } from "motion/react";
 import {
   Plus,
   Check,
@@ -21,7 +21,7 @@ import {
   LayoutGrid,
   ListOrdered,
   Flame,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   TrackId,
   PRACTICE_SETS,
@@ -31,25 +31,25 @@ import {
   CATALOG_PROGRAMS,
   MENTOR_PROFILES,
   CatalogProgram,
-} from '@/lib/study-data';
+} from "@/lib/study-data";
 import {
   FlowerShape,
   StarburstShape,
   ArrowsMotifShape,
   SquiggleBoltShape,
   MentorAvatar,
-} from './BrandMotifs';
+} from "./BrandMotifs";
 import {
   SpringButton,
   ShakeContainer,
   BouncySurface,
   SPRING_SNAPPY,
   SPRING_BOUNCY,
-} from './PhysicsUI';
-import { playSoundCue } from '@/lib/sound-effects';
-import { MathText } from './MathRenderer';
+} from "./PhysicsUI";
+import { playSoundCue } from "@/lib/sound-effects";
+import { MathText } from "./MathRenderer";
 
-export const HOMEWORK_ORDER_STORAGE_KEY = 'learnflow-homework-order';
+export const HOMEWORK_ORDER_STORAGE_KEY = "learnflow-homework-order";
 
 export function HomeworkAndNotesSection({
   onLaunchTopic,
@@ -58,8 +58,8 @@ export function HomeworkAndNotesSection({
   onLaunchTopic: (track: TrackId, topic: string) => void;
   onNotify: (msg: string) => void;
 }) {
-  const [subTab, setSubTab] = useState<'quests' | 'notes'>('quests');
-  const [homeworkLayout, setHomeworkLayout] = useState<'grid' | 'stack'>('grid');
+  const [subTab, setSubTab] = useState<"quests" | "notes">("quests");
+  const [homeworkLayout, setHomeworkLayout] = useState<"grid" | "stack">("grid");
   const [homeworkItems, setHomeworkItems] = useState<PracticeSetItem[]>(PRACTICE_SETS);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
@@ -68,13 +68,13 @@ export function HomeworkAndNotesSection({
   const [notes, setNotes] = useState<StudyNoteItem[]>(INITIAL_STUDY_NOTES);
   const [selectedNote, setSelectedNote] = useState<StudyNoteItem | null>(null);
   const [isCreatingNote, setIsCreatingNote] = useState(false);
-  const [newNoteTitle, setNewNoteTitle] = useState('');
-  const [newNoteContent, setNewNoteContent] = useState('');
+  const [newNoteTitle, setNewNoteTitle] = useState("");
+  const [newNoteContent, setNewNoteContent] = useState("");
   const [noteShakeKey, setNoteShakeKey] = useState(0);
 
   // Hydrate saved homework priority order from localStorage & listen for Settings resets
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const loadOrder = () => {
       try {
@@ -103,17 +103,17 @@ export function HomeworkAndNotesSection({
     };
 
     loadOrder();
-    window.addEventListener('learnflow-homework-order-updated', loadOrder);
-    return () => window.removeEventListener('learnflow-homework-order-updated', loadOrder);
+    window.addEventListener("learnflow-homework-order-updated", loadOrder);
+    return () => window.removeEventListener("learnflow-homework-order-updated", loadOrder);
   }, []);
 
   const persistHomeworkOrder = useCallback((nextItems: PracticeSetItem[]) => {
     setHomeworkItems(nextItems);
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
         localStorage.setItem(
           HOMEWORK_ORDER_STORAGE_KEY,
-          JSON.stringify(nextItems.map((i) => i.id))
+          JSON.stringify(nextItems.map((i) => i.id)),
         );
       } catch {
         // Ignore storage quota errors
@@ -136,18 +136,18 @@ export function HomeworkAndNotesSection({
       const [moved] = updated.splice(fromIndex, 1);
       updated.splice(toIndex, 0, moved);
       persistHomeworkOrder(updated);
-      playSoundCue('option');
+      playSoundCue("option");
       if (announce) {
         onNotify(`Moved "${moved.title}" to Priority #${toIndex + 1}`);
       }
     },
-    [homeworkItems, onNotify, persistHomeworkOrder]
+    [homeworkItems, onNotify, persistHomeworkOrder],
   );
 
   const handleResetHomeworkOrder = useCallback(() => {
     persistHomeworkOrder(PRACTICE_SETS);
-    playSoundCue('tap');
-    onNotify('Homework priority order reset to default');
+    playSoundCue("tap");
+    onNotify("Homework priority order reset to default");
   }, [onNotify, persistHomeworkOrder]);
 
   // 2D Grid Drag-and-Drop handlers using pointer hit-testing + motion/react layout spring physics
@@ -155,18 +155,18 @@ export function HomeworkAndNotesSection({
     isDraggingRef.current = true;
     setDraggingId(id);
     setDragOverId(null);
-    playSoundCue('tap');
+    playSoundCue("tap");
   }, []);
 
   const handleGridDrag = useCallback(
     (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-      if (typeof document === 'undefined' || !draggingId) return;
+      if (typeof document === "undefined" || !draggingId) return;
       const elements = document.elementsFromPoint(info.point.x, info.point.y);
       let foundTargetId: string | null = null;
       for (const el of elements) {
-        const cardEl = (el as HTMLElement).closest?.('[data-homework-id]') as HTMLElement | null;
+        const cardEl = (el as HTMLElement).closest?.("[data-homework-id]") as HTMLElement | null;
         if (cardEl) {
-          const candidateId = cardEl.getAttribute('data-homework-id');
+          const candidateId = cardEl.getAttribute("data-homework-id");
           if (candidateId && candidateId !== draggingId) {
             foundTargetId = candidateId;
             break;
@@ -177,7 +177,7 @@ export function HomeworkAndNotesSection({
         setDragOverId(foundTargetId);
       }
     },
-    [draggingId, dragOverId]
+    [draggingId, dragOverId],
   );
 
   const handleGridDragEnd = useCallback(
@@ -195,40 +195,38 @@ export function HomeworkAndNotesSection({
         isDraggingRef.current = false;
       }, 140);
     },
-    [dragOverId, homeworkItems, moveHomeworkItem]
+    [dragOverId, homeworkItems, moveHomeworkItem],
   );
 
   const handleSaveNote = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newNoteTitle.trim() || !newNoteContent.trim()) {
       setNoteShakeKey((k) => k + 1);
-      onNotify('Add both a title and study note content before saving');
+      onNotify("Add both a title and study note content before saving");
       return;
     }
 
-    const motifs: ('flower' | 'burst' | 'squiggle')[] = ['flower', 'burst', 'squiggle'];
-    const bgVars: ('--pk' | '--yl' | '--gr' | '--bl')[] = ['--pk', '--yl', '--gr', '--bl'];
+    const motifs: ("flower" | "burst" | "squiggle")[] = ["flower", "burst", "squiggle"];
+    const bgVars: ("--pk" | "--yl" | "--gr" | "--bl")[] = ["--pk", "--yl", "--gr", "--bl"];
     const created: StudyNoteItem = {
       id: `note-${Date.now()}`,
       title: newNoteTitle.trim(),
-      category: 'Personal Note',
-      dateLabel: 'Saved just now',
-      summary: newNoteContent.trim().slice(0, 75) + '...',
+      category: "Personal Note",
+      dateLabel: "Saved just now",
+      summary: newNoteContent.trim().slice(0, 75) + "...",
       content: newNoteContent.trim(),
       motif: motifs[notes.length % motifs.length],
       bgVar: bgVars[notes.length % bgVars.length],
     };
 
     setNotes((prev) => [created, ...prev]);
-    setNewNoteTitle('');
-    setNewNoteContent('');
+    setNewNoteTitle("");
+    setNewNoteContent("");
     setIsCreatingNote(false);
-    onNotify('Study note saved to your notebook');
+    onNotify("Study note saved to your notebook");
   };
 
-  const isCustomOrder = homeworkItems.some(
-    (item, idx) => item.id !== PRACTICE_SETS[idx]?.id
-  );
+  const isCustomOrder = homeworkItems.some((item, idx) => item.id !== PRACTICE_SETS[idx]?.id);
 
   return (
     <section className="space-y-4">
@@ -240,20 +238,21 @@ export function HomeworkAndNotesSection({
             </h3>
             <span
               className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold inline-flex items-center gap-1"
-              style={{ backgroundColor: 'var(--yl)', color: '#2D2D2B' }}
+              style={{ backgroundColor: "var(--yl)", color: "#2D2D2B" }}
             >
               <GripVertical className="w-3 h-3" />
               <span>Drag to prioritize</span>
             </span>
           </div>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--mute)' }}>
-            Drag and drop homework cards to reorder your priority queue, or click any task to launch AI drills
+          <p className="text-sm mt-0.5" style={{ color: "var(--mute)" }}>
+            Drag and drop homework cards to reorder your priority queue, or click any task to launch
+            AI drills
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Layout & Reset Controls when viewing Homework Quests */}
-          {subTab === 'quests' && (
+          {subTab === "quests" && (
             <div className="flex items-center gap-1.5">
               {isCustomOrder && (
                 <motion.button
@@ -263,9 +262,9 @@ export function HomeworkAndNotesSection({
                   onClick={handleResetHomeworkOrder}
                   className="px-3 py-2 rounded-full text-xs font-bold flex items-center gap-1 cursor-pointer"
                   style={{
-                    backgroundColor: 'var(--card)',
-                    color: 'var(--ink)',
-                    border: '1px solid var(--line)',
+                    backgroundColor: "var(--card)",
+                    color: "var(--ink)",
+                    border: "1px solid var(--line)",
                   }}
                   title="Reset homework priority order"
                 >
@@ -276,20 +275,20 @@ export function HomeworkAndNotesSection({
 
               <div
                 className="inline-flex items-center p-1 rounded-full"
-                style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
                 role="group"
                 aria-label="Homework layout mode"
               >
                 <button
                   type="button"
                   onClick={() => {
-                    playSoundCue('option');
-                    setHomeworkLayout('grid');
+                    playSoundCue("option");
+                    setHomeworkLayout("grid");
                   }}
                   className="px-2.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
                   style={{
-                    backgroundColor: homeworkLayout === 'grid' ? '#2D2D2B' : 'transparent',
-                    color: homeworkLayout === 'grid' ? '#FFFCF5' : 'var(--mute)',
+                    backgroundColor: homeworkLayout === "grid" ? "#2D2D2B" : "transparent",
+                    color: homeworkLayout === "grid" ? "#FFFCF5" : "var(--mute)",
                   }}
                   title="Bento Grid (2D Drag & Swap)"
                 >
@@ -299,13 +298,13 @@ export function HomeworkAndNotesSection({
                 <button
                   type="button"
                   onClick={() => {
-                    playSoundCue('option');
-                    setHomeworkLayout('stack');
+                    playSoundCue("option");
+                    setHomeworkLayout("stack");
                   }}
                   className="px-2.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
                   style={{
-                    backgroundColor: homeworkLayout === 'stack' ? '#2D2D2B' : 'transparent',
-                    color: homeworkLayout === 'stack' ? '#FFFCF5' : 'var(--mute)',
+                    backgroundColor: homeworkLayout === "stack" ? "#2D2D2B" : "transparent",
+                    color: homeworkLayout === "stack" ? "#FFFCF5" : "var(--mute)",
                   }}
                   title="Priority List (Live Reorder Stack)"
                 >
@@ -319,9 +318,9 @@ export function HomeworkAndNotesSection({
           {/* Segmented Control (Homework / Notes) */}
           <div
             className="inline-flex items-center p-1 rounded-full"
-            style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+            style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
           >
-            {(['quests', 'notes'] as const).map((tab) => {
+            {(["quests", "notes"] as const).map((tab) => {
               const active = subTab === tab;
               return (
                 <motion.button
@@ -331,18 +330,18 @@ export function HomeworkAndNotesSection({
                   whileTap={{ scale: 0.94 }}
                   transition={SPRING_SNAPPY}
                   className="relative px-4 py-2 rounded-full text-xs sm:text-sm font-semibold cursor-pointer whitespace-nowrap"
-                  style={{ color: active ? '#2D2D2B' : 'var(--ink)' }}
+                  style={{ color: active ? "#2D2D2B" : "var(--ink)" }}
                 >
                   {active && (
                     <motion.span
                       layoutId="homeworkNotesToggle"
                       transition={SPRING_BOUNCY}
                       className="absolute inset-0 rounded-full"
-                      style={{ backgroundColor: 'var(--pk)' }}
+                      style={{ backgroundColor: "var(--pk)" }}
                     />
                   )}
                   <span className="relative z-10">
-                    {tab === 'quests'
+                    {tab === "quests"
                       ? `Homework (${homeworkItems.length})`
                       : `Study notes (${notes.length})`}
                   </span>
@@ -354,8 +353,8 @@ export function HomeworkAndNotesSection({
       </div>
 
       <AnimatePresence mode="wait">
-        {subTab === 'quests' ? (
-          homeworkLayout === 'grid' ? (
+        {subTab === "quests" ? (
+          homeworkLayout === "grid" ? (
             <motion.div
               key="quests-grid"
               initial={{ opacity: 0, y: 10 }}
@@ -381,14 +380,12 @@ export function HomeworkAndNotesSection({
                     onDragStart={() => handleGridDragStart(item.id)}
                     onDrag={handleGridDrag}
                     onDragEnd={() => handleGridDragEnd(item.id)}
-                    whileHover={
-                      isDraggingThis ? undefined : { y: -4, scale: 1.01 }
-                    }
+                    whileHover={isDraggingThis ? undefined : { y: -4, scale: 1.01 }}
                     whileDrag={{
                       scale: 1.05,
                       rotate: -1.5,
                       zIndex: 40,
-                      boxShadow: '0 24px 48px rgba(28, 28, 26, 0.24)',
+                      boxShadow: "0 24px 48px rgba(28, 28, 26, 0.24)",
                     }}
                     animate={{
                       scale: isDropTarget ? 1.03 : 1,
@@ -401,14 +398,14 @@ export function HomeworkAndNotesSection({
                     }}
                     style={{
                       backgroundColor: `var(${item.colorVar})`,
-                      color: '#2D2D2B',
+                      color: "#2D2D2B",
                       outline: isDropTarget
-                        ? '3px dashed #2D2D2B'
+                        ? "3px dashed #2D2D2B"
                         : isTopPriority
-                        ? '2px solid rgba(45, 45, 43, 0.35)'
-                        : 'none',
-                      outlineOffset: isDropTarget ? '-4px' : '0px',
-                      touchAction: 'none',
+                          ? "2px solid rgba(45, 45, 43, 0.35)"
+                          : "none",
+                      outlineOffset: isDropTarget ? "-4px" : "0px",
+                      touchAction: "none",
                     }}
                     className="rounded-3xl p-5 min-h-[168px] flex flex-col justify-between cursor-grab active:cursor-grabbing relative overflow-hidden select-none"
                   >
@@ -419,14 +416,14 @@ export function HomeworkAndNotesSection({
                           className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold tabular-nums"
                           style={{
                             backgroundColor: isTopPriority
-                              ? '#2D2D2B'
-                              : 'rgba(255, 252, 245, 0.78)',
-                            color: isTopPriority ? '#FFFCF5' : '#2D2D2B',
+                              ? "#2D2D2B"
+                              : "rgba(255, 252, 245, 0.78)",
+                            color: isTopPriority ? "#FFFCF5" : "#2D2D2B",
                           }}
                         >
                           {isTopPriority && <Flame className="w-3 h-3 text-[var(--yl)]" />}
                           <span>
-                            #{idx + 1} {isTopPriority ? 'Top Priority' : 'Priority'}
+                            #{idx + 1} {isTopPriority ? "Top Priority" : "Priority"}
                           </span>
                         </span>
                         {isDropTarget && (
@@ -436,10 +433,7 @@ export function HomeworkAndNotesSection({
                         )}
                       </div>
 
-                      <div
-                        className="flex items-center gap-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
                           disabled={idx === 0}
@@ -504,8 +498,8 @@ export function HomeworkAndNotesSection({
                         style={{
                           background: `conic-gradient(#2D2D2B ${item.progress}%, rgba(45,45,43,0.18) 0)`,
                           WebkitMask:
-                            'radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))',
-                          mask: 'radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))',
+                            "radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))",
+                          mask: "radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))",
                         }}
                         aria-label={`${item.progress}% complete`}
                       />
@@ -533,10 +527,10 @@ export function HomeworkAndNotesSection({
                     value={item}
                     onDragStart={() => {
                       isDraggingRef.current = true;
-                      playSoundCue('tap');
+                      playSoundCue("tap");
                     }}
                     onDragEnd={() => {
-                      playSoundCue('option');
+                      playSoundCue("option");
                       setTimeout(() => {
                         isDraggingRef.current = false;
                       }, 120);
@@ -544,13 +538,13 @@ export function HomeworkAndNotesSection({
                     whileDrag={{
                       scale: 1.02,
                       rotate: -0.5,
-                      boxShadow: '0 22px 44px rgba(28, 28, 26, 0.22)',
+                      boxShadow: "0 22px 44px rgba(28, 28, 26, 0.22)",
                       zIndex: 40,
                     }}
                     transition={SPRING_BOUNCY}
                     style={{
                       backgroundColor: `var(${item.colorVar})`,
-                      color: '#2D2D2B',
+                      color: "#2D2D2B",
                     }}
                     className="rounded-3xl p-4 sm:p-5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 cursor-grab active:cursor-grabbing select-none"
                   >
@@ -568,15 +562,15 @@ export function HomeworkAndNotesSection({
                             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold tabular-nums"
                             style={{
                               backgroundColor: isTopPriority
-                                ? '#2D2D2B'
-                                : 'rgba(255, 252, 245, 0.78)',
-                              color: isTopPriority ? '#FFFCF5' : '#2D2D2B',
+                                ? "#2D2D2B"
+                                : "rgba(255, 252, 245, 0.78)",
+                              color: isTopPriority ? "#FFFCF5" : "#2D2D2B",
                             }}
                           >
                             {isTopPriority && <Flame className="w-3 h-3 text-[var(--yl)]" />}
                             <span>
                               Priority #{idx + 1}
-                              {isTopPriority ? ' · Next Up' : ''}
+                              {isTopPriority ? " · Next Up" : ""}
                             </span>
                           </span>
                           <span className="text-xs font-bold opacity-80 flex items-center gap-1">
@@ -601,8 +595,8 @@ export function HomeworkAndNotesSection({
                         style={{
                           background: `conic-gradient(#2D2D2B ${item.progress}%, rgba(45,45,43,0.18) 0)`,
                           WebkitMask:
-                            'radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))',
-                          mask: 'radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))',
+                            "radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))",
+                          mask: "radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px))",
                         }}
                         aria-label={`${item.progress}% complete`}
                       />
@@ -642,7 +636,7 @@ export function HomeworkAndNotesSection({
                   onClick={() => setSelectedNote(note)}
                   style={{
                     backgroundColor: `var(${note.bgVar})`,
-                    color: '#2D2D2B',
+                    color: "#2D2D2B",
                   }}
                   className="rounded-3xl p-5 min-h-[180px] flex flex-col justify-between cursor-pointer relative overflow-hidden"
                 >
@@ -651,10 +645,14 @@ export function HomeworkAndNotesSection({
                       {note.category} · {note.dateLabel}
                     </span>
                     <div className="-mt-1 -mr-1">
-                      {note.motif === 'burst' ? (
+                      {note.motif === "burst" ? (
                         <ArrowsMotifShape className="w-12 h-10" color="#6B7B42" />
-                      ) : note.motif === 'squiggle' ? (
-                        <SquiggleBoltShape className="w-14 h-12" waveColor="#FFB2DD" boltColor="#2D2D2B" />
+                      ) : note.motif === "squiggle" ? (
+                        <SquiggleBoltShape
+                          className="w-14 h-12"
+                          waveColor="#FFB2DD"
+                          boltColor="#2D2D2B"
+                        />
                       ) : (
                         <FlowerShape className="w-12 h-12" color="#B6CAEB" centerColor="#F7D66E" />
                       )}
@@ -674,12 +672,9 @@ export function HomeworkAndNotesSection({
             </div>
 
             <div className="flex justify-start">
-              <SpringButton
-                variant="blue"
-                onClick={() => setIsCreatingNote((v) => !v)}
-              >
+              <SpringButton variant="blue" onClick={() => setIsCreatingNote((v) => !v)}>
                 <Plus className="w-4 h-4" />
-                <span>{isCreatingNote ? 'Close note editor' : 'New study note'}</span>
+                <span>{isCreatingNote ? "Close note editor" : "New study note"}</span>
               </SpringButton>
             </div>
 
@@ -692,18 +687,16 @@ export function HomeworkAndNotesSection({
                     exit={{ opacity: 0, y: 8 }}
                     onSubmit={handleSaveNote}
                     className="rounded-3xl p-6 space-y-4"
-                    style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                    style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
                   >
-                    <h4 className="font-display font-extrabold text-xl">
-                      Create new study note
-                    </h4>
+                    <h4 className="font-display font-extrabold text-xl">Create new study note</h4>
                     <input
                       type="text"
                       value={newNoteTitle}
                       onChange={(e) => setNewNoteTitle(e.target.value)}
                       placeholder="How to remember the unit circle & trig identities..."
                       className="w-full rounded-2xl px-4 py-3 text-base font-semibold focus:outline-2 focus:outline-[var(--pk)]"
-                      style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)' }}
+                      style={{ backgroundColor: "var(--bg)", color: "var(--ink)" }}
                     />
                     <textarea
                       rows={4}
@@ -711,7 +704,7 @@ export function HomeworkAndNotesSection({
                       onChange={(e) => setNewNoteContent(e.target.value)}
                       placeholder="Rule 1: Write your key formula, mnemonic, or code pattern..."
                       className="w-full rounded-2xl p-4 text-base focus:outline-2 focus:outline-[var(--pk)]"
-                      style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)' }}
+                      style={{ backgroundColor: "var(--bg)", color: "var(--ink)" }}
                     />
                     <div className="flex gap-2">
                       <SpringButton type="submit" variant="pink">
@@ -738,22 +731,18 @@ export function HomeworkAndNotesSection({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 8 }}
                   className="rounded-3xl p-6 space-y-3"
-                  style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                  style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <span className="text-xs font-semibold" style={{ color: 'var(--mute)' }}>
+                      <span className="text-xs font-semibold" style={{ color: "var(--mute)" }}>
                         {selectedNote.category} · {selectedNote.dateLabel}
                       </span>
                       <h4 className="font-display font-extrabold text-2xl mt-0.5">
                         {selectedNote.title}
                       </h4>
                     </div>
-                    <SpringButton
-                      size="sm"
-                      variant="soft"
-                      onClick={() => setSelectedNote(null)}
-                    >
+                    <SpringButton size="sm" variant="soft" onClick={() => setSelectedNote(null)}>
                       <X className="w-4 h-4" />
                       <span>Close</span>
                     </SpringButton>
@@ -774,27 +763,27 @@ export function HomeworkAndNotesSection({
 export function CatalogExplorerView({
   onStartProgramTrack,
   onNotify,
-  initialSearchQuery = '',
-  initialProgramId = '',
+  initialSearchQuery = "",
+  initialProgramId = "",
 }: {
   onStartProgramTrack: (track: TrackId, topic: string) => void;
   onNotify: (msg: string) => void;
   initialSearchQuery?: string;
   initialProgramId?: string;
 }) {
-  const [catalogMode, setCatalogMode] = useState<'programs' | 'mentors'>('programs');
-  const [subjectFilter, setSubjectFilter] = useState<string>('All');
+  const [catalogMode, setCatalogMode] = useState<"programs" | "mentors">("programs");
+  const [subjectFilter, setSubjectFilter] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>(initialSearchQuery);
-  const [sortBy, setSortBy] = useState<'rating' | 'price'>('rating');
+  const [sortBy, setSortBy] = useState<"rating" | "price">("rating");
   const [selectedProgram, setSelectedProgram] = useState<CatalogProgram | null>(null);
-  const [promoCode, setPromoCode] = useState('');
+  const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoShake, setPromoShake] = useState(0);
 
   useEffect(() => {
     if (initialSearchQuery !== undefined) {
       setSearchQuery(initialSearchQuery);
-      setSubjectFilter('All');
+      setSubjectFilter("All");
     }
   }, [initialSearchQuery]);
 
@@ -802,40 +791,44 @@ export function CatalogExplorerView({
     if (initialProgramId) {
       const found = CATALOG_PROGRAMS.find((p) => p.id === initialProgramId);
       if (found) {
-        setCatalogMode('programs');
+        setCatalogMode("programs");
         setSelectedProgram(found);
       }
     }
   }, [initialProgramId]);
 
-  const subjects = ['All', 'Mathematics', 'Computer Science', 'Languages'];
+  const subjects = ["All", "Mathematics", "Computer Science", "Languages"];
 
   const filteredPrograms = CATALOG_PROGRAMS.filter((p) => {
-    const matchesSubj = subjectFilter === 'All' || p.subject === subjectFilter;
+    const matchesSubj = subjectFilter === "All" || p.subject === subjectFilter;
     const matchesSearch =
       !searchQuery.trim() ||
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.subject.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSubj && matchesSearch;
-  }).sort((a, b) => (sortBy === 'rating' ? b.rating - a.rating : a.pricePerLesson - b.pricePerLesson));
+  }).sort((a, b) =>
+    sortBy === "rating" ? b.rating - a.rating : a.pricePerLesson - b.pricePerLesson,
+  );
 
   const filteredMentors = MENTOR_PROFILES.filter((m) => {
-    const matchesSubj = subjectFilter === 'All' || m.subject === subjectFilter;
+    const matchesSubj = subjectFilter === "All" || m.subject === subjectFilter;
     const matchesSearch =
       !searchQuery.trim() ||
       m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       m.subject.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSubj && matchesSearch;
-  }).sort((a, b) => (sortBy === 'rating' ? b.rating - a.rating : a.pricePerLesson - b.pricePerLesson));
+  }).sort((a, b) =>
+    sortBy === "rating" ? b.rating - a.rating : a.pricePerLesson - b.pricePerLesson,
+  );
 
   const handleApplyPromo = () => {
     const code = promoCode.trim().toUpperCase();
-    if (code === 'MATRIC20' || code === 'FLOW20' || code.length >= 3) {
+    if (code === "MATRIC20" || code === "FLOW20" || code.length >= 3) {
       setPromoApplied(true);
-      onNotify('Promo code applied: R250 Matric discount unlocked!');
+      onNotify("Promo code applied: R250 Matric discount unlocked!");
     } else {
       setPromoShake((k) => k + 1);
-      onNotify('Enter a valid promo code (e.g. MATRIC20)');
+      onNotify("Enter a valid promo code (e.g. MATRIC20)");
     }
   };
 
@@ -844,19 +837,17 @@ export function CatalogExplorerView({
       {/* Header & Mode Switch (Programs vs Mentors inspired by IMG_5788.jpeg) */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl sm:text-5xl font-display font-extrabold">
-            Curriculum & Mentors
-          </h2>
-          <p className="text-sm sm:text-base mt-1" style={{ color: 'var(--mute)' }}>
+          <h2 className="text-3xl sm:text-5xl font-display font-extrabold">Curriculum & Mentors</h2>
+          <p className="text-sm sm:text-base mt-1" style={{ color: "var(--mute)" }}>
             Structured AI-augmented study programs and expert curriculum coaches
           </p>
         </div>
 
         <div
           className="inline-flex items-center p-1.5 rounded-full"
-          style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+          style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
         >
-          {(['programs', 'mentors'] as const).map((m) => {
+          {(["programs", "mentors"] as const).map((m) => {
             const active = catalogMode === m;
             return (
               <motion.button
@@ -866,18 +857,18 @@ export function CatalogExplorerView({
                 whileTap={{ scale: 0.95 }}
                 transition={SPRING_SNAPPY}
                 className="relative px-5 py-2.5 rounded-full text-sm font-semibold cursor-pointer whitespace-nowrap"
-                style={{ color: active ? '#2D2D2B' : 'var(--ink)' }}
+                style={{ color: active ? "#2D2D2B" : "var(--ink)" }}
               >
                 {active && (
                   <motion.span
                     layoutId="catalogModePill"
                     transition={SPRING_BOUNCY}
                     className="absolute inset-0 rounded-full"
-                    style={{ backgroundColor: 'var(--pk)' }}
+                    style={{ backgroundColor: "var(--pk)" }}
                   />
                 )}
                 <span className="relative z-10">
-                  {m === 'programs' ? 'Study Programs' : 'AI & Human Coaches'}
+                  {m === "programs" ? "Study Programs" : "AI & Human Coaches"}
                 </span>
               </motion.button>
             );
@@ -888,10 +879,13 @@ export function CatalogExplorerView({
       {/* Smart Filter Bar inspired by IMG_5784.jpeg */}
       <div
         className="rounded-3xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3"
-        style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+        style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
       >
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold mr-1 flex items-center gap-1" style={{ color: 'var(--mute)' }}>
+          <span
+            className="text-xs font-semibold mr-1 flex items-center gap-1"
+            style={{ color: "var(--mute)" }}
+          >
             <SlidersHorizontal className="w-3.5 h-3.5" />
             Subject:
           </span>
@@ -906,9 +900,9 @@ export function CatalogExplorerView({
                 onClick={() => setSubjectFilter(subj)}
                 className="px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer"
                 style={{
-                  backgroundColor: active ? 'var(--pk)' : 'var(--bg)',
-                  color: active ? '#2D2D2B' : 'var(--ink)',
-                  border: '1px solid var(--line)',
+                  backgroundColor: active ? "var(--pk)" : "var(--bg)",
+                  color: active ? "#2D2D2B" : "var(--ink)",
+                  border: "1px solid var(--line)",
                 }}
               >
                 {subj}
@@ -920,32 +914,36 @@ export function CatalogExplorerView({
         <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
           <div
             className="flex items-center gap-2 px-3.5 py-2 rounded-full flex-1 sm:w-56"
-            style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--line)' }}
+            style={{ backgroundColor: "var(--bg)", border: "1px solid var(--line)" }}
           >
-            <Search className="w-4 h-4 shrink-0" style={{ color: 'var(--mute)' }} />
+            <Search className="w-4 h-4 shrink-0" style={{ color: "var(--mute)" }} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search trig, algorithms..."
               className="bg-transparent text-base w-full focus:outline-none"
-              style={{ color: 'var(--ink)' }}
+              style={{ color: "var(--ink)" }}
             />
           </div>
 
           <button
             type="button"
-            onClick={() => setSortBy((s) => (s === 'rating' ? 'price' : 'rating'))}
+            onClick={() => setSortBy((s) => (s === "rating" ? "price" : "rating"))}
             className="px-3.5 py-2 rounded-full text-xs font-semibold cursor-pointer whitespace-nowrap"
-            style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)', border: '1px solid var(--line)' }}
+            style={{
+              backgroundColor: "var(--bg)",
+              color: "var(--ink)",
+              border: "1px solid var(--line)",
+            }}
           >
-            Sort: {sortBy === 'rating' ? 'Highest Rated' : 'Lowest Price'}
+            Sort: {sortBy === "rating" ? "Highest Rated" : "Lowest Price"}
           </button>
         </div>
       </div>
 
       {/* Programs or Mentors Grid */}
-      {catalogMode === 'programs' ? (
+      {catalogMode === "programs" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredPrograms.map((prog) => (
             <BouncySurface
@@ -954,34 +952,38 @@ export function CatalogExplorerView({
                 setSelectedProgram(prog);
                 setPromoApplied(false);
               }}
-              style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+              style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
               className="rounded-3xl p-6 flex flex-col justify-between gap-4 cursor-pointer"
             >
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-semibold" style={{ color: 'var(--mute)' }}>
+                <div
+                  className="flex items-center justify-between text-xs font-semibold"
+                  style={{ color: "var(--mute)" }}
+                >
                   <span>
                     {prog.subject} · {prog.gradeRange} · {prog.goal}
                   </span>
-                  <span className="tabular-nums font-bold" style={{ color: 'var(--ink)' }}>
+                  <span className="tabular-nums font-bold" style={{ color: "var(--ink)" }}>
                     ★ {prog.rating} ({prog.reviewsCount})
                   </span>
                 </div>
 
-                <h3 className="text-2xl font-display font-extrabold leading-tight">
-                  {prog.title}
-                </h3>
+                <h3 className="text-2xl font-display font-extrabold leading-tight">{prog.title}</h3>
 
-                <div className="text-sm leading-relaxed" style={{ color: 'var(--mute)' }}>
+                <div className="text-sm leading-relaxed" style={{ color: "var(--mute)" }}>
                   <MathText text={prog.description} />
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: 'var(--line)' }}>
+              <div
+                className="flex items-center justify-between pt-3 border-t"
+                style={{ borderColor: "var(--line)" }}
+              >
                 <div>
                   <span className="font-display font-extrabold text-xl tabular-nums">
                     R{prog.pricePerLesson} / lesson
                   </span>
-                  <span className="text-xs block" style={{ color: 'var(--mute)' }}>
+                  <span className="text-xs block" style={{ color: "var(--mute)" }}>
                     {prog.lessonsCount} interactive AI + mentor lessons
                   </span>
                 </div>
@@ -1005,7 +1007,7 @@ export function CatalogExplorerView({
           {filteredMentors.map((mentor) => (
             <BouncySurface
               key={mentor.id}
-              style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+              style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
               className="rounded-3xl p-6 flex flex-col justify-between gap-5"
             >
               <div className="space-y-4">
@@ -1013,7 +1015,7 @@ export function CatalogExplorerView({
                   <MentorAvatar name={mentor.name} accentVar={mentor.accentColor} size="lg" />
                   <div>
                     <h3 className="font-display font-extrabold text-xl">{mentor.name}</h3>
-                    <p className="text-xs font-semibold" style={{ color: 'var(--mute)' }}>
+                    <p className="text-xs font-semibold" style={{ color: "var(--mute)" }}>
                       {mentor.subject} · {mentor.gradeRange}
                     </p>
                     <p className="text-xs font-bold mt-1 tabular-nums">
@@ -1022,7 +1024,7 @@ export function CatalogExplorerView({
                   </div>
                 </div>
 
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--mute)' }}>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--mute)" }}>
                   {mentor.bio}
                 </p>
 
@@ -1030,32 +1032,35 @@ export function CatalogExplorerView({
                 <div className="grid grid-cols-2 gap-2.5 pt-1">
                   <div
                     className="rounded-2xl p-3"
-                    style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--line)' }}
+                    style={{ backgroundColor: "var(--bg)", border: "1px solid var(--line)" }}
                   >
-                    <Award className="w-4 h-4 mb-1" style={{ color: 'var(--ink)' }} />
+                    <Award className="w-4 h-4 mb-1" style={{ color: "var(--ink)" }} />
                     <div className="font-display font-extrabold text-sm tabular-nums">
                       {mentor.experienceYears} years
                     </div>
-                    <div className="text-[11px]" style={{ color: 'var(--mute)' }}>
+                    <div className="text-[11px]" style={{ color: "var(--mute)" }}>
                       Teaching experience
                     </div>
                   </div>
                   <div
                     className="rounded-2xl p-3"
-                    style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--line)' }}
+                    style={{ backgroundColor: "var(--bg)", border: "1px solid var(--line)" }}
                   >
-                    <GraduationCap className="w-4 h-4 mb-1" style={{ color: 'var(--ink)' }} />
+                    <GraduationCap className="w-4 h-4 mb-1" style={{ color: "var(--ink)" }} />
                     <div className="font-display font-extrabold text-sm tabular-nums">
                       &gt;{mentor.studentsCount} students
                     </div>
-                    <div className="text-[11px]" style={{ color: 'var(--mute)' }}>
+                    <div className="text-[11px]" style={{ color: "var(--mute)" }}>
                       Completed tracks
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t flex items-center justify-between" style={{ borderColor: 'var(--line)' }}>
+              <div
+                className="pt-3 border-t flex items-center justify-between"
+                style={{ borderColor: "var(--line)" }}
+              >
                 <span className="font-display font-extrabold text-lg tabular-nums">
                   from R{mentor.pricePerLesson} / session
                 </span>
@@ -1064,18 +1069,18 @@ export function CatalogExplorerView({
                   variant="pink"
                   onClick={() => {
                     const targetTrack: TrackId =
-                      mentor.subject === 'Computer Science'
-                        ? 'code'
-                        : mentor.subject === 'Languages'
-                          ? 'lang'
-                          : 'exam';
+                      mentor.subject === "Computer Science"
+                        ? "code"
+                        : mentor.subject === "Languages"
+                          ? "lang"
+                          : "exam";
                     onStartProgramTrack(
                       targetTrack,
-                      targetTrack === 'code'
-                        ? 'Two pointers'
-                        : targetTrack === 'lang'
-                          ? 'Afrikaans Tye & STOMPI'
-                          : 'Quadratic & nature of roots'
+                      targetTrack === "code"
+                        ? "Two pointers"
+                        : targetTrack === "lang"
+                          ? "Afrikaans Tye & STOMPI"
+                          : "Quadratic & nature of roots",
                     );
                     onNotify(`Started ${mentor.name}’s AI Twin practice track`);
                   }}
@@ -1096,7 +1101,7 @@ export function CatalogExplorerView({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ backgroundColor: 'rgba(45, 45, 43, 0.55)' }}
+            style={{ backgroundColor: "rgba(45, 45, 43, 0.55)" }}
             onClick={() => setSelectedProgram(null)}
           >
             <motion.div
@@ -1106,17 +1111,21 @@ export function CatalogExplorerView({
               transition={SPRING_BOUNCY}
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl"
-              style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)' }}
+              style={{ backgroundColor: "var(--bg)", color: "var(--ink)" }}
             >
               {/* Colorful Header Banner with Starburst Motif */}
               <div
                 className="p-6 relative overflow-hidden"
-                style={{ backgroundColor: `var(${selectedProgram.bgVar})`, color: '#2D2D2B' }}
+                style={{ backgroundColor: `var(${selectedProgram.bgVar})`, color: "#2D2D2B" }}
               >
-                <StarburstShape className="w-24 h-24 absolute -right-4 -top-4 opacity-80" color="var(--yl)" />
+                <StarburstShape
+                  className="w-24 h-24 absolute -right-4 -top-4 opacity-80"
+                  color="var(--yl)"
+                />
                 <div className="relative z-10 space-y-2">
                   <div className="text-xs font-bold opacity-80">
-                    {selectedProgram.subject} · {selectedProgram.gradeRange} · ★ {selectedProgram.rating}
+                    {selectedProgram.subject} · {selectedProgram.gradeRange} · ★{" "}
+                    {selectedProgram.rating}
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-display font-extrabold leading-tight">
                     {selectedProgram.title}
@@ -1125,12 +1134,12 @@ export function CatalogExplorerView({
               </div>
 
               <div className="p-6 space-y-4">
-                <div className="text-sm leading-relaxed" style={{ color: 'var(--mute)' }}>
+                <div className="text-sm leading-relaxed" style={{ color: "var(--mute)" }}>
                   <MathText text={selectedProgram.description} />
                 </div>
 
                 <div className="space-y-2">
-                  <div className="text-xs font-bold" style={{ color: 'var(--mute)' }}>
+                  <div className="text-xs font-bold" style={{ color: "var(--mute)" }}>
                     Syllabus & Adaptive Milestones
                   </div>
                   <ul className="space-y-2 text-sm font-medium">
@@ -1138,7 +1147,7 @@ export function CatalogExplorerView({
                       <li
                         key={i}
                         className="flex items-center gap-2.5 p-2.5 rounded-xl"
-                        style={{ backgroundColor: 'var(--card)' }}
+                        style={{ backgroundColor: "var(--card)" }}
                       >
                         <BookOpen className="w-4 h-4 shrink-0" />
                         <span>
@@ -1158,7 +1167,7 @@ export function CatalogExplorerView({
                       onChange={(e) => setPromoCode(e.target.value)}
                       placeholder="Promo code (try MATRIC20)"
                       className="flex-1 rounded-full px-4 py-2.5 text-base font-medium focus:outline-2 focus:outline-[var(--pk)]"
-                      style={{ backgroundColor: 'var(--card)', color: 'var(--ink)' }}
+                      style={{ backgroundColor: "var(--card)", color: "var(--ink)" }}
                     />
                     <SpringButton size="sm" variant="pink" onClick={handleApplyPromo}>
                       Apply
@@ -1168,22 +1177,28 @@ export function CatalogExplorerView({
 
                 <div
                   className="rounded-2xl p-4 space-y-1.5 text-sm"
-                  style={{ backgroundColor: 'var(--card)' }}
+                  style={{ backgroundColor: "var(--card)" }}
                 >
                   <div className="flex justify-between">
-                    <span style={{ color: 'var(--mute)' }}>Duration</span>
-                    <span className="font-semibold tabular-nums">{selectedProgram.lessonsCount} lessons</span>
+                    <span style={{ color: "var(--mute)" }}>Duration</span>
+                    <span className="font-semibold tabular-nums">
+                      {selectedProgram.lessonsCount} lessons
+                    </span>
                   </div>
                   {promoApplied && (
-                    <div className="flex justify-between" style={{ color: 'var(--gr)' }}>
+                    <div className="flex justify-between" style={{ color: "var(--gr)" }}>
                       <span>Promo discount</span>
                       <span className="font-bold tabular-nums">−R250</span>
                     </div>
                   )}
-                  <div className="flex justify-between font-display font-extrabold text-lg pt-1 border-t" style={{ borderColor: 'var(--line)' }}>
+                  <div
+                    className="flex justify-between font-display font-extrabold text-lg pt-1 border-t"
+                    style={{ borderColor: "var(--line)" }}
+                  >
                     <span>Total program (ZAR)</span>
                     <span className="tabular-nums">
-                      R{promoApplied ? selectedProgram.totalPrice - 250 : selectedProgram.totalPrice}
+                      R
+                      {promoApplied ? selectedProgram.totalPrice - 250 : selectedProgram.totalPrice}
                     </span>
                   </div>
                 </div>
@@ -1194,19 +1209,19 @@ export function CatalogExplorerView({
                     className="flex-1 justify-center"
                     onClick={() => {
                       const track: TrackId =
-                        selectedProgram.subject === 'Computer Science'
-                          ? 'code'
-                          : selectedProgram.subject === 'Languages'
-                            ? 'lang'
-                            : 'exam';
+                        selectedProgram.subject === "Computer Science"
+                          ? "code"
+                          : selectedProgram.subject === "Languages"
+                            ? "lang"
+                            : "exam";
                       setSelectedProgram(null);
                       onStartProgramTrack(
                         track,
-                        track === 'code'
-                          ? 'Two pointers'
-                          : track === 'lang'
-                            ? 'isiZulu Noun Classes (Amabizo)'
-                            : 'Quadratic & nature of roots'
+                        track === "code"
+                          ? "Two pointers"
+                          : track === "lang"
+                            ? "isiZulu Noun Classes (Amabizo)"
+                            : "Quadratic & nature of roots",
                       );
                       onNotify(`Enrolled in "${selectedProgram.title}"! Starting Lesson 1.`);
                     }}

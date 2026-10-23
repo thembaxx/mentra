@@ -1,44 +1,44 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion, HTMLMotionProps } from 'motion/react';
-import { playSoundCue, SoundCueType } from '@/lib/sound-effects';
+import React, { useState, useEffect } from "react";
+import { motion, HTMLMotionProps } from "motion/react";
+import { playSoundCue, SoundCueType } from "@/lib/sound-effects";
 
 export const SPRING_SNAPPY = {
-  type: 'spring' as const,
+  type: "spring" as const,
   stiffness: 460,
   damping: 20,
   mass: 0.75,
 };
 
 export const SPRING_BOUNCY = {
-  type: 'spring' as const,
+  type: "spring" as const,
   stiffness: 380,
   damping: 15,
   mass: 0.85,
 };
 
 export const SPRING_GENTLE = {
-  type: 'spring' as const,
+  type: "spring" as const,
   stiffness: 260,
   damping: 24,
   mass: 1,
 };
 
-interface SpringButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref'> {
-  variant?: 'pink' | 'soft' | 'blue' | 'yellow' | 'green' | 'ink' | 'card';
-  size?: 'sm' | 'md' | 'lg';
+interface SpringButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {
+  variant?: "pink" | "soft" | "blue" | "yellow" | "green" | "ink" | "card";
+  size?: "sm" | "md" | "lg";
   magnetic?: boolean;
   soundCue?: SoundCueType | false;
   children: React.ReactNode;
 }
 
 export function SpringButton({
-  variant = 'pink',
-  size = 'md',
+  variant = "pink",
+  size = "md",
   magnetic = false,
-  soundCue = 'tap',
-  className = '',
+  soundCue = "tap",
+  className = "",
   children,
   disabled,
   onClick,
@@ -75,22 +75,22 @@ export function SpringButton({
     onClick?.(e);
   };
 
-  const bgStyles: Record<NonNullable<SpringButtonProps['variant']>, React.CSSProperties> = {
-    pink: { backgroundColor: 'var(--pk)', color: '#2D2D2B' },
-    soft: { backgroundColor: 'var(--pks)', color: 'var(--ink)' },
-    blue: { backgroundColor: 'var(--bl)', color: '#2D2D2B' },
-    yellow: { backgroundColor: 'var(--yl)', color: '#2D2D2B' },
-    green: { backgroundColor: 'var(--gr)', color: '#2D2D2B' },
-    ink: { backgroundColor: 'var(--ink)', color: 'var(--bg)' },
-    card: { backgroundColor: 'var(--card)', color: 'var(--ink)', border: '1px solid var(--line)' },
+  const bgStyles: Record<NonNullable<SpringButtonProps["variant"]>, React.CSSProperties> = {
+    pink: { backgroundColor: "var(--pk)", color: "#2D2D2B" },
+    soft: { backgroundColor: "var(--pks)", color: "var(--ink)" },
+    blue: { backgroundColor: "var(--bl)", color: "#2D2D2B" },
+    yellow: { backgroundColor: "var(--yl)", color: "#2D2D2B" },
+    green: { backgroundColor: "var(--gr)", color: "#2D2D2B" },
+    ink: { backgroundColor: "var(--ink)", color: "var(--bg)" },
+    card: { backgroundColor: "var(--card)", color: "var(--ink)", border: "1px solid var(--line)" },
   };
 
   const sizeClasses =
-    size === 'sm'
-      ? 'px-3.5 py-2 text-xs font-semibold'
-      : size === 'lg'
-        ? 'px-7 py-4 text-base font-bold'
-        : 'px-5 py-3.5 text-[15px] font-semibold';
+    size === "sm"
+      ? "px-3.5 py-2 text-xs font-semibold"
+      : size === "lg"
+        ? "px-7 py-4 text-base font-bold"
+        : "px-5 py-3.5 text-[15px] font-semibold";
 
   return (
     <motion.button
@@ -128,7 +128,7 @@ export function SpringButton({
 
 export function ShakeContainer({
   shakeKey,
-  className = '',
+  className = "",
   children,
 }: {
   shakeKey: number;
@@ -137,7 +137,7 @@ export function ShakeContainer({
 }) {
   useEffect(() => {
     if (shakeKey > 0) {
-      playSoundCue('error');
+      playSoundCue("error");
     }
   }, [shakeKey]);
 
@@ -151,7 +151,7 @@ export function ShakeContainer({
             }
           : { x: 0 }
       }
-      transition={{ duration: 0.42, ease: 'easeInOut' }}
+      transition={{ duration: 0.42, ease: "easeInOut" }}
       className={className}
     >
       {children}
@@ -161,7 +161,7 @@ export function ShakeContainer({
 
 export function BouncySurface({
   children,
-  className = '',
+  className = "",
   style,
   onClick,
   hoverLift = 4,
@@ -174,7 +174,7 @@ export function BouncySurface({
 }) {
   const handleSurfaceClick = () => {
     if (onClick) {
-      playSoundCue('tap');
+      playSoundCue("tap");
       onClick();
     }
   };
@@ -182,20 +182,29 @@ export function BouncySurface({
   return (
     <motion.div
       onClick={onClick ? handleSurfaceClick : undefined}
-      onKeyDown={onClick ? (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          handleSurfaceClick();
-        }
-      } : undefined}
-      role={onClick ? 'button' : undefined}
+      onKeyDown={
+        onClick
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                handleSurfaceClick();
+              }
+            }
+          : undefined
+      }
+      role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       aria-disabled={onClick ? false : undefined}
       whileHover={onClick ? { y: -hoverLift, scale: 1.012 } : undefined}
       whileTap={onClick ? { scale: 0.975, y: 0 } : undefined}
       transition={SPRING_BOUNCY}
       style={style}
-      className={onClick ? className + ' cursor-pointer focus-visible:outline-3 focus-visible:outline-[var(--series-blue)] focus-visible:outline-offset-2' : className}
+      className={
+        onClick
+          ? className +
+            " cursor-pointer focus-visible:outline-3 focus-visible:outline-[var(--series-blue)] focus-visible:outline-offset-2"
+          : className
+      }
     >
       {children}
     </motion.div>

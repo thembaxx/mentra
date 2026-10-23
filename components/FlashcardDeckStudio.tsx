@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   motion,
   AnimatePresence,
@@ -9,7 +9,7 @@ import {
   useSpring,
   useReducedMotion,
   PanInfo,
-} from 'motion/react';
+} from "motion/react";
 import {
   RotateCw,
   Check,
@@ -23,28 +23,19 @@ import {
   Lightbulb,
   Code2,
   Shuffle,
-} from 'lucide-react';
-import {
-  TrackId,
-  DifficultyLevel,
-  FlashcardItem,
-  INITIAL_FLASHCARDS,
-} from '@/lib/study-data';
-import {
-  FlowerShape,
-  StarburstShape,
-  SquiggleBoltShape,
-} from './BrandMotifs';
+} from "lucide-react";
+import { TrackId, DifficultyLevel, FlashcardItem, INITIAL_FLASHCARDS } from "@/lib/study-data";
+import { FlowerShape, StarburstShape, SquiggleBoltShape } from "./BrandMotifs";
 import {
   SpringButton,
   ShakeContainer,
   SPRING_SNAPPY,
   SPRING_BOUNCY,
   SPRING_GENTLE,
-} from './PhysicsUI';
-import { playSoundCue } from '@/lib/sound-effects';
-import { fireLearnFlowConfetti } from './DailyStudyGoalCard';
-import { MathText } from './MathRenderer';
+} from "./PhysicsUI";
+import { playSoundCue } from "@/lib/sound-effects";
+import { fireLearnFlowConfetti } from "./DailyStudyGoalCard";
+import { MathText } from "./MathRenderer";
 
 interface FlashcardDeckStudioProps {
   activeTrack: TrackId;
@@ -80,12 +71,12 @@ export function FlashcardDeckStudio({
   }, [isFlipped, flipRotation, reducedMotion]);
   const [masteredIds, setMasteredIds] = useState<Record<string, boolean>>({});
   const [reviewLaterIds, setReviewLaterIds] = useState<Record<string, boolean>>({});
-  const [exitDirection, setExitDirection] = useState<'left' | 'right' | null>(null);
+  const [exitDirection, setExitDirection] = useState<"left" | "right" | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isStreamingCard, setIsStreamingCard] = useState<boolean>(false);
-  const [streamPreviewTitle, setStreamPreviewTitle] = useState<string>('');
+  const [streamPreviewTitle, setStreamPreviewTitle] = useState<string>("");
   const [shakeKey, setShakeKey] = useState<number>(0);
-  const [filterMode, setFilterMode] = useState<'all' | 'unmastered'>('all');
+  const [filterMode, setFilterMode] = useState<"all" | "unmastered">("all");
 
   const x = useMotionValue(0);
   const rotateZ = useTransform(x, [-240, 0, 240], [-13, 0, 13]);
@@ -98,15 +89,16 @@ export function FlashcardDeckStudio({
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const advancingRef = useRef(false);
 
-  useEffect(() => () => {
-    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    },
+    [],
+  );
 
   const fullTrackDeck = decksByTrack[activeTrack] || INITIAL_FLASHCARDS.exam;
   const visibleDeck =
-    filterMode === 'unmastered'
-      ? fullTrackDeck.filter((c) => !masteredIds[c.id])
-      : fullTrackDeck;
+    filterMode === "unmastered" ? fullTrackDeck.filter((c) => !masteredIds[c.id]) : fullTrackDeck;
 
   const safeIndex = visibleDeck.length > 0 ? activeIndex % visibleDeck.length : 0;
   const currentCard: FlashcardItem | undefined = visibleDeck[safeIndex];
@@ -117,9 +109,7 @@ export function FlashcardDeckStudio({
 
   const trackMasteredCount = fullTrackDeck.filter((c) => masteredIds[c.id]).length;
   const trackProgressPct =
-    fullTrackDeck.length > 0
-      ? Math.round((trackMasteredCount / fullTrackDeck.length) * 100)
-      : 0;
+    fullTrackDeck.length > 0 ? Math.round((trackMasteredCount / fullTrackDeck.length) * 100) : 0;
 
   // Reset card flip & index when switching track
   useEffect(() => {
@@ -136,33 +126,36 @@ export function FlashcardDeckStudio({
 
   const handleFlipCard = useCallback(() => {
     if (isDraggingRef.current || !currentCard) return;
-    playSoundCue('step_reveal');
+    playSoundCue("step_reveal");
     setIsFlipped((prev) => !prev);
   }, [currentCard]);
 
   const advanceCard = useCallback(
-    (direction: 'left' | 'right') => {
+    (direction: "left" | "right") => {
       if (!currentCard || advancingRef.current) return;
       advancingRef.current = true;
       const cardId = currentCard.id;
       setExitDirection(direction);
 
-      if (direction === 'right') {
+      if (direction === "right") {
         const firstMastery = !masteredIds[cardId];
         if (firstMastery) onCardMastered?.();
-        if (firstMastery && fullTrackDeck.every((card) => card.id === cardId || masteredIds[card.id])) {
+        if (
+          firstMastery &&
+          fullTrackDeck.every((card) => card.id === cardId || masteredIds[card.id])
+        ) {
           fireLearnFlowConfetti();
-          onNotify('All ' + fullTrackDeck.length + ' flashcards in this deck mastered!');
+          onNotify("All " + fullTrackDeck.length + " flashcards in this deck mastered!");
         }
-        playSoundCue('grade_success');
+        playSoundCue("grade_success");
       } else {
-        playSoundCue('option');
+        playSoundCue("option");
       }
 
       // Commit after the exit animation: filtering a mastered card too early
       // removes it from under the gesture and may skip the following card.
       advanceTimerRef.current = setTimeout(() => {
-        if (direction === 'right') {
+        if (direction === "right") {
           setMasteredIds((previous) => ({ ...previous, [cardId]: true }));
           setReviewLaterIds((previous) => {
             const next = { ...previous };
@@ -174,19 +167,18 @@ export function FlashcardDeckStudio({
         }
         setIsFlipped(false);
         x.set(0);
-        setActiveIndex((previous) => previous + (filterMode === 'unmastered' && direction === 'right' ? 0 : 1));
+        setActiveIndex(
+          (previous) => previous + (filterMode === "unmastered" && direction === "right" ? 0 : 1),
+        );
         setExitDirection(null);
         advancingRef.current = false;
         advanceTimerRef.current = null;
       }, 180);
     },
-    [currentCard, masteredIds, fullTrackDeck, filterMode, onCardMastered, onNotify, x]
+    [currentCard, masteredIds, fullTrackDeck, filterMode, onCardMastered, onNotify, x],
   );
 
-  const handleDragEnd = (
-    _e: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo
-  ) => {
+  const handleDragEnd = (_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     setTimeout(() => {
       isDraggingRef.current = false;
     }, 60);
@@ -195,12 +187,9 @@ export function FlashcardDeckStudio({
     const velocityThreshold = 460;
 
     if (info.offset.x > offsetThreshold || info.velocity.x > velocityThreshold) {
-      advanceCard('right');
-    } else if (
-      info.offset.x < -offsetThreshold ||
-      info.velocity.x < -velocityThreshold
-    ) {
-      advanceCard('left');
+      advanceCard("right");
+    } else if (info.offset.x < -offsetThreshold || info.velocity.x < -velocityThreshold) {
+      advanceCard("left");
     } else {
       x.set(0);
     }
@@ -212,40 +201,38 @@ export function FlashcardDeckStudio({
       const target = e.target as HTMLElement | null;
       if (
         target &&
-        (target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.isContentEditable)
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
       ) {
         return;
       }
-      if (e.code === 'Space') {
+      if (e.code === "Space") {
         e.preventDefault();
         handleFlipCard();
-      } else if (e.code === 'ArrowRight') {
+      } else if (e.code === "ArrowRight") {
         e.preventDefault();
-        advanceCard('right');
-      } else if (e.code === 'ArrowLeft') {
+        advanceCard("right");
+      } else if (e.code === "ArrowLeft") {
         e.preventDefault();
-        advanceCard('left');
+        advanceCard("left");
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleFlipCard, advanceCard]);
 
   const handleCopySnippet = (e: React.MouseEvent, card: FlashcardItem) => {
     e.stopPropagation();
-    playSoundCue('tap');
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    playSoundCue("tap");
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(card.codeOrFormulaSnippet).catch(() => {});
     }
     setCopiedId(card.id);
-    onNotify('Copied snippet to clipboard');
+    onNotify("Copied snippet to clipboard");
     setTimeout(() => setCopiedId(null), 1800);
   };
 
   const handleShuffleDeck = () => {
-    playSoundCue('option');
+    playSoundCue("option");
     setDecksByTrack((prev) => {
       const list = [...prev[activeTrack]];
       for (let i = list.length - 1; i > 0; i--) {
@@ -256,11 +243,11 @@ export function FlashcardDeckStudio({
     });
     setIsFlipped(false);
     setActiveIndex(0);
-    onNotify('Shuffled flashcard deck');
+    onNotify("Shuffled flashcard deck");
   };
 
   const handleResetMastery = () => {
-    playSoundCue('tap');
+    playSoundCue("tap");
     setMasteredIds((prev) => {
       const next = { ...prev };
       fullTrackDeck.forEach((c) => delete next[c.id]);
@@ -271,21 +258,21 @@ export function FlashcardDeckStudio({
       fullTrackDeck.forEach((c) => delete next[c.id]);
       return next;
     });
-    setFilterMode('all');
+    setFilterMode("all");
     setActiveIndex(0);
     setIsFlipped(false);
-    onNotify('Reset mastery progress for this deck');
+    onNotify("Reset mastery progress for this deck");
   };
 
   // Stream a brand-new AI flashcard from /api/tutor
   const handleStreamAIFlashcard = async () => {
     const topicToUse =
       customTopic.trim() ||
-      (activeTrack === 'code'
-        ? 'Two pointers & Hash Maps'
-        : activeTrack === 'lang'
-          ? 'Subjunctive triggers'
-          : 'Quadratic vertex form');
+      (activeTrack === "code"
+        ? "Two pointers & Hash Maps"
+        : activeTrack === "lang"
+          ? "Subjunctive triggers"
+          : "Quadratic vertex form");
 
     if (!onConsumeQuota()) {
       setShakeKey((k) => k + 1);
@@ -296,11 +283,11 @@ export function FlashcardDeckStudio({
     setStreamPreviewTitle(`Synthesizing "${topicToUse}" flashcard...`);
 
     try {
-      const response = await fetch('/api/tutor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/tutor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: 'generate_flashcard',
+          action: "generate_flashcard",
           track: activeTrack,
           topic: topicToUse,
           difficulty,
@@ -308,12 +295,12 @@ export function FlashcardDeckStudio({
       });
 
       if (!response.ok || !response.body) {
-        throw new Error('Failed to stream AI flashcard');
+        throw new Error("Failed to stream AI flashcard");
       }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let raw = '';
+      let raw = "";
 
       while (true) {
         const { done, value } = await reader.read();
@@ -331,12 +318,7 @@ export function FlashcardDeckStudio({
       const snippetMatch = raw.match(/SNIPPET:\s*([\s\S]*?)(?=\nTIP:|$)/i);
       const tipMatch = raw.match(/TIP:\s*([\s\S]*)$/i);
 
-      const colors: ('--pk' | '--yl' | '--gr' | '--bl')[] = [
-        '--pk',
-        '--bl',
-        '--yl',
-        '--gr',
-      ];
+      const colors: ("--pk" | "--yl" | "--gr" | "--bl")[] = ["--pk", "--bl", "--yl", "--gr"];
       const newCard: FlashcardItem = {
         id: `fc-ai-${Date.now()}`,
         track: activeTrack,
@@ -356,11 +338,11 @@ export function FlashcardDeckStudio({
           `// ${topicToUse} (${difficulty})\n1. Establish base state\n2. Transform invariant step-by-step\n3. Verify boundary conditions`
         ).trim(),
         snippetLabel:
-          activeTrack === 'code'
-            ? 'AI-Generated Code Template'
-            : activeTrack === 'lang'
-              ? 'AI-Generated Grammar Pattern'
-              : 'AI-Generated Formula & Invariant',
+          activeTrack === "code"
+            ? "AI-Generated Code Template"
+            : activeTrack === "lang"
+              ? "AI-Generated Grammar Pattern"
+              : "AI-Generated Formula & Invariant",
         memoryTip: (
           tipMatch?.[1] ||
           `Test ${topicToUse} on small boundary cases first to confirm the invariant holds.`
@@ -372,16 +354,16 @@ export function FlashcardDeckStudio({
         ...prev,
         [activeTrack]: [newCard, ...prev[activeTrack]],
       }));
-      setFilterMode('all');
+      setFilterMode("all");
       setActiveIndex(0);
       setIsFlipped(false);
       setIsStreamingCard(false);
-      playSoundCue('step_reveal');
+      playSoundCue("step_reveal");
       onNotify(`Added new AI flashcard: "${newCard.frontTitle}"`);
     } catch {
       setIsStreamingCard(false);
       setShakeKey((k) => k + 1);
-      onNotify('Could not stream flashcard right now — try again');
+      onNotify("Could not stream flashcard right now — try again");
     }
   };
 
@@ -392,15 +374,14 @@ export function FlashcardDeckStudio({
         {/* Top Deck Status Bar */}
         <div
           className="rounded-3xl p-4 sm:px-6 flex flex-wrap items-center justify-between gap-3"
-          style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+          style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
         >
           <div className="flex items-center gap-3">
             <div
               className="w-11 h-11 rounded-2xl grid place-items-center font-display font-extrabold text-sm tabular-nums"
               style={{
-                backgroundColor:
-                  trackProgressPct === 100 ? 'var(--gr)' : 'var(--pk)',
-                color: '#2D2D2B',
+                backgroundColor: trackProgressPct === 100 ? "var(--gr)" : "var(--pk)",
+                color: "#2D2D2B",
               }}
             >
               {trackProgressPct}%
@@ -410,12 +391,12 @@ export function FlashcardDeckStudio({
                 <span>Swipe-to-Master Deck</span>
                 <span
                   className="text-xs font-bold px-2.5 py-0.5 rounded-full tabular-nums"
-                  style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)' }}
+                  style={{ backgroundColor: "var(--bg)", color: "var(--ink)" }}
                 >
                   {trackMasteredCount}/{fullTrackDeck.length} mastered
                 </span>
               </div>
-              <p className="text-xs" style={{ color: 'var(--mute)' }}>
+              <p className="text-xs" style={{ color: "var(--mute)" }}>
                 Tap card (or press Space) to flip · Drag right to master · Drag left to review again
               </p>
             </div>
@@ -425,20 +406,19 @@ export function FlashcardDeckStudio({
             <button
               type="button"
               onClick={() => {
-                playSoundCue('option');
-                setFilterMode((m) => (m === 'all' ? 'unmastered' : 'all'));
+                playSoundCue("option");
+                setFilterMode((m) => (m === "all" ? "unmastered" : "all"));
                 setActiveIndex(0);
                 setIsFlipped(false);
               }}
               className="px-3 py-1.5 rounded-full text-xs font-bold cursor-pointer transition-colors"
               style={{
-                backgroundColor:
-                  filterMode === 'unmastered' ? 'var(--yl)' : 'var(--bg)',
-                color: filterMode === 'unmastered' ? '#2D2D2B' : 'var(--ink)',
-                border: '1px solid var(--line)',
+                backgroundColor: filterMode === "unmastered" ? "var(--yl)" : "var(--bg)",
+                color: filterMode === "unmastered" ? "#2D2D2B" : "var(--ink)",
+                border: "1px solid var(--line)",
               }}
             >
-              {filterMode === 'unmastered' ? 'Showing Unmastered' : 'All Cards'}
+              {filterMode === "unmastered" ? "Showing Unmastered" : "All Cards"}
             </button>
 
             <button
@@ -448,9 +428,9 @@ export function FlashcardDeckStudio({
               aria-label="Shuffle deck"
               className="p-2 rounded-full cursor-pointer"
               style={{
-                backgroundColor: 'var(--bg)',
-                border: '1px solid var(--line)',
-                color: 'var(--ink)',
+                backgroundColor: "var(--bg)",
+                border: "1px solid var(--line)",
+                color: "var(--ink)",
               }}
             >
               <Shuffle className="w-3.5 h-3.5" />
@@ -464,9 +444,9 @@ export function FlashcardDeckStudio({
                 aria-label="Reset mastery progress"
                 className="p-2 rounded-full cursor-pointer"
                 style={{
-                  backgroundColor: 'var(--bg)',
-                  border: '1px solid var(--line)',
-                  color: 'var(--ink)',
+                  backgroundColor: "var(--bg)",
+                  border: "1px solid var(--line)",
+                  color: "var(--ink)",
                 }}
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -478,7 +458,7 @@ export function FlashcardDeckStudio({
         {/* 3D Stacked Card Arena */}
         <div
           className="relative min-h-[472px] sm:min-h-[494px] flex items-center justify-center select-none py-3"
-          style={{ perspective: '1400px' }}
+          style={{ perspective: "1400px" }}
         >
           {currentCard ? (
             <>
@@ -491,7 +471,7 @@ export function FlashcardDeckStudio({
                   className="absolute inset-x-4 sm:inset-x-8 h-[430px] sm:h-[445px] rounded-[32px] pointer-events-none"
                   style={{
                     backgroundColor: `var(${nextCard2.colorVar})`,
-                    border: '1px solid rgba(45,45,43,0.14)',
+                    border: "1px solid rgba(45,45,43,0.14)",
                     zIndex: 1,
                   }}
                 />
@@ -506,7 +486,7 @@ export function FlashcardDeckStudio({
                   className="absolute inset-x-2 sm:inset-x-5 h-[430px] sm:h-[445px] rounded-[32px] pointer-events-none"
                   style={{
                     backgroundColor: `var(${nextCard1.colorVar})`,
-                    border: '1px solid rgba(45,45,43,0.16)',
+                    border: "1px solid rgba(45,45,43,0.16)",
                     zIndex: 2,
                   }}
                 />
@@ -530,15 +510,20 @@ export function FlashcardDeckStudio({
                   }}
                   initial={{ scale: 0.92, opacity: 0, y: 18 }}
                   animate={
-                    exitDirection === 'right'
+                    exitDirection === "right"
                       ? { x: 440, rotateZ: 18, opacity: 0, scale: 0.92 }
-                      : exitDirection === 'left'
+                      : exitDirection === "left"
                         ? { x: -440, rotateZ: -18, opacity: 0, scale: 0.92 }
                         : { x: 0, rotateZ: 0, scale: 1, opacity: 1, y: 0 }
                   }
                   transition={SPRING_SNAPPY}
                   onClick={handleFlipCard}
-                  onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleFlipCard(); } }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      handleFlipCard();
+                    }
+                  }}
                   role="button"
                   tabIndex={0}
                   aria-label={`Flashcard: ${currentCard.frontTitle}. Click or press Space to flip.`}
@@ -549,9 +534,9 @@ export function FlashcardDeckStudio({
                     style={{
                       opacity: masterStampOpacity,
                       scale: masterStampScale,
-                      backgroundColor: 'var(--gr)',
-                      color: '#2D2D2B',
-                      border: '3px solid #2D2D2B',
+                      backgroundColor: "var(--gr)",
+                      color: "#2D2D2B",
+                      border: "3px solid #2D2D2B",
                     }}
                     className="pointer-events-none absolute top-6 left-6 z-30 px-4 py-1.5 rounded-2xl font-display font-extrabold text-sm sm:text-base tracking-tight flex items-center gap-1.5 shadow-lg -rotate-12"
                   >
@@ -564,9 +549,9 @@ export function FlashcardDeckStudio({
                     style={{
                       opacity: reviewStampOpacity,
                       scale: reviewStampScale,
-                      backgroundColor: 'var(--yl)',
-                      color: '#2D2D2B',
-                      border: '3px solid #2D2D2B',
+                      backgroundColor: "var(--yl)",
+                      color: "#2D2D2B",
+                      border: "3px solid #2D2D2B",
                     }}
                     className="pointer-events-none absolute top-6 right-6 z-30 px-4 py-1.5 rounded-2xl font-display font-extrabold text-sm sm:text-base tracking-tight flex items-center gap-1.5 shadow-lg rotate-12"
                   >
@@ -577,7 +562,7 @@ export function FlashcardDeckStudio({
                   {/* 3D Inner Flip Container */}
                   <motion.div
                     className="w-full h-full relative"
-                    style={{ rotateY: flipRotation, transformStyle: 'preserve-3d' }}
+                    style={{ rotateY: flipRotation, transformStyle: "preserve-3d" }}
                   >
                     {/* FRONT FACE: Concept / Prompt */}
                     <motion.div
@@ -585,24 +570,24 @@ export function FlashcardDeckStudio({
                       className="absolute inset-0 w-full h-full rounded-[32px] p-5 sm:p-8 flex flex-col justify-between overflow-hidden shadow-xl"
                       style={{
                         opacity: frontOpacity,
-                        pointerEvents: isFlipped ? 'none' : 'auto',
+                        pointerEvents: isFlipped ? "none" : "auto",
                         backgroundColor: `var(${currentCard.colorVar})`,
-                        color: '#2D2D2B',
-                        backfaceVisibility: 'hidden',
-                        WebkitBackfaceVisibility: 'hidden',
-                        transform: 'translateZ(1px)',
-                        border: '2px solid rgba(45,45,43,0.12)',
+                        color: "#2D2D2B",
+                        backfaceVisibility: "hidden",
+                        WebkitBackfaceVisibility: "hidden",
+                        transform: "translateZ(1px)",
+                        border: "2px solid rgba(45,45,43,0.12)",
                       }}
                     >
                       {/* Decorative Classly Geometric Motif */}
                       <div className="pointer-events-none absolute -right-6 -bottom-6 opacity-35">
-                        {currentCard.track === 'code' ? (
+                        {currentCard.track === "code" ? (
                           <SquiggleBoltShape
                             className="w-36 h-32"
                             waveColor="#FFFCF5"
                             boltColor="#2D2D2B"
                           />
-                        ) : currentCard.track === 'lang' ? (
+                        ) : currentCard.track === "lang" ? (
                           <StarburstShape className="w-36 h-36" color="#FFFCF5" />
                         ) : (
                           <FlowerShape
@@ -619,8 +604,8 @@ export function FlashcardDeckStudio({
                           <span
                             className="max-w-[52vw] sm:max-w-[220px] truncate px-3 py-1 rounded-full"
                             style={{
-                              backgroundColor: 'rgba(255, 252, 245, 0.85)',
-                              color: '#2D2D2B',
+                              backgroundColor: "rgba(255, 252, 245, 0.85)",
+                              color: "#2D2D2B",
                             }}
                           >
                             {currentCard.topic}
@@ -628,8 +613,8 @@ export function FlashcardDeckStudio({
                           <span
                             className="px-2.5 py-1 rounded-full"
                             style={{
-                              backgroundColor: 'rgba(45, 45, 43, 0.1)',
-                              color: '#2D2D2B',
+                              backgroundColor: "rgba(45, 45, 43, 0.1)",
+                              color: "#2D2D2B",
                             }}
                           >
                             {currentCard.difficulty}
@@ -641,8 +626,8 @@ export function FlashcardDeckStudio({
                             <span
                               className="px-2.5 py-1 rounded-full text-[11px] font-extrabold flex items-center gap-1"
                               style={{
-                                backgroundColor: '#2D2D2B',
-                                color: '#FFFCF5',
+                                backgroundColor: "#2D2D2B",
+                                color: "#FFFCF5",
                               }}
                             >
                               <Check className="w-3 h-3 stroke-[3]" />
@@ -674,9 +659,7 @@ export function FlashcardDeckStudio({
                           <RotateCw className="w-3.5 h-3.5" />
                           <span>Tap card or press Space to flip for definition & code</span>
                         </span>
-                        <span className="hidden sm:inline opacity-75">
-                          ← Review · Master →
-                        </span>
+                        <span className="hidden sm:inline opacity-75">← Review · Master →</span>
                       </div>
                     </motion.div>
 
@@ -686,13 +669,13 @@ export function FlashcardDeckStudio({
                       className="absolute inset-0 w-full h-full rounded-[32px] p-5 sm:p-7 flex flex-col overflow-hidden shadow-xl"
                       style={{
                         opacity: backOpacity,
-                        pointerEvents: isFlipped ? 'auto' : 'none',
-                        backgroundColor: '#2D2D2B',
-                        color: '#F8F3E7',
-                        backfaceVisibility: 'hidden',
-                        WebkitBackfaceVisibility: 'hidden',
-                        transform: 'rotateY(180deg) translateZ(1px)',
-                        border: '2px solid var(--pk)',
+                        pointerEvents: isFlipped ? "auto" : "none",
+                        backgroundColor: "#2D2D2B",
+                        color: "#F8F3E7",
+                        backfaceVisibility: "hidden",
+                        WebkitBackfaceVisibility: "hidden",
+                        transform: "rotateY(180deg) translateZ(1px)",
+                        border: "2px solid var(--pk)",
                       }}
                     >
                       {/* Top Header */}
@@ -700,14 +683,14 @@ export function FlashcardDeckStudio({
                         <div className="flex min-w-0 items-center gap-2">
                           <span
                             className="max-w-[50vw] sm:max-w-[240px] truncate px-3 py-1 rounded-full text-xs font-extrabold"
-                            style={{ backgroundColor: 'var(--pk)', color: '#2D2D2B' }}
+                            style={{ backgroundColor: "var(--pk)", color: "#2D2D2B" }}
                           >
                             {currentCard.frontTitle}
                           </span>
                         </div>
                         <span
                           className="text-xs font-bold flex items-center gap-1"
-                          style={{ color: '#B9B6AA' }}
+                          style={{ color: "#B9B6AA" }}
                         >
                           <RotateCw className="w-3.5 h-3.5" />
                           <span>Tap to flip back</span>
@@ -724,14 +707,14 @@ export function FlashcardDeckStudio({
                         <div
                           className="rounded-2xl p-3.5 space-y-2"
                           style={{
-                            backgroundColor: 'rgba(255, 252, 245, 0.07)',
-                            border: '1px solid rgba(255, 252, 245, 0.14)',
+                            backgroundColor: "rgba(255, 252, 245, 0.07)",
+                            border: "1px solid rgba(255, 252, 245, 0.14)",
                           }}
                         >
                           <div className="flex items-center justify-between text-[11px] font-bold">
                             <span
                               className="flex items-center gap-1.5"
-                              style={{ color: 'var(--yl)' }}
+                              style={{ color: "var(--yl)" }}
                             >
                               <Code2 className="w-3.5 h-3.5" />
                               <span>{currentCard.snippetLabel}</span>
@@ -742,7 +725,7 @@ export function FlashcardDeckStudio({
                               tabIndex={isFlipped ? 0 : -1}
                               aria-label="Copy flashcard code or formula"
                               className="px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer hover:bg-white/10 transition-colors"
-                              style={{ color: '#F8F3E7' }}
+                              style={{ color: "#F8F3E7" }}
                             >
                               {copiedId === currentCard.id ? (
                                 <>
@@ -757,7 +740,7 @@ export function FlashcardDeckStudio({
                               )}
                             </button>
                           </div>
-                          {currentCard.track === 'exam' ? (
+                          {currentCard.track === "exam" ? (
                             <div className="min-w-0 text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap break-words text-[#EAF0F9]">
                               <MathText text={currentCard.codeOrFormulaSnippet} />
                             </div>
@@ -772,8 +755,8 @@ export function FlashcardDeckStudio({
                         <div
                           className="rounded-xl px-3.5 py-2.5 flex items-start gap-2 text-xs"
                           style={{
-                            backgroundColor: 'rgba(247, 214, 110, 0.12)',
-                            color: '#FEEFBF',
+                            backgroundColor: "rgba(247, 214, 110, 0.12)",
+                            color: "#FEEFBF",
                           }}
                         >
                           <Lightbulb className="w-4 h-4 shrink-0 mt-0.5 text-[var(--yl)]" />
@@ -801,14 +784,14 @@ export function FlashcardDeckStudio({
               transition={SPRING_BOUNCY}
               className="w-full rounded-[32px] p-8 text-center space-y-4"
               style={{
-                backgroundColor: 'var(--grs)',
-                color: '#2D2D2B',
-                border: '2px solid var(--gr)',
+                backgroundColor: "var(--grs)",
+                color: "#2D2D2B",
+                border: "2px solid var(--gr)",
               }}
             >
               <div
                 className="w-16 h-16 rounded-3xl mx-auto grid place-items-center"
-                style={{ backgroundColor: 'var(--gr)', color: '#2D2D2B' }}
+                style={{ backgroundColor: "var(--gr)", color: "#2D2D2B" }}
               >
                 <Trophy className="w-8 h-8" />
               </div>
@@ -816,13 +799,14 @@ export function FlashcardDeckStudio({
                 Every card in this deck is mastered!
               </h3>
               <p className="text-sm max-w-md mx-auto opacity-85">
-                You have mastered all {fullTrackDeck.length} flashcards in this track. Show all cards to review again or stream a brand-new AI flashcard on any topic.
+                You have mastered all {fullTrackDeck.length} flashcards in this track. Show all
+                cards to review again or stream a brand-new AI flashcard on any topic.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                 <SpringButton
                   variant="ink"
                   onClick={() => {
-                    setFilterMode('all');
+                    setFilterMode("all");
                     setActiveIndex(0);
                   }}
                 >
@@ -843,7 +827,7 @@ export function FlashcardDeckStudio({
             <SpringButton
               variant="card"
               soundCue={false}
-              onClick={() => advanceCard('left')}
+              onClick={() => advanceCard("left")}
               className="w-full justify-center py-3.5"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -857,14 +841,14 @@ export function FlashcardDeckStudio({
               className="w-full justify-center py-3.5"
             >
               <RotateCw className="w-4 h-4" />
-              <span>{isFlipped ? 'Show Prompt' : 'Flip Card'}</span>
+              <span>{isFlipped ? "Show Prompt" : "Flip Card"}</span>
             </SpringButton>
 
             <SpringButton
               variant="green"
               magnetic
               soundCue={false}
-              onClick={() => advanceCard('right')}
+              onClick={() => advanceCard("right")}
               className="w-full justify-center py-3.5"
             >
               <Check className="w-4 h-4 stroke-[2.5]" />
@@ -882,16 +866,16 @@ export function FlashcardDeckStudio({
           <div
             className="rounded-3xl p-5 sm:p-6 space-y-4"
             style={{
-              backgroundColor: '#2D2D2B',
-              color: '#F8F3E7',
-              border: '1px solid var(--line)',
+              backgroundColor: "#2D2D2B",
+              color: "#F8F3E7",
+              border: "1px solid var(--line)",
             }}
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2.5">
                 <div
                   className="w-9 h-9 rounded-xl grid place-items-center shrink-0"
-                  style={{ backgroundColor: 'var(--pk)', color: '#2D2D2B' }}
+                  style={{ backgroundColor: "var(--pk)", color: "#2D2D2B" }}
                 >
                   <Sparkles className="w-4 h-4" />
                 </div>
@@ -899,7 +883,7 @@ export function FlashcardDeckStudio({
                   <h4 className="font-display font-extrabold text-lg leading-tight">
                     AI Flashcard Synthesizer
                   </h4>
-                  <p className="text-xs" style={{ color: '#B9B6AA' }}>
+                  <p className="text-xs" style={{ color: "#B9B6AA" }}>
                     Stream a custom 3D card with definition & code/formula
                   </p>
                 </div>
@@ -912,17 +896,17 @@ export function FlashcardDeckStudio({
                 value={customTopic}
                 onChange={(e) => onChangeCustomTopic(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     e.preventDefault();
                     handleStreamAIFlashcard();
                   }
                 }}
                 placeholder={
-                  activeTrack === 'code'
-                    ? 'e.g., Monotonic Stack, Dijkstra, Trie...'
-                    : activeTrack === 'lang'
-                      ? 'e.g., Subjunctive triggers, Ser vs Estar...'
-                      : 'e.g., Binomial theorem, Circle equations...'
+                  activeTrack === "code"
+                    ? "e.g., Monotonic Stack, Dijkstra, Trie..."
+                    : activeTrack === "lang"
+                      ? "e.g., Subjunctive triggers, Ser vs Estar..."
+                      : "e.g., Binomial theorem, Circle equations..."
                 }
                 aria-label="Custom flashcard topic"
                 className="w-full rounded-2xl px-4 py-3 text-base bg-white/10 text-white placeholder:text-white/45 focus:outline-2 focus:outline-[var(--pk)]"
@@ -938,8 +922,8 @@ export function FlashcardDeckStudio({
                 <Sparkles className="w-4 h-4" />
                 <span>
                   {isStreamingCard
-                    ? streamPreviewTitle || 'Streaming AI Flashcard...'
-                    : 'Stream New AI Flashcard'}
+                    ? streamPreviewTitle || "Streaming AI Flashcard..."
+                    : "Stream New AI Flashcard"}
                 </span>
               </SpringButton>
             </div>
@@ -949,14 +933,14 @@ export function FlashcardDeckStudio({
         {/* Deck Queue & Mastery Checklist */}
         <div
           className="rounded-3xl p-5 space-y-3"
-          style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+          style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
         >
           <div className="flex items-center justify-between">
             <h4 className="font-display font-extrabold text-lg flex items-center gap-2">
               <Layers className="w-4 h-4" />
               <span>Deck Cards ({fullTrackDeck.length})</span>
             </h4>
-            <span className="text-xs font-bold tabular-nums" style={{ color: 'var(--mute)' }}>
+            <span className="text-xs font-bold tabular-nums" style={{ color: "var(--mute)" }}>
               Click any card to jump
             </span>
           </div>
@@ -974,18 +958,16 @@ export function FlashcardDeckStudio({
                   whileHover={{ x: 3 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => {
-                    playSoundCue('tap');
-                    setFilterMode('all');
+                    playSoundCue("tap");
+                    setFilterMode("all");
                     setActiveIndex(idx);
                     setIsFlipped(false);
                   }}
                   className="w-full rounded-2xl p-3 text-left flex items-center justify-between gap-3 cursor-pointer transition-colors"
                   style={{
-                    backgroundColor: isCurrent ? 'var(--pks)' : 'var(--bg)',
-                    border: isCurrent
-                      ? '2px solid var(--pk)'
-                      : '1px solid var(--line)',
-                    color: 'var(--ink)',
+                    backgroundColor: isCurrent ? "var(--pks)" : "var(--bg)",
+                    border: isCurrent ? "2px solid var(--pk)" : "1px solid var(--line)",
+                    color: "var(--ink)",
                   }}
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -993,18 +975,16 @@ export function FlashcardDeckStudio({
                       className="w-7 h-7 rounded-xl font-display font-extrabold text-xs grid place-items-center shrink-0 tabular-nums"
                       style={{
                         backgroundColor: `var(${card.colorVar})`,
-                        color: '#2D2D2B',
+                        color: "#2D2D2B",
                       }}
                     >
                       {idx + 1}
                     </span>
                     <div className="min-w-0">
-                      <div className="font-bold text-xs sm:text-sm truncate">
-                        {card.frontTitle}
-                      </div>
+                      <div className="font-bold text-xs sm:text-sm truncate">{card.frontTitle}</div>
                       <div
                         className="text-[11px] font-medium truncate"
-                        style={{ color: 'var(--mute)' }}
+                        style={{ color: "var(--mute)" }}
                       >
                         {card.topic} · {card.difficulty}
                       </div>
@@ -1015,7 +995,7 @@ export function FlashcardDeckStudio({
                     {isMastered ? (
                       <span
                         className="px-2.5 py-1 rounded-full text-[11px] font-extrabold inline-flex items-center gap-1"
-                        style={{ backgroundColor: 'var(--gr)', color: '#2D2D2B' }}
+                        style={{ backgroundColor: "var(--gr)", color: "#2D2D2B" }}
                       >
                         <Check className="w-3 h-3 stroke-[2.5]" />
                         Mastered
@@ -1023,15 +1003,12 @@ export function FlashcardDeckStudio({
                     ) : isReview ? (
                       <span
                         className="px-2.5 py-1 rounded-full text-[11px] font-extrabold inline-flex items-center gap-1"
-                        style={{ backgroundColor: 'var(--yl)', color: '#2D2D2B' }}
+                        style={{ backgroundColor: "var(--yl)", color: "#2D2D2B" }}
                       >
                         Review
                       </span>
                     ) : (
-                      <span
-                        className="text-[11px] font-semibold"
-                        style={{ color: 'var(--mute)' }}
-                      >
+                      <span className="text-[11px] font-semibold" style={{ color: "var(--mute)" }}>
                         New
                       </span>
                     )}

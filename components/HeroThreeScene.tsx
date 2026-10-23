@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import React, { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
 const _tempVec = new THREE.Vector3();
 const _dummyObj = new THREE.Object3D();
 const _instanceColor = new THREE.Color();
 
 export function HeroThreeScene({
-  activeTrack = 'exam',
+  activeTrack = "exam",
   pulseTrigger = 0,
 }: {
-  activeTrack?: 'exam' | 'code' | 'lang';
+  activeTrack?: "exam" | "code" | "lang";
   pulseTrigger?: number;
 }) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const impulseRef = useRef<number>(0);
   const pointerRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const trackRef = useRef<'exam' | 'code' | 'lang'>(activeTrack);
+  const trackRef = useRef<"exam" | "code" | "lang">(activeTrack);
   const [webglReady, setWebglReady] = useState(true);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export function HeroThreeScene({
       renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
-        powerPreference: 'high-performance',
+        powerPreference: "high-performance",
       });
     } catch {
       setWebglReady(false);
@@ -43,7 +43,7 @@ export function HeroThreeScene({
     }
 
     const isHeadless =
-      typeof navigator !== 'undefined' &&
+      typeof navigator !== "undefined" &&
       (navigator.webdriver || /HeadlessChrome/i.test(navigator.userAgent));
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -56,7 +56,7 @@ export function HeroThreeScene({
     const width = container.clientWidth || 640;
     const height = container.clientHeight || 420;
     renderer.setSize(width, height);
-    container.innerHTML = '';
+    container.innerHTML = "";
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
@@ -86,7 +86,7 @@ export function HeroThreeScene({
 
     // PBR Palette Materials matching Classly / Mentra tokens
     const matPink = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color('#FFB2DD'),
+      color: new THREE.Color("#FFB2DD"),
       roughness: 0.22,
       metalness: 0.08,
       clearcoat: 0.85,
@@ -94,27 +94,27 @@ export function HeroThreeScene({
     });
 
     const matYellow = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color('#F7D66E'),
+      color: new THREE.Color("#F7D66E"),
       roughness: 0.28,
       metalness: 0.15,
       clearcoat: 0.6,
     });
 
     const matGreen = new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#9AAB65'),
+      color: new THREE.Color("#9AAB65"),
       roughness: 0.48,
       metalness: 0.05,
     });
 
     const matCream = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color('#FFFCF5'),
+      color: new THREE.Color("#FFFCF5"),
       roughness: 0.18,
       metalness: 0.04,
       clearcoat: 0.9,
     });
 
     const matInk = new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#2D2D2B'),
+      color: new THREE.Color("#2D2D2B"),
       roughness: 0.35,
       metalness: 0.3,
     });
@@ -192,8 +192,14 @@ export function HeroThreeScene({
       clearcoat: 0.8,
     });
     const nodesInstanced = new THREE.InstancedMesh(nodeGeo, nodeMat, nodeCount);
-    const paletteHex = ['#FFB2DD', '#F7D66E', '#9AAB65', '#FFFCF5'];
-    const nodeOrbits: { radius: number; speed: number; angle: number; yOffset: number; scale: number }[] = [];
+    const paletteHex = ["#FFB2DD", "#F7D66E", "#9AAB65", "#FFFCF5"];
+    const nodeOrbits: {
+      radius: number;
+      speed: number;
+      angle: number;
+      yOffset: number;
+      scale: number;
+    }[] = [];
 
     for (let i = 0; i < nodeCount; i++) {
       const radius = 2.8 + (i % 4) * 0.55;
@@ -225,7 +231,7 @@ export function HeroThreeScene({
     const handleCanvasLoss = (e: Event) => {
       e.preventDefault();
     };
-    renderer.domElement.addEventListener('webglcontextlost', handleCanvasLoss);
+    renderer.domElement.addEventListener("webglcontextlost", handleCanvasLoss);
 
     const handleResize = () => {
       if (!container) return;
@@ -235,7 +241,7 @@ export function HeroThreeScene({
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     const clock = new THREE.Clock();
     let frameId = 0;
@@ -282,7 +288,7 @@ export function HeroThreeScene({
         _tempVec.set(
           Math.cos(a) * o.radius,
           o.yOffset + Math.sin(elapsed * 1.5 + i) * 0.15,
-          Math.sin(a) * (o.radius * 0.45) - 1.1
+          Math.sin(a) * (o.radius * 0.45) - 1.1,
         );
         _dummyObj.position.copy(_tempVec);
         _dummyObj.scale.setScalar(o.scale * (1 + impulseRef.current * 0.12));
@@ -298,8 +304,8 @@ export function HeroThreeScene({
 
     return () => {
       cancelAnimationFrame(frameId);
-      window.removeEventListener('resize', handleResize);
-      renderer.domElement.removeEventListener('webglcontextlost', handleCanvasLoss);
+      window.removeEventListener("resize", handleResize);
+      renderer.domElement.removeEventListener("webglcontextlost", handleCanvasLoss);
       petalGeo.dispose();
       coreGeo.dispose();
       rayGeo.dispose();

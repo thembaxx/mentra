@@ -2,29 +2,29 @@
 
 :root {
   color-scheme: light dark;
-  --yl: #F7D66E;
-  --yls: #FEEFBF;
-  --gr: #9AAB65;
-  --grs: #E1E6D1;
-  --bl: #B6CAEB;
-  --bls: #EAF0F9;
-  --pk: #FFB2DD;
-  --pks: #FAE0E4;
-  --bg: #FFFCF5;
-  --card: #F8F3E7;
-  --ink: #2D2D2B;
-  --mute: #6F6D63;
-  --line: #E9E1CC;
-  --on: #2D2D2B;
-  --tooltip-bg: #FFFFFF;
-  --tooltip-border: #E5E0D2;
+  --yl: #f7d66e;
+  --yls: #feefbf;
+  --gr: #9aab65;
+  --grs: #e1e6d1;
+  --bl: #b6caeb;
+  --bls: #eaf0f9;
+  --pk: #ffb2dd;
+  --pks: #fae0e4;
+  --bg: #fffcf5;
+  --card: #f8f3e7;
+  --ink: #2d2d2b;
+  --mute: #6f6d63;
+  --line: #e9e1cc;
+  --on: #2d2d2b;
+  --tooltip-bg: #ffffff;
+  --tooltip-border: #e5e0d2;
   --tooltip-shadow: 0 14px 34px -6px rgba(45, 45, 43, 0.14), 0 4px 12px -2px rgba(45, 45, 43, 0.06);
   --chart-grid: rgba(45, 45, 43, 0.09);
   --chart-cursor: rgba(45, 45, 43, 0.14);
-  --series-blue: #2563EB;
-  --series-orange: #EA7A2E;
-  --series-green: #4EBA6F;
-  --series-pink: #EC66A4;
+  --series-blue: #2563eb;
+  --series-orange: #ea7a2e;
+  --series-green: #4eba6f;
+  --series-pink: #ec66a4;
 }
 
 :root[data-theme="light"] {
@@ -33,47 +33,47 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #1C1C1A;
-  --card: #2A2A27;
-  --ink: #F8F3E7;
-  --mute: #A9A79B;
-  --line: #3A3935;
-  --pks: #3A2B34;
-  --bls: #252C3A;
-  --yls: #3A3422;
-  --grs: #2C3022;
+  --bg: #1c1c1a;
+  --card: #2a2a27;
+  --ink: #f8f3e7;
+  --mute: #a9a79b;
+  --line: #3a3935;
+  --pks: #3a2b34;
+  --bls: #252c3a;
+  --yls: #3a3422;
+  --grs: #2c3022;
   --tooltip-bg: #232320;
-  --tooltip-border: #3D3C37;
+  --tooltip-border: #3d3c37;
   --tooltip-shadow: 0 18px 40px -6px rgba(0, 0, 0, 0.65), 0 4px 14px -2px rgba(0, 0, 0, 0.45);
   --chart-grid: rgba(248, 243, 231, 0.09);
   --chart-cursor: rgba(248, 243, 231, 0.18);
-  --series-blue: #4D88F7;
-  --series-orange: #F48C3E;
-  --series-green: #58CA7B;
-  --series-pink: #F275B0;
+  --series-blue: #4d88f7;
+  --series-orange: #f48c3e;
+  --series-green: #58ca7b;
+  --series-pink: #f275b0;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #1C1C1A;
-    --card: #2A2A27;
-    --ink: #F8F3E7;
-    --mute: #A9A79B;
-    --line: #3A3935;
-    --pks: #3A2B34;
-    --bls: #252C3A;
-    --yls: #3A3422;
-    --grs: #2C3022;
+    --bg: #1c1c1a;
+    --card: #2a2a27;
+    --ink: #f8f3e7;
+    --mute: #a9a79b;
+    --line: #3a3935;
+    --pks: #3a2b34;
+    --bls: #252c3a;
+    --yls: #3a3422;
+    --grs: #2c3022;
     --tooltip-bg: #232320;
-    --tooltip-border: #3D3C37;
+    --tooltip-border: #3d3c37;
     --tooltip-shadow: 0 18px 40px -6px rgba(0, 0, 0, 0.65), 0 4px 14px -2px rgba(0, 0, 0, 0.45);
     --chart-grid: rgba(248, 243, 231, 0.09);
     --chart-cursor: rgba(248, 243, 231, 0.18);
-    --series-blue: #4D88F7;
-    --series-orange: #F48C3E;
-    --series-green: #58CA7B;
-    --series-pink: #F275B0;
+    --series-blue: #4d88f7;
+    --series-orange: #f48c3e;
+    --series-green: #58ca7b;
+    --series-pink: #f275b0;
   }
 }
 
@@ -99,11 +99,17 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
   font-family: var(--font-plus-jakarta), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4, .font-display {
+h1,
+h2,
+h3,
+h4,
+.font-display {
   font-family: var(--font-bricolage), var(--font-plus-jakarta), sans-serif;
   letter-spacing: -0.035em;
   line-height: 1.02;
@@ -119,29 +125,64 @@ select {
   font-size: 16px;
 }
 
-
 /* Interactive visual learning: uses Mentra's existing light/dark palette. */
 .visual-lab-shell {
   background: var(--bg);
   border: 1px solid var(--line);
 }
-.visual-lab-muted { color: var(--mute); }
-.visual-lab-icon { background: var(--bls); color: var(--ink); }
-.visual-lab-tag { background: var(--grs); color: var(--ink); }
-.visual-lab-tabs { background: var(--card); border: 1px solid var(--line); }
-.visual-lab-tab { color: var(--mute); }
+.visual-lab-muted {
+  color: var(--mute);
+}
+.visual-lab-icon {
+  background: var(--bls);
+  color: var(--ink);
+}
+.visual-lab-tag {
+  background: var(--grs);
+  color: var(--ink);
+}
+.visual-lab-tabs {
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+.visual-lab-tab {
+  color: var(--mute);
+}
 .visual-lab-tab[aria-pressed="true"] {
   background: var(--bg);
   color: var(--ink);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
-.visual-lab-plot { background: var(--card); border: 1px solid var(--line); }
-.visual-lab-insight { background: var(--bls); color: var(--ink); }
-.visual-lab-output { background: var(--card); border: 1px solid var(--line); }
-.visual-lab-range { accent-color: var(--series-blue); min-height: 24px; }
-.visual-lab-check { accent-color: var(--series-blue); width: 17px; height: 17px; }
-.visual-lab-reset { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
-.visual-lab-play { background: var(--yl); color: #2D2D2B; }
+.visual-lab-plot {
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+.visual-lab-insight {
+  background: var(--bls);
+  color: var(--ink);
+}
+.visual-lab-output {
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+.visual-lab-range {
+  accent-color: var(--series-blue);
+  min-height: 24px;
+}
+.visual-lab-check {
+  accent-color: var(--series-blue);
+  width: 17px;
+  height: 17px;
+}
+.visual-lab-reset {
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.visual-lab-play {
+  background: var(--yl);
+  color: #2d2d2b;
+}
 .visual-lab-tab:focus-visible,
 .visual-lab-play:focus-visible,
 .visual-lab-reset:focus-visible,
@@ -180,7 +221,9 @@ select {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
+  *,
+  ::before,
+  ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

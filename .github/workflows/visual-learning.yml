@@ -2,23 +2,23 @@ name: Visual learning verification
 on:
   pull_request:
     paths:
-      - 'components/InteractiveVisualLab.tsx'
-      - 'components/StepVisualJourney.tsx'
-      - 'lib/step-visualization.ts'
-      - 'lib/tutor-step-parser.ts'
-      - 'tests/tutor-visual-steps.test.mjs'
-      - 'components/ExpandedVisualModels.tsx'
-      - 'lib/visualization-schema.ts'
-      - 'tests/visualization-schema.test.mjs'
-      - 'app/api/visualization/route.ts'
-      - 'app/api/tutor/route.ts'
-      - 'lib/study-data.ts'
-      - 'components/FlashcardDeckStudio.tsx'
-      - 'components/MathRenderer.tsx'
-      - 'components/PhysicsUI.tsx'
-      - 'components/QuestionGeneratorStudio.tsx'
-      - 'app/globals.css'
-      - '.github/workflows/visual-learning.yml'
+      - "components/InteractiveVisualLab.tsx"
+      - "components/StepVisualJourney.tsx"
+      - "lib/step-visualization.ts"
+      - "lib/tutor-step-parser.ts"
+      - "tests/tutor-visual-steps.test.mjs"
+      - "components/ExpandedVisualModels.tsx"
+      - "lib/visualization-schema.ts"
+      - "tests/visualization-schema.test.mjs"
+      - "app/api/visualization/route.ts"
+      - "app/api/tutor/route.ts"
+      - "lib/study-data.ts"
+      - "components/FlashcardDeckStudio.tsx"
+      - "components/MathRenderer.tsx"
+      - "components/PhysicsUI.tsx"
+      - "components/QuestionGeneratorStudio.tsx"
+      - "app/globals.css"
+      - ".github/workflows/visual-learning.yml"
   workflow_dispatch:
 permissions:
   contents: read
@@ -30,13 +30,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
           cache: npm
       - name: Install locked dependencies
         run: npm ci
       - name: TypeScript
         run: npx tsc --noEmit
-      - name: ESLint
+      - name: Oxlint
         run: npm run lint
       - name: Visualization schema tests
         run: npm run test:visualizations

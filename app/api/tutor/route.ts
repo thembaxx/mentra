@@ -1,16 +1,16 @@
-import { GoogleGenAI, ThinkingLevel } from '@google/genai';
-import { NextRequest } from 'next/server';
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
+import { NextRequest } from "next/server";
 
 function getGenAIClient() {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === 'MY_GEMINI_API_KEY') {
+  if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
     return null;
   }
   return new GoogleGenAI({
     apiKey,
     httpOptions: {
       headers: {
-        'User-Agent': 'aistudio-build',
+        "User-Agent": "aistudio-build",
       },
     },
   });
@@ -27,7 +27,7 @@ function createSimulatedStream(text: string, chunkDelayMs = 18): ReadableStream 
         controller.close();
         return;
       }
-      const nextChunk = tokens.slice(index, index + 2).join('');
+      const nextChunk = tokens.slice(index, index + 2).join("");
       index += 2;
       controller.enqueue(encoder.encode(nextChunk));
       await new Promise((r) => setTimeout(r, chunkDelayMs));
@@ -40,24 +40,24 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       action,
-      track = 'exam',
-      topic = 'Quadratic & nature of roots',
-      difficulty = 'Medium',
-      questionPrompt = '',
-      userAnswer = '',
-      followUpQuestion = '',
-      fallbackText = '',
+      track = "exam",
+      topic = "Quadratic & nature of roots",
+      difficulty = "Medium",
+      questionPrompt = "",
+      userAnswer = "",
+      followUpQuestion = "",
+      fallbackText = "",
     } = body;
 
     const ai = getGenAIClient();
 
-    if (action === 'generate_question') {
+    if (action === "generate_question") {
       const trackLabel =
-        track === 'code'
-          ? 'South African SWE & CAPS IT Coding Interviews & Algorithms'
-          : track === 'lang'
-            ? 'South African Languages (isiZulu & Afrikaans FAL/HL Grammar & Comprehension)'
-            : 'South African Grade 12 NSC (CAPS) / IEB STEM & NBT University Entrance (Mathematics & Physical Sciences)';
+        track === "code"
+          ? "South African SWE & CAPS IT Coding Interviews & Algorithms"
+          : track === "lang"
+            ? "South African Languages (isiZulu & Afrikaans FAL/HL Grammar & Comprehension)"
+            : "South African Grade 12 NSC (CAPS) / IEB STEM & NBT University Entrance (Mathematics & Physical Sciences)";
 
       const systemPrompt = `You are LearnFlow AI, an expert South African educational question designer for ${trackLabel}.
 Generate ONE engaging, rigorous practice question on the topic "${topic}" at "${difficulty}" difficulty, grounded in the South African context (e.g., NSC Paper 1 & 2, IEB, NBT, ZAR currency R, South African cities/names, isiZulu/Afrikaans where appropriate).
@@ -76,7 +76,7 @@ VISUALIZATION_JSON: [On ONE line, return null unless the question explicitly inc
       if (ai) {
         try {
           const responseStream = await ai.models.generateContentStream({
-            model: 'gemini-3.8-flash',
+            model: "gemini-3.8-flash",
             contents: `Generate a new ${difficulty} practice question about "${topic}" for the ${trackLabel} track using KaTeX ($...$) notation where relevant.`,
             config: {
               systemInstruction: systemPrompt,
@@ -105,9 +105,9 @@ VISUALIZATION_JSON: [On ONE line, return null unless the question explicitly inc
 
           return new Response(stream, {
             headers: {
-              'Content-Type': 'text/plain; charset=utf-8',
-              'Cache-Control': 'no-cache, no-transform',
-              'X-Content-Type-Options': 'nosniff',
+              "Content-Type": "text/plain; charset=utf-8",
+              "Cache-Control": "no-cache, no-transform",
+              "X-Content-Type-Options": "nosniff",
             },
           });
         } catch {
@@ -128,13 +128,13 @@ Step 3: Divide by the charging rate $4.5$ to obtain $t = \\frac{45}{4.5} = 10\\t
 
       return new Response(createSimulatedStream(synthesized, 14), {
         headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'Cache-Control': 'no-cache, no-transform',
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
         },
       });
     }
 
-    if (action === 'grade_answer') {
+    if (action === "grade_answer") {
       const systemPrompt = `You are LearnFlow AI Tutor, a warm, rigorous South African NSC/IEB & University STEM/Languages grader.
 Evaluate the student's response to the question.
 Start your response with "SCORE: X/10" on the very first line (where X is an integer from 1 to 10).
@@ -143,7 +143,7 @@ Then provide a concise, specific 2-3 sentence assessment of what the student got
       if (ai) {
         try {
           const responseStream = await ai.models.generateContentStream({
-            model: 'gemini-3.8-flash',
+            model: "gemini-3.8-flash",
             contents: `Topic: ${topic} (${difficulty})
 Question: ${questionPrompt}
 Student's Answer: ${userAnswer}`,
@@ -174,8 +174,8 @@ Student's Answer: ${userAnswer}`,
 
           return new Response(stream, {
             headers: {
-              'Content-Type': 'text/plain; charset=utf-8',
-              'Cache-Control': 'no-cache, no-transform',
+              "Content-Type": "text/plain; charset=utf-8",
+              "Cache-Control": "no-cache, no-transform",
             },
           });
         } catch {
@@ -185,27 +185,27 @@ Student's Answer: ${userAnswer}`,
 
       return new Response(createSimulatedStream(fallbackText, 16), {
         headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'Cache-Control': 'no-cache, no-transform',
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
         },
       });
     }
 
-    if (action === 'explain_steps' || action === 'follow_up') {
+    if (action === "explain_steps" || action === "follow_up") {
       const systemPrompt =
-        action === 'follow_up'
+        action === "follow_up"
           ? `You are LearnFlow Pro AI Tutor for South African NSC/IEB & University students. Answer the student's follow-up question clearly and concisely in 3-5 sentences, using $...$ and $$...$$ LaTeX notation for any mathematical expressions.`
           : `You are LearnFlow Pro AI Tutor for South African NSC/IEB & University students. Provide a clear, numbered Step-by-Step explanation (Step 1, Step 2, Step 3, and Verification) using $...$ and $$...$$ LaTeX notation for formulas so the student masters the underlying concept.`;
 
       const userContent =
-        action === 'follow_up'
-          ? `Problem: ${questionPrompt}\nStudent's current answer: ${userAnswer || '(none yet)'}\nStudent's follow-up question: ${followUpQuestion}`
+        action === "follow_up"
+          ? `Problem: ${questionPrompt}\nStudent's current answer: ${userAnswer || "(none yet)"}\nStudent's follow-up question: ${followUpQuestion}`
           : `Problem (${topic} - ${difficulty}): ${questionPrompt}\nProvide a complete step-by-step breakdown with LaTeX math.`;
 
       if (ai) {
         try {
           const responseStream = await ai.models.generateContentStream({
-            model: 'gemini-3.8-flash',
+            model: "gemini-3.8-flash",
             contents: userContent,
             config: {
               systemInstruction: systemPrompt,
@@ -234,8 +234,8 @@ Student's Answer: ${userAnswer}`,
 
           return new Response(stream, {
             headers: {
-              'Content-Type': 'text/plain; charset=utf-8',
-              'Cache-Control': 'no-cache, no-transform',
+              "Content-Type": "text/plain; charset=utf-8",
+              "Cache-Control": "no-cache, no-transform",
             },
           });
         } catch {
@@ -249,19 +249,19 @@ Student's Answer: ${userAnswer}`,
 
       return new Response(createSimulatedStream(defaultFollowUp, 15), {
         headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'Cache-Control': 'no-cache, no-transform',
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
         },
       });
     }
 
-    if (action === 'generate_flashcard') {
+    if (action === "generate_flashcard") {
       const trackLabel =
-        track === 'code'
-          ? 'South African Coding Interviews & Algorithms (TypeScript code snippet & Big-O)'
-          : track === 'lang'
-            ? 'South African Languages: isiZulu & Afrikaans FAL/HL (Grammar pattern & examples)'
-            : 'South African Grade 12 NSC / IEB STEM (Mathematics & Physical Sciences formulas in $...$ LaTeX)';
+        track === "code"
+          ? "South African Coding Interviews & Algorithms (TypeScript code snippet & Big-O)"
+          : track === "lang"
+            ? "South African Languages: isiZulu & Afrikaans FAL/HL (Grammar pattern & examples)"
+            : "South African Grade 12 NSC / IEB STEM (Mathematics & Physical Sciences formulas in $...$ LaTeX)";
 
       const systemPrompt = `You are LearnFlow AI, an expert South African educational flashcard creator for ${trackLabel}.
 Create ONE high-yield study flashcard on the topic "${topic}" at "${difficulty}" difficulty. Use $...$ and $$...$$ LaTeX notation for any mathematical formulas.
@@ -276,7 +276,7 @@ TIP: [One memorable NSC exam or interview lifehack]`;
       if (ai) {
         try {
           const responseStream = await ai.models.generateContentStream({
-            model: 'gemini-3.8-flash',
+            model: "gemini-3.8-flash",
             contents: `Generate a new ${difficulty} flashcard about "${topic}" for ${trackLabel}.`,
             config: {
               systemInstruction: systemPrompt,
@@ -302,8 +302,8 @@ TIP: [One memorable NSC exam or interview lifehack]`;
 
           return new Response(stream, {
             headers: {
-              'Content-Type': 'text/plain; charset=utf-8',
-              'Cache-Control': 'no-cache, no-transform',
+              "Content-Type": "text/plain; charset=utf-8",
+              "Cache-Control": "no-cache, no-transform",
             },
           });
         } catch {
@@ -323,17 +323,16 @@ TIP: Always state the formula directly from the NSC information sheet before sub
 
       return new Response(createSimulatedStream(synthesizedCard, 12), {
         headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'Cache-Control': 'no-cache, no-transform',
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
         },
       });
     }
 
-    return new Response('Unsupported action', { status: 400 });
+    return new Response("Unsupported action", { status: 400 });
   } catch (error) {
-    return new Response(
-      error instanceof Error ? error.message : 'Streaming error occurred',
-      { status: 500 }
-    );
+    return new Response(error instanceof Error ? error.message : "Streaming error occurred", {
+      status: 500,
+    });
   }
 }

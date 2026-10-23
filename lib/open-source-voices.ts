@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import catalogueData from './voice-catalogue.json';
-import { playSoundCue } from './sound-effects';
+import { useState, useEffect, useCallback, useRef } from "react";
+import catalogueData from "./voice-catalogue.json";
+import { playSoundCue } from "./sound-effects";
 
-export type VoiceCountryCode = 'US' | 'UK' | 'ZA';
-export type VoiceGender = 'female' | 'male';
+export type VoiceCountryCode = "US" | "UK" | "ZA";
+export type VoiceGender = "female" | "male";
 
 export interface SharedEngineSpec {
-  id: 'piper-onnx-wasm' | 'espeak-ng-compact';
+  id: "piper-onnx-wasm" | "espeak-ng-compact";
   name: string;
   phonemizerPackage?: string;
   onnxRuntimeVersion?: string;
@@ -28,8 +28,8 @@ export interface OpenSourceVoicePack {
   id: string;
   name: string;
   displayTitle: string;
-  engine: 'Piper ONNX' | 'eSpeak-NG';
-  sharedEngineId: 'piper-onnx-wasm' | 'espeak-ng-compact';
+  engine: "Piper ONNX" | "eSpeak-NG";
+  sharedEngineId: "piper-onnx-wasm" | "espeak-ng-compact";
   license: string;
   datasetLicense: string;
   weightsLicense: string;
@@ -37,7 +37,7 @@ export interface OpenSourceVoicePack {
   country: VoiceCountryCode;
   countryLabel: string;
   gender: VoiceGender;
-  locale: 'en-US' | 'en-GB' | 'af-ZA';
+  locale: "en-US" | "en-GB" | "af-ZA";
   languageLabel: string;
   regionTag: string;
   /** Separate voice model size in MB (0.0 for Afrikaans variants that share the 3.3 MB compact pack) */
@@ -70,7 +70,7 @@ export interface BrowserSystemVoiceInfo {
 }
 
 export interface VoiceDownloadState {
-  status: 'not-downloaded' | 'downloading' | 'verifying' | 'downloaded' | 'error';
+  status: "not-downloaded" | "downloading" | "verifying" | "downloaded" | "error";
   progressPct: number;
   downloadedMB: number;
   totalDownloadMB: number;
@@ -90,7 +90,7 @@ export const VOICE_CATALOGUE_META = {
   repositoryRevision: catalogueData.repositoryRevision,
   privacyGuarantee: catalogueData.privacyGuarantee,
   sharedEngines: catalogueData.sharedEngines as Record<
-    'piper-onnx-wasm' | 'espeak-ng-compact',
+    "piper-onnx-wasm" | "espeak-ng-compact",
     SharedEngineSpec
   >,
   excludedResearchNotes: catalogueData.excludedResearchNotes,
@@ -100,27 +100,30 @@ export const OPEN_SOURCE_VOICE_PACKS: OpenSourceVoicePack[] = catalogueData.voic
   id: v.id,
   name: v.name,
   displayTitle: v.displayTitle,
-  engine: v.engine as 'Piper ONNX' | 'eSpeak-NG',
-  sharedEngineId: v.sharedEngineId as 'piper-onnx-wasm' | 'espeak-ng-compact',
-  license: v.datasetLicense === v.weightsLicense ? v.weightsLicense : `${v.datasetLicense} data · ${v.weightsLicense} weights`,
+  engine: v.engine as "Piper ONNX" | "eSpeak-NG",
+  sharedEngineId: v.sharedEngineId as "piper-onnx-wasm" | "espeak-ng-compact",
+  license:
+    v.datasetLicense === v.weightsLicense
+      ? v.weightsLicense
+      : `${v.datasetLicense} data · ${v.weightsLicense} weights`,
   datasetLicense: v.datasetLicense,
   weightsLicense: v.weightsLicense,
   modelCardPath: v.modelCardPath,
   country: v.country as VoiceCountryCode,
   countryLabel: v.countryLabel,
   gender: v.gender as VoiceGender,
-  locale: v.locale as 'en-US' | 'en-GB' | 'af-ZA',
+  locale: v.locale as "en-US" | "en-GB" | "af-ZA",
   languageLabel:
-    v.country === 'US'
-      ? `English (US · ${v.gender === 'female' ? 'Female' : 'Male'})`
-      : v.country === 'UK'
-        ? `English (UK · ${v.gender === 'female' ? 'Female' : 'Male'})`
-        : `Afrikaans (${v.gender === 'female' ? 'Female' : 'Male'} · Synthetic Tone Variant)`,
+    v.country === "US"
+      ? `English (US · ${v.gender === "female" ? "Female" : "Male"})`
+      : v.country === "UK"
+        ? `English (UK · ${v.gender === "female" ? "Female" : "Male"})`
+        : `Afrikaans (${v.gender === "female" ? "Female" : "Male"} · Synthetic Tone Variant)`,
   regionTag:
-    v.country === 'US'
-      ? `United States (${v.gender === 'female' ? 'Female' : 'Male'})`
-      : v.country === 'UK'
-        ? `United Kingdom (${v.gender === 'female' ? 'Female' : 'Male'})`
+    v.country === "US"
+      ? `United States (${v.gender === "female" ? "Female" : "Male"})`
+      : v.country === "UK"
+        ? `United Kingdom (${v.gender === "female" ? "Female" : "Male"})`
         : `Afrikaans · Shared Compact Pack`,
   voiceSizeMB: v.voiceSizeMB,
   sharedEngineSizeMB: v.sharedEngineSizeMB,
@@ -129,10 +132,7 @@ export const OPEN_SOURCE_VOICE_PACKS: OpenSourceVoicePack[] = catalogueData.voic
   configBytes: v.configBytes,
   modelSha256: v.modelSha256,
   configSha256: v.configSha256,
-  quantization:
-    v.engine === 'Piper ONNX'
-      ? 'ONNX 1.18.0 SIMD'
-      : 'Compact Tone Variant',
+  quantization: v.engine === "Piper ONNX" ? "ONNX 1.18.0 SIMD" : "Compact Tone Variant",
   isNeural: v.isNeural,
   isSyntheticToneVariant: v.isSyntheticToneVariant,
   modelKey: v.modelKey,
@@ -142,12 +142,12 @@ export const OPEN_SOURCE_VOICE_PACKS: OpenSourceVoicePack[] = catalogueData.voic
   defaultInstalled: false,
 }));
 
-const INSTALLED_VOICES_STORAGE_KEY = 'learnflow-installed-voices-v2';
-const ACTIVE_VOICE_STORAGE_KEY = 'learnflow-active-voice-v2';
-const ACTIVE_SYSTEM_VOICE_STORAGE_KEY = 'learnflow-active-system-voice-v2';
-const VOICE_CACHE_NAME = 'learnflow-voice-packs-v2';
-const VOICE_STAGING_CACHE_NAME = 'learnflow-voice-staging-v2';
-const VOICE_SYNC_EVENT = 'learnflow-os-voices-updated';
+const INSTALLED_VOICES_STORAGE_KEY = "learnflow-installed-voices-v2";
+const ACTIVE_VOICE_STORAGE_KEY = "learnflow-active-voice-v2";
+const ACTIVE_SYSTEM_VOICE_STORAGE_KEY = "learnflow-active-system-voice-v2";
+const VOICE_CACHE_NAME = "learnflow-voice-packs-v2";
+const VOICE_STAGING_CACHE_NAME = "learnflow-voice-staging-v2";
+const VOICE_SYNC_EVENT = "learnflow-os-voices-updated";
 
 /**
  * Strips LaTeX delimiters and converts math notation into natural, human-paced spoken clauses
@@ -155,25 +155,25 @@ const VOICE_SYNC_EVENT = 'learnflow-os-voices-updated';
  */
 export function formatMathTextForSpeech(raw: string): string {
   return raw
-    .replace(/\$\$/g, ', ')
-    .replace(/\$/g, ' ')
-    .replace(/\\Delta/g, ' delta ')
-    .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, ' $1 divided by $2 ')
-    .replace(/\\sqrt\{([^}]+)\}/g, ' the square root of $1 ')
-    .replace(/\\pm/g, ' plus or minus ')
-    .replace(/\\implies/g, ', which implies ')
-    .replace(/\\le/g, ' is less than or equal to ')
-    .replace(/\\ge/g, ' is greater than or equal to ')
-    .replace(/\\neq/g, ' is not equal to ')
-    .replace(/\\times/g, ' times ')
-    .replace(/\\cdot/g, ' times ')
-    .replace(/\\lim_\{h \\to 0\}/g, ' the limit as h approaches zero of ')
-    .replace(/\\mathcal\{O\}\(([^)]+)\)/g, ' Big O of $1 ')
-    .replace(/\^2\b/g, ' squared ')
-    .replace(/\^3\b/g, ' cubed ')
-    .replace(/\\[a-zA-Z]+/g, ' ')
-    .replace(/[{}]/g, '')
-    .replace(/\s+/g, ' ')
+    .replace(/\$\$/g, ", ")
+    .replace(/\$/g, " ")
+    .replace(/\\Delta/g, " delta ")
+    .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, " $1 divided by $2 ")
+    .replace(/\\sqrt\{([^}]+)\}/g, " the square root of $1 ")
+    .replace(/\\pm/g, " plus or minus ")
+    .replace(/\\implies/g, ", which implies ")
+    .replace(/\\le/g, " is less than or equal to ")
+    .replace(/\\ge/g, " is greater than or equal to ")
+    .replace(/\\neq/g, " is not equal to ")
+    .replace(/\\times/g, " times ")
+    .replace(/\\cdot/g, " times ")
+    .replace(/\\lim_\{h \\to 0\}/g, " the limit as h approaches zero of ")
+    .replace(/\\mathcal\{O\}\(([^)]+)\)/g, " Big O of $1 ")
+    .replace(/\^2\b/g, " squared ")
+    .replace(/\^3\b/g, " cubed ")
+    .replace(/\\[a-zA-Z]+/g, " ")
+    .replace(/[{}]/g, "")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -181,10 +181,10 @@ export function formatMathTextForSpeech(raw: string): string {
  * Computes a real SHA-256 hex digest using Web Crypto API (`crypto.subtle.digest`).
  */
 export async function computeSha256Hex(buffer: ArrayBuffer): Promise<string> {
-  if (typeof window !== 'undefined' && window.crypto?.subtle) {
-    const hashBuffer = await window.crypto.subtle.digest('SHA-256', buffer);
+  if (typeof window !== "undefined" && window.crypto?.subtle) {
+    const hashBuffer = await window.crypto.subtle.digest("SHA-256", buffer);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   }
   // Fallback deterministic hex if SubtleCrypto unavailable in test runner
   const bytes = new Uint8Array(buffer);
@@ -193,7 +193,7 @@ export async function computeSha256Hex(buffer: ArrayBuffer): Promise<string> {
     acc ^= bytes[i];
     acc = Math.imul(acc, 0x01000193) >>> 0;
   }
-  return acc.toString(16).padStart(64, '0');
+  return acc.toString(16).padStart(64, "0");
 }
 
 /**
@@ -202,14 +202,14 @@ export async function computeSha256Hex(buffer: ArrayBuffer): Promise<string> {
  */
 async function stageAndVerifyVoicePackInCache(
   voice: OpenSourceVoicePack,
-  simulateIntegrityFailure = false
+  simulateIntegrityFailure = false,
 ): Promise<{ verified: boolean; sha256: string; error?: string }> {
-  if (typeof window === 'undefined' || !('caches' in window)) {
+  if (typeof window === "undefined" || !("caches" in window)) {
     if (simulateIntegrityFailure) {
       return {
         verified: false,
-        sha256: '',
-        error: 'SHA-256 checksum mismatch on staged model weights. Rolled back staged files.',
+        sha256: "",
+        error: "SHA-256 checksum mismatch on staged model weights. Rolled back staged files.",
       };
     }
     return { verified: true, sha256: voice.modelSha256 };
@@ -228,10 +228,10 @@ async function stageAndVerifyVoicePackInCache(
       modelKey: voice.modelKey,
       engine: voice.engine,
       sharedEngineId: voice.sharedEngineId,
-      onnxRuntimeVersion: '1.18.0',
-      phonemizer: '@diffusionstudio/piper-wasm',
+      onnxRuntimeVersion: "1.18.0",
+      phonemizer: "@diffusionstudio/piper-wasm",
       sampleRate: 22050,
-      espeakVoice: voice.locale === 'af-ZA' ? voice.modelKey : voice.locale,
+      espeakVoice: voice.locale === "af-ZA" ? voice.modelKey : voice.locale,
       pinnedSha256: voice.modelSha256,
     });
     const configBuffer = new Uint8Array(voice.configBytes);
@@ -243,44 +243,44 @@ async function stageAndVerifyVoicePackInCache(
       configUrl,
       new Response(configBuffer.buffer, {
         headers: {
-          'Content-Type': 'application/json',
-          'X-Expected-Bytes': String(voice.configBytes),
-          'X-Pinned-Sha256': voice.configSha256,
+          "Content-Type": "application/json",
+          "X-Expected-Bytes": String(voice.configBytes),
+          "X-Pinned-Sha256": voice.configSha256,
         },
-      })
+      }),
     );
 
     const modelHeaderPayload = new TextEncoder().encode(
-      `PIPER_ONNX_1_18_0_MODEL:${voice.modelKey}:BYTES=${voice.modelBytes}:SHA256=${voice.modelSha256}`
+      `PIPER_ONNX_1_18_0_MODEL:${voice.modelKey}:BYTES=${voice.modelBytes}:SHA256=${voice.modelSha256}`,
     );
     await stagingCache.put(
       modelUrl,
       new Response(modelHeaderPayload, {
         headers: {
-          'Content-Type': 'application/octet-stream',
-          'X-Expected-Bytes': String(voice.modelBytes),
-          'X-Pinned-Sha256': voice.modelSha256,
+          "Content-Type": "application/octet-stream",
+          "X-Expected-Bytes": String(voice.modelBytes),
+          "X-Pinned-Sha256": voice.modelSha256,
         },
-      })
+      }),
     );
 
     // 2. Verify exact bytes & SHA-256 on staged config before committing
     const stagedConfigResp = await stagingCache.match(configUrl);
     if (!stagedConfigResp) {
-      throw new Error('Staged configuration missing from Cache Storage.');
+      throw new Error("Staged configuration missing from Cache Storage.");
     }
     const stagedConfigBuf = await stagedConfigResp.arrayBuffer();
     const expectedBytes = simulateIntegrityFailure ? voice.configBytes + 17 : voice.configBytes;
 
     if (stagedConfigBuf.byteLength !== expectedBytes) {
       throw new Error(
-        `Integrity check failed: expected ${expectedBytes} bytes, received ${stagedConfigBuf.byteLength} bytes.`
+        `Integrity check failed: expected ${expectedBytes} bytes, received ${stagedConfigBuf.byteLength} bytes.`,
       );
     }
 
     const computedHash = await computeSha256Hex(stagedConfigBuf);
     if (!computedHash || computedHash.length !== 64) {
-      throw new Error('SHA-256 digest verification failed.');
+      throw new Error("SHA-256 digest verification failed.");
     }
 
     // 3. Commit verified blobs from staging into permanent Cache Storage
@@ -292,8 +292,8 @@ async function stageAndVerifyVoicePackInCache(
     await finalCache.put(
       engineUrl,
       new Response(`WASM_ENGINE:${voice.sharedEngineId}:ONNX_1.18.0_SIMD`, {
-        headers: { 'Content-Type': 'application/wasm' },
-      })
+        headers: { "Content-Type": "application/wasm" },
+      }),
     );
 
     // Clean up staging cache
@@ -307,11 +307,11 @@ async function stageAndVerifyVoicePackInCache(
     await stagingCache.delete(modelUrl);
     return {
       verified: false,
-      sha256: '',
+      sha256: "",
       error:
         err instanceof Error
           ? `${err.message} Staged files rolled back.`
-          : 'Download verification failed. Staged files rolled back.',
+          : "Download verification failed. Staged files rolled back.",
     };
   }
 }
@@ -391,81 +391,80 @@ const ESPEAK_GPL_WORKER_SOURCE = `
 function pickMostNaturalSpeechVoice(
   availableVoices: SpeechSynthesisVoice[],
   country: VoiceCountryCode,
-  gender: VoiceGender
+  gender: VoiceGender,
 ): SpeechSynthesisVoice | null {
   if (!availableVoices || availableVoices.length === 0) return null;
 
-  const targetLangPrefix =
-    country === 'US' ? 'en-us' : country === 'UK' ? 'en-gb' : 'af';
+  const targetLangPrefix = country === "US" ? "en-us" : country === "UK" ? "en-gb" : "af";
 
   const femaleHints = [
-    'linda',
-    'cori',
-    'samantha',
-    'aria',
-    'jenny',
-    'sonia',
-    'libby',
-    'hazel',
-    'serena',
-    'martha',
-    'karen',
-    'moira',
-    'tessa',
-    'victoria',
-    'ava',
-    'allison',
-    'susan',
-    'zira',
-    'female',
-    'google us english',
-    'google uk english female',
+    "linda",
+    "cori",
+    "samantha",
+    "aria",
+    "jenny",
+    "sonia",
+    "libby",
+    "hazel",
+    "serena",
+    "martha",
+    "karen",
+    "moira",
+    "tessa",
+    "victoria",
+    "ava",
+    "allison",
+    "susan",
+    "zira",
+    "female",
+    "google us english",
+    "google uk english female",
   ];
   const maleHints = [
-    'john',
-    'northern',
-    'guy',
-    'ryan',
-    'daniel',
-    'arthur',
-    'oliver',
-    'george',
-    'alex',
-    'DAVID',
-    'david',
-    'mark',
-    'james',
-    'tom',
-    'aaron',
-    'male',
-    'google uk english male',
+    "john",
+    "northern",
+    "guy",
+    "ryan",
+    "daniel",
+    "arthur",
+    "oliver",
+    "george",
+    "alex",
+    "DAVID",
+    "david",
+    "mark",
+    "james",
+    "tom",
+    "aaron",
+    "male",
+    "google uk english male",
   ];
 
-  const genderHints = gender === 'female' ? femaleHints : maleHints;
-  const oppositeHints = gender === 'female' ? maleHints : femaleHints;
+  const genderHints = gender === "female" ? femaleHints : maleHints;
+  const oppositeHints = gender === "female" ? maleHints : femaleHints;
 
   let bestVoice: SpeechSynthesisVoice | null = null;
   let bestScore = -999;
 
   for (const v of availableVoices) {
     const nameLower = v.name.toLowerCase();
-    const langLower = v.lang.toLowerCase().replace('_', '-');
+    const langLower = v.lang.toLowerCase().replace("_", "-");
     let score = 0;
 
     // Language / Country match
-    if (country === 'ZA') {
-      if (langLower.startsWith('af')) score += 60;
-      else if (langLower === 'en-za') score += 35;
-      else if (langLower.startsWith('nl')) score += 25;
-      else if (langLower.startsWith('en')) score += 10;
+    if (country === "ZA") {
+      if (langLower.startsWith("af")) score += 60;
+      else if (langLower === "en-za") score += 35;
+      else if (langLower.startsWith("nl")) score += 25;
+      else if (langLower.startsWith("en")) score += 10;
     } else {
       if (langLower === targetLangPrefix) score += 55;
       else if (
-        country === 'UK' &&
-        (langLower === 'en-gb' || langLower === 'en-ie' || langLower === 'en-au')
+        country === "UK" &&
+        (langLower === "en-gb" || langLower === "en-ie" || langLower === "en-au")
       ) {
         score += 40;
-      } else if (langLower.startsWith('en')) {
+      } else if (langLower.startsWith("en")) {
         score += 20;
       } else {
         continue;
@@ -473,21 +472,21 @@ function pickMostNaturalSpeechVoice(
     }
 
     // Natural / Neural quality preference (critical for non-robotic sound!)
-    if (nameLower.includes('natural') || nameLower.includes('neural')) score += 45;
-    if (nameLower.includes('online')) score += 25;
-    if (nameLower.includes('premium') || nameLower.includes('enhanced')) score += 30;
-    if (nameLower.includes('google')) score += 28;
-    if (nameLower.includes('samantha') || nameLower.includes('daniel')) score += 24;
+    if (nameLower.includes("natural") || nameLower.includes("neural")) score += 45;
+    if (nameLower.includes("online")) score += 25;
+    if (nameLower.includes("premium") || nameLower.includes("enhanced")) score += 30;
+    if (nameLower.includes("google")) score += 28;
+    if (nameLower.includes("samantha") || nameLower.includes("daniel")) score += 24;
 
     // Penalize explicitly robotic/novelty system voices
     if (
-      nameLower.includes('zarvox') ||
-      nameLower.includes('trinoids') ||
-      nameLower.includes('whisper') ||
-      nameLower.includes('albert') ||
-      nameLower.includes('bells') ||
-      nameLower.includes('boing') ||
-      nameLower.includes('Fred'.toLowerCase())
+      nameLower.includes("zarvox") ||
+      nameLower.includes("trinoids") ||
+      nameLower.includes("whisper") ||
+      nameLower.includes("albert") ||
+      nameLower.includes("bells") ||
+      nameLower.includes("boing") ||
+      nameLower.includes("Fred".toLowerCase())
     ) {
       score -= 100;
     }
@@ -508,13 +507,14 @@ function pickMostNaturalSpeechVoice(
 export function useOpenSourceVoices() {
   // Reconciled installed voice IDs
   const [installedIds, setInstalledIds] = useState<string[]>([]);
-  const [activeVoiceId, setActiveVoiceId] = useState<string>('piper-en-us-linda');
+  const [activeVoiceId, setActiveVoiceId] = useState<string>("piper-en-us-linda");
   const [activeSystemVoiceURI, setActiveSystemVoiceURI] = useState<string | null>(null);
   const [systemVoices, setSystemVoices] = useState<BrowserSystemVoiceInfo[]>([]);
   const [downloads, setDownloads] = useState<Record<string, VoiceDownloadState>>({});
   const [speakingVoiceId, setSpeakingVoiceId] = useState<string | null>(null);
-  const [workerFallbackNotice, setWorkerFallbackNotice] =
-    useState<WorkerFallbackNotice | null>(null);
+  const [workerFallbackNotice, setWorkerFallbackNotice] = useState<WorkerFallbackNotice | null>(
+    null,
+  );
   const [lastLoadedWorkerModel, setLastLoadedWorkerModel] = useState<string | null>(null);
 
   const timersRef = useRef<Record<string, ReturnType<typeof setInterval>>>({});
@@ -525,7 +525,7 @@ export function useOpenSourceVoices() {
 
   // Enumerate Browser SpeechSynthesis system voices
   useEffect(() => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
 
     const updateSystemVoices = () => {
       try {
@@ -545,29 +545,27 @@ export function useOpenSourceVoices() {
     };
 
     updateSystemVoices();
-    window.speechSynthesis.addEventListener?.('voiceschanged', updateSystemVoices);
+    window.speechSynthesis.addEventListener?.("voiceschanged", updateSystemVoices);
     return () => {
-      window.speechSynthesis.removeEventListener?.('voiceschanged', updateSystemVoices);
+      window.speechSynthesis.removeEventListener?.("voiceschanged", updateSystemVoices);
     };
   }, []);
 
   // Reconcile installed packs with Cache Storage on startup (in case browser evicted storage)
   const syncAndReconcileFromStorage = useCallback(async () => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     try {
       const rawInstalled = localStorage.getItem(INSTALLED_VOICES_STORAGE_KEY);
       let storedIds: string[] = [];
       if (rawInstalled) {
         const parsed = JSON.parse(rawInstalled);
         if (Array.isArray(parsed)) {
-          storedIds = parsed.filter((id) =>
-            OPEN_SOURCE_VOICE_PACKS.some((v) => v.id === id)
-          );
+          storedIds = parsed.filter((id) => OPEN_SOURCE_VOICE_PACKS.some((v) => v.id === id));
         }
       }
 
       // Check Cache Storage if available to reconcile evicted packs
-      if ('caches' in window && storedIds.length > 0) {
+      if ("caches" in window && storedIds.length > 0) {
         const cache = await window.caches.open(VOICE_CACHE_NAME);
         const reconciled: string[] = [];
         for (const id of storedIds) {
@@ -602,7 +600,7 @@ export function useOpenSourceVoices() {
 
   useEffect(() => {
     syncAndReconcileFromStorage();
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     const handleSync = () => {
       syncAndReconcileFromStorage();
     };
@@ -634,12 +632,12 @@ export function useOpenSourceVoices() {
   }, []);
 
   const ensureBlobWorkerForVoice = useCallback((voice: OpenSourceVoicePack) => {
-    if (typeof window === 'undefined' || typeof Worker === 'undefined') return;
+    if (typeof window === "undefined" || typeof Worker === "undefined") return;
 
-    if (voice.engine === 'Piper ONNX') {
+    if (voice.engine === "Piper ONNX") {
       if (!piperWorkerRef.current) {
         const blob = new Blob([PIPER_NEURAL_WORKER_SOURCE], {
-          type: 'application/javascript',
+          type: "application/javascript",
         });
         const blobUrl = URL.createObjectURL(blob);
         const worker = new Worker(blobUrl);
@@ -647,7 +645,7 @@ export function useOpenSourceVoices() {
       }
       // Reload both model and config when switching voices (no global singleton)
       piperWorkerRef.current.worker.postMessage({
-        type: 'LOAD_OR_SWITCH_VOICE',
+        type: "LOAD_OR_SWITCH_VOICE",
         voiceKey: voice.modelKey,
         modelBytes: voice.modelBytes,
         configBytes: voice.configBytes,
@@ -657,7 +655,7 @@ export function useOpenSourceVoices() {
       // Separate GPL-3.0-or-later worker for eSpeak-NG Afrikaans
       if (!espeakWorkerRef.current) {
         const blob = new Blob([ESPEAK_GPL_WORKER_SOURCE], {
-          type: 'application/javascript',
+          type: "application/javascript",
         });
         const blobUrl = URL.createObjectURL(blob);
         const worker = new Worker(blobUrl);
@@ -675,18 +673,18 @@ export function useOpenSourceVoices() {
       if (pack) {
         ensureBlobWorkerForVoice(pack);
       }
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         localStorage.setItem(ACTIVE_VOICE_STORAGE_KEY, voiceId);
         localStorage.removeItem(ACTIVE_SYSTEM_VOICE_STORAGE_KEY);
         window.dispatchEvent(new Event(VOICE_SYNC_EVENT));
       }
     },
-    [ensureBlobWorkerForVoice]
+    [ensureBlobWorkerForVoice],
   );
 
   const selectSystemVoice = useCallback((voiceURI: string | null) => {
     setActiveSystemVoiceURI(voiceURI);
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       if (voiceURI) {
         localStorage.setItem(ACTIVE_SYSTEM_VOICE_STORAGE_KEY, voiceURI);
       } else {
@@ -704,7 +702,7 @@ export function useOpenSourceVoices() {
     (
       voice: OpenSourceVoicePack,
       onComplete?: (voice: OpenSourceVoicePack) => void,
-      options?: { simulateFailure?: boolean }
+      options?: { simulateFailure?: boolean },
     ) => {
       if (!options?.simulateFailure && installedIds.includes(voice.id)) {
         selectActiveVoice(voice.id);
@@ -714,15 +712,15 @@ export function useOpenSourceVoices() {
         return;
       }
 
-      playSoundCue('tap');
+      playSoundCue("tap");
 
       // Check whether the shared engine is already installed by another voice of the same engine family
       const isSharedEngineInstalled = OPEN_SOURCE_VOICE_PACKS.some(
-        (v) => v.sharedEngineId === voice.sharedEngineId && installedIds.includes(v.id)
+        (v) => v.sharedEngineId === voice.sharedEngineId && installedIds.includes(v.id),
       );
 
       const totalDownloadMB =
-        voice.engine === 'eSpeak-NG'
+        voice.engine === "eSpeak-NG"
           ? voice.sharedEngineSizeMB // 3.3 MB shared pack
           : isSharedEngineInstalled
             ? voice.voiceSizeMB // ~63 MB voice weights only
@@ -733,7 +731,7 @@ export function useOpenSourceVoices() {
       setDownloads((prev) => ({
         ...prev,
         [voice.id]: {
-          status: 'downloading',
+          status: "downloading",
           progressPct: 5,
           downloadedMB: Number(((totalDownloadMB * 5) / 100).toFixed(1)),
           totalDownloadMB,
@@ -753,29 +751,29 @@ export function useOpenSourceVoices() {
           setDownloads((prev) => ({
             ...prev,
             [voice.id]: {
-              status: 'verifying',
+              status: "verifying",
               progressPct: 99,
               downloadedMB: totalDownloadMB,
               totalDownloadMB,
-              stageLabel: 'Verifying exact bytes & SHA-256 digest...',
+              stageLabel: "Verifying exact bytes & SHA-256 digest...",
             },
           }));
 
           // Perform Cache Storage staging & SHA-256 + byte verification
           const verification = await stageAndVerifyVoicePackInCache(
             voice,
-            Boolean(options?.simulateFailure)
+            Boolean(options?.simulateFailure),
           );
 
           if (!verification.verified) {
             setDownloads((prev) => ({
               ...prev,
               [voice.id]: {
-                status: 'error',
+                status: "error",
                 progressPct: 0,
                 downloadedMB: 0,
                 totalDownloadMB,
-                stageLabel: verification.error || 'Checksum verification failed',
+                stageLabel: verification.error || "Checksum verification failed",
                 checksumVerified: false,
                 errorMessage: verification.error,
               },
@@ -785,10 +783,10 @@ export function useOpenSourceVoices() {
 
           // If Afrikaans eSpeak-NG compact pack was downloaded, both Male and Female variants share the same download!
           const siblingIdsToInstall =
-            voice.sharedEngineId === 'espeak-ng-compact'
-              ? OPEN_SOURCE_VOICE_PACKS.filter(
-                  (v) => v.sharedEngineId === 'espeak-ng-compact'
-                ).map((v) => v.id)
+            voice.sharedEngineId === "espeak-ng-compact"
+              ? OPEN_SOURCE_VOICE_PACKS.filter((v) => v.sharedEngineId === "espeak-ng-compact").map(
+                  (v) => v.id,
+                )
               : [voice.id];
 
           for (const sibId of siblingIdsToInstall) {
@@ -801,18 +799,18 @@ export function useOpenSourceVoices() {
           setDownloads((prev) => ({
             ...prev,
             [voice.id]: {
-              status: 'downloaded',
+              status: "downloaded",
               progressPct: 100,
               downloadedMB: totalDownloadMB,
               totalDownloadMB,
-              stageLabel: 'SHA-256 & exact bytes verified in Cache Storage',
+              stageLabel: "SHA-256 & exact bytes verified in Cache Storage",
               checksumVerified: true,
             },
           }));
 
           setInstalledIds((prev) => {
             const next = Array.from(new Set([...prev, ...siblingIdsToInstall]));
-            if (typeof window !== 'undefined') {
+            if (typeof window !== "undefined") {
               localStorage.setItem(INSTALLED_VOICES_STORAGE_KEY, JSON.stringify(next));
               localStorage.setItem(ACTIVE_VOICE_STORAGE_KEY, voice.id);
               localStorage.removeItem(ACTIVE_SYSTEM_VOICE_STORAGE_KEY);
@@ -824,7 +822,7 @@ export function useOpenSourceVoices() {
           setActiveVoiceId(voice.id);
           setActiveSystemVoiceURI(null);
           ensureBlobWorkerForVoice(voice);
-          playSoundCue('grade_success');
+          playSoundCue("grade_success");
           onComplete?.(voice);
           return;
         }
@@ -836,12 +834,12 @@ export function useOpenSourceVoices() {
               : `Downloading shared ${voice.engine} runtime (${voice.sharedEngineSizeMB} MB)...`
             : currentPct < 80
               ? `Staging ${voice.modelKey} tensors in Cache Storage...`
-              : 'Computing Web Crypto SHA-256 & byte-length check...';
+              : "Computing Web Crypto SHA-256 & byte-length check...";
 
         setDownloads((prev) => ({
           ...prev,
           [voice.id]: {
-            status: 'downloading',
+            status: "downloading",
             progressPct: currentPct,
             downloadedMB: Number(((totalDownloadMB * currentPct) / 100).toFixed(1)),
             totalDownloadMB,
@@ -850,7 +848,7 @@ export function useOpenSourceVoices() {
         }));
       }, 170);
     },
-    [ensureBlobWorkerForVoice, installedIds, selectActiveVoice]
+    [ensureBlobWorkerForVoice, installedIds, selectActiveVoice],
   );
 
   /**
@@ -867,15 +865,13 @@ export function useOpenSourceVoices() {
       const targetVoice = OPEN_SOURCE_VOICE_PACKS.find((v) => v.id === voiceId);
 
       // Roll back staging cache & delete committed cache entries
-      if (typeof window !== 'undefined' && 'caches' in window && targetVoice) {
+      if (typeof window !== "undefined" && "caches" in window && targetVoice) {
         try {
           const stagingCache = await window.caches.open(VOICE_STAGING_CACHE_NAME);
           const finalCache = await window.caches.open(VOICE_CACHE_NAME);
           const packsToRemove =
-            targetVoice.sharedEngineId === 'espeak-ng-compact'
-              ? OPEN_SOURCE_VOICE_PACKS.filter(
-                  (v) => v.sharedEngineId === 'espeak-ng-compact'
-                )
+            targetVoice.sharedEngineId === "espeak-ng-compact"
+              ? OPEN_SOURCE_VOICE_PACKS.filter((v) => v.sharedEngineId === "espeak-ng-compact")
               : [targetVoice];
 
           for (const p of packsToRemove) {
@@ -892,11 +888,11 @@ export function useOpenSourceVoices() {
       }
 
       // Release blob-backed worker when removing pack
-      if (targetVoice?.engine === 'Piper ONNX' && piperWorkerRef.current) {
+      if (targetVoice?.engine === "Piper ONNX" && piperWorkerRef.current) {
         piperWorkerRef.current.worker.terminate();
         URL.revokeObjectURL(piperWorkerRef.current.blobUrl);
         piperWorkerRef.current = null;
-      } else if (targetVoice?.engine === 'eSpeak-NG' && espeakWorkerRef.current) {
+      } else if (targetVoice?.engine === "eSpeak-NG" && espeakWorkerRef.current) {
         espeakWorkerRef.current.worker.terminate();
         URL.revokeObjectURL(espeakWorkerRef.current.blobUrl);
         espeakWorkerRef.current = null;
@@ -909,31 +905,31 @@ export function useOpenSourceVoices() {
       });
 
       const idsToRemove =
-        targetVoice?.sharedEngineId === 'espeak-ng-compact'
-          ? OPEN_SOURCE_VOICE_PACKS.filter(
-              (v) => v.sharedEngineId === 'espeak-ng-compact'
-            ).map((v) => v.id)
+        targetVoice?.sharedEngineId === "espeak-ng-compact"
+          ? OPEN_SOURCE_VOICE_PACKS.filter((v) => v.sharedEngineId === "espeak-ng-compact").map(
+              (v) => v.id,
+            )
           : [voiceId];
 
       setInstalledIds((prev) => {
         const next = prev.filter((id) => !idsToRemove.includes(id));
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           localStorage.setItem(INSTALLED_VOICES_STORAGE_KEY, JSON.stringify(next));
         }
         if (idsToRemove.includes(activeVoiceId)) {
-          const fallbackId = next[0] || 'piper-en-us-linda';
+          const fallbackId = next[0] || "piper-en-us-linda";
           setActiveVoiceId(fallbackId);
-          if (typeof window !== 'undefined') {
+          if (typeof window !== "undefined") {
             localStorage.setItem(ACTIVE_VOICE_STORAGE_KEY, fallbackId);
           }
         }
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           window.dispatchEvent(new Event(VOICE_SYNC_EVENT));
         }
         return next;
       });
     },
-    [activeVoiceId]
+    [activeVoiceId],
   );
 
   const stopSpeaking = useCallback(() => {
@@ -946,7 +942,7 @@ export function useOpenSourceVoices() {
       }
       audioPreviewRef.current = null;
     }
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
       try {
         window.speechSynthesis.cancel();
       } catch {
@@ -971,7 +967,7 @@ export function useOpenSourceVoices() {
     (
       voice: OpenSourceVoicePack,
       customText?: string,
-      options?: { simulateWorkerMemoryError?: boolean; preferRepositorySample?: boolean }
+      options?: { simulateWorkerMemoryError?: boolean; preferRepositorySample?: boolean },
     ) => {
       if (speakingVoiceId === voice.id) {
         stopSpeaking();
@@ -987,7 +983,7 @@ export function useOpenSourceVoices() {
           voiceId: voice.id,
           voiceName: voice.displayTitle,
           reason:
-            'Speech synthesis worker exceeded available memory on this device. Switch to the 3.3 MB Compact eSpeak-NG pack or Browser System SpeechSynthesis fallback.',
+            "Speech synthesis worker exceeded available memory on this device. Switch to the 3.3 MB Compact eSpeak-NG pack or Browser System SpeechSynthesis fallback.",
         });
         return;
       }
@@ -997,12 +993,12 @@ export function useOpenSourceVoices() {
       const rawText = (customText && customText.trim()) || voice.previewText;
       const cleanSpeechText = formatMathTextForSpeech(rawText);
       const isDefaultSamplePreview =
-        !customText || customText.trim() === '' || customText.trim() === voice.previewText;
+        !customText || customText.trim() === "" || customText.trim() === voice.previewText;
 
       setSpeakingVoiceId(voice.id);
 
       const speakViaNaturalSynthesis = () => {
-        if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+        if (typeof window === "undefined" || !("speechSynthesis" in window)) {
           speechTimeoutRef.current = setTimeout(() => {
             setSpeakingVoiceId(null);
           }, 3000);
@@ -1019,7 +1015,7 @@ export function useOpenSourceVoices() {
           // Check if user explicitly selected a Browser System Voice override
           if (activeSystemVoiceURI) {
             const sysMatch = availableVoices.find(
-              (v) => v.voiceURI === activeSystemVoiceURI || v.name === activeSystemVoiceURI
+              (v) => v.voiceURI === activeSystemVoiceURI || v.name === activeSystemVoiceURI,
             );
             if (sysMatch) {
               utterance.voice = sysMatch;
@@ -1031,7 +1027,7 @@ export function useOpenSourceVoices() {
             const matchedVoice = pickMostNaturalSpeechVoice(
               availableVoices,
               voice.country,
-              voice.gender
+              voice.gender,
             );
             if (matchedVoice) {
               utterance.voice = matchedVoice;
@@ -1044,7 +1040,7 @@ export function useOpenSourceVoices() {
               utterance.rate = 0.98;
             } else {
               // Documented eSpeak-NG Afrikaans synthetic tone variants (af+f3 female vs af+m3 male)
-              utterance.pitch = voice.gender === 'female' ? 1.06 : 0.88;
+              utterance.pitch = voice.gender === "female" ? 1.06 : 0.88;
               utterance.rate = 0.95;
             }
           }
@@ -1063,7 +1059,7 @@ export function useOpenSourceVoices() {
 
         const estimatedMs = Math.max(
           2600,
-          Math.min(15000, cleanSpeechText.split(' ').length * 340)
+          Math.min(15000, cleanSpeechText.split(" ").length * 340),
         );
         speechTimeoutRef.current = setTimeout(() => {
           setSpeakingVoiceId((current) => (current === voice.id ? null : current));
@@ -1076,7 +1072,7 @@ export function useOpenSourceVoices() {
         isDefaultSamplePreview &&
         voice.previewAudioUrl &&
         options?.preferRepositorySample !== false &&
-        typeof window !== 'undefined' &&
+        typeof window !== "undefined" &&
         navigator.onLine
       ) {
         try {
@@ -1106,7 +1102,7 @@ export function useOpenSourceVoices() {
 
       speakViaNaturalSynthesis();
     },
-    [activeSystemVoiceURI, ensureBlobWorkerForVoice, speakingVoiceId, stopSpeaking]
+    [activeSystemVoiceURI, ensureBlobWorkerForVoice, speakingVoiceId, stopSpeaking],
   );
 
   /**
@@ -1119,7 +1115,7 @@ export function useOpenSourceVoices() {
         return;
       }
       stopSpeaking();
-      if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+      if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
 
       const sample =
         customText?.trim() ||
@@ -1131,7 +1127,7 @@ export function useOpenSourceVoices() {
         const utterance = new SpeechSynthesisUtterance(formatMathTextForSpeech(sample));
         const rawVoices = window.speechSynthesis.getVoices() || [];
         const matched = rawVoices.find(
-          (v) => v.voiceURI === sysVoice.voiceURI || v.name === sysVoice.name
+          (v) => v.voiceURI === sysVoice.voiceURI || v.name === sysVoice.name,
         );
         if (matched) {
           utterance.voice = matched;
@@ -1150,32 +1146,19 @@ export function useOpenSourceVoices() {
         setSpeakingVoiceId((curr) => (curr === sysVoice.id ? null : curr));
       }, 6000);
     },
-    [speakingVoiceId, stopSpeaking]
+    [speakingVoiceId, stopSpeaking],
   );
 
   const activeVoice =
-    OPEN_SOURCE_VOICE_PACKS.find((v) => v.id === activeVoiceId) ||
-    OPEN_SOURCE_VOICE_PACKS[0];
+    OPEN_SOURCE_VOICE_PACKS.find((v) => v.id === activeVoiceId) || OPEN_SOURCE_VOICE_PACKS[0];
 
   // Calculate accurate separate voice + deduplicated shared engine storage
-  const installedPacks = OPEN_SOURCE_VOICE_PACKS.filter((v) =>
-    installedIds.includes(v.id)
-  );
-  const installedVoiceWeightsMB = installedPacks.reduce(
-    (sum, v) => sum + v.voiceSizeMB,
-    0
-  );
-  const hasPiperInstalled = installedPacks.some(
-    (v) => v.sharedEngineId === 'piper-onnx-wasm'
-  );
-  const hasEspeakInstalled = installedPacks.some(
-    (v) => v.sharedEngineId === 'espeak-ng-compact'
-  );
-  const installedSharedEngineMB =
-    (hasPiperInstalled ? 29.1 : 0) + (hasEspeakInstalled ? 3.3 : 0);
-  const totalInstalledMB = Number(
-    (installedVoiceWeightsMB + installedSharedEngineMB).toFixed(1)
-  );
+  const installedPacks = OPEN_SOURCE_VOICE_PACKS.filter((v) => installedIds.includes(v.id));
+  const installedVoiceWeightsMB = installedPacks.reduce((sum, v) => sum + v.voiceSizeMB, 0);
+  const hasPiperInstalled = installedPacks.some((v) => v.sharedEngineId === "piper-onnx-wasm");
+  const hasEspeakInstalled = installedPacks.some((v) => v.sharedEngineId === "espeak-ng-compact");
+  const installedSharedEngineMB = (hasPiperInstalled ? 29.1 : 0) + (hasEspeakInstalled ? 3.3 : 0);
+  const totalInstalledMB = Number((installedVoiceWeightsMB + installedSharedEngineMB).toFixed(1));
 
   return {
     voices: OPEN_SOURCE_VOICE_PACKS,
