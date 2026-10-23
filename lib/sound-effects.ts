@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
 export type SoundCueType =
-  | 'tap'
-  | 'option'
-  | 'grade_success'
-  | 'grade_partial'
-  | 'error'
-  | 'goal_reached'
-  | 'step_reveal';
+  | "tap"
+  | "option"
+  | "grade_success"
+  | "grade_partial"
+  | "error"
+  | "goal_reached"
+  | "step_reveal";
 
-const STORAGE_KEY = 'learnflow-audio-muted';
-const EVENT_NAME = 'learnflow-audio-change';
+const STORAGE_KEY = "learnflow-audio-muted";
+const EVENT_NAME = "learnflow-audio-change";
 
 let sharedAudioCtx: AudioContext | null = null;
 
 function getAudioContext(): AudioContext | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   const AudioCtx =
     window.AudioContext ||
     (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -26,25 +26,25 @@ function getAudioContext(): AudioContext | null {
   if (!sharedAudioCtx) {
     sharedAudioCtx = new AudioCtx();
   }
-  if (sharedAudioCtx.state === 'suspended') {
+  if (sharedAudioCtx.state === "suspended") {
     sharedAudioCtx.resume().catch(() => {});
   }
   return sharedAudioCtx;
 }
 
 export function isAudioMuted(): boolean {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === "undefined") return false;
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'true';
+    return localStorage.getItem(STORAGE_KEY) === "true";
   } catch {
     return false;
   }
 }
 
 export function setAudioMuted(muted: boolean): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(STORAGE_KEY, muted ? 'true' : 'false');
+    localStorage.setItem(STORAGE_KEY, muted ? "true" : "false");
     window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: { muted } }));
   } catch {
     // Ignore storage errors
@@ -57,8 +57,8 @@ function playNote(
   startTime: number,
   duration: number,
   peakGain: number,
-  type: OscillatorType = 'sine',
-  endFreq?: number
+  type: OscillatorType = "sine",
+  endFreq?: number,
 ) {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -81,7 +81,7 @@ function playNote(
 }
 
 export function playSoundCue(cue: SoundCueType): void {
-  if (typeof window === 'undefined' || isAudioMuted()) return;
+  if (typeof window === "undefined" || isAudioMuted()) return;
 
   const ctx = getAudioContext();
   if (!ctx) return;
@@ -89,37 +89,37 @@ export function playSoundCue(cue: SoundCueType): void {
   const now = ctx.currentTime;
 
   switch (cue) {
-    case 'tap': {
+    case "tap": {
       // Subtle warm tactile pop
-      playNote(ctx, 320, now, 0.038, 0.04, 'sine', 165);
+      playNote(ctx, 320, now, 0.038, 0.04, "sine", 165);
       break;
     }
-    case 'option': {
+    case "option": {
       // Soft marimba selection tick
-      playNote(ctx, 480, now, 0.045, 0.045, 'triangle', 620);
+      playNote(ctx, 480, now, 0.045, 0.045, "triangle", 620);
       break;
     }
-    case 'step_reveal': {
+    case "step_reveal": {
       // Gentle two-note airy chime when step-by-step explanation unfolds
-      playNote(ctx, 523.25, now, 0.14, 0.045, 'sine'); // C5
-      playNote(ctx, 659.25, now + 0.055, 0.18, 0.05, 'sine'); // E5
+      playNote(ctx, 523.25, now, 0.14, 0.045, "sine"); // C5
+      playNote(ctx, 659.25, now + 0.055, 0.18, 0.05, "sine"); // E5
       break;
     }
-    case 'grade_partial': {
+    case "grade_partial": {
       // Encouraging warm interval for partial credit
-      playNote(ctx, 440, now, 0.14, 0.055, 'sine'); // A4
-      playNote(ctx, 554.37, now + 0.08, 0.22, 0.06, 'sine'); // C#5
+      playNote(ctx, 440, now, 0.14, 0.055, "sine"); // A4
+      playNote(ctx, 554.37, now + 0.08, 0.22, 0.06, "sine"); // C#5
       break;
     }
-    case 'grade_success': {
+    case "grade_success": {
       // Pleasant ascending harmonic triad for mastering a quiz question
       const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
       notes.forEach((f, idx) => {
-        playNote(ctx, f, now + idx * 0.065, 0.26, 0.065, 'sine');
+        playNote(ctx, f, now + idx * 0.065, 0.26, 0.065, "sine");
       });
       break;
     }
-    case 'goal_reached': {
+    case "goal_reached": {
       // Uplifting major 9th celebration arpeggio when reaching the daily study goal
       const fanfare = [523.25, 659.25, 783.99, 987.77, 1174.66]; // C5, E5, G5, B5, D6
       fanfare.forEach((f, idx) => {
@@ -129,15 +129,15 @@ export function playSoundCue(cue: SoundCueType): void {
           now + idx * 0.075,
           idx === fanfare.length - 1 ? 0.48 : 0.25,
           0.075,
-          'triangle'
+          "triangle",
         );
       });
       break;
     }
-    case 'error': {
+    case "error": {
       // Soft muted double low pulse for validation shake
-      playNote(ctx, 175, now, 0.07, 0.055, 'triangle', 130);
-      playNote(ctx, 145, now + 0.085, 0.09, 0.05, 'triangle', 110);
+      playNote(ctx, 175, now, 0.07, 0.055, "triangle", 130);
+      playNote(ctx, 145, now + 0.085, 0.09, 0.05, "triangle", 110);
       break;
     }
   }
@@ -151,7 +151,7 @@ export function useSoundSettings() {
 
     const handleAudioChange = (e: Event) => {
       const custom = e as CustomEvent<{ muted: boolean }>;
-      if (custom.detail && typeof custom.detail.muted === 'boolean') {
+      if (custom.detail && typeof custom.detail.muted === "boolean") {
         setMutedState(custom.detail.muted);
       } else {
         setMutedState(isAudioMuted());
@@ -168,7 +168,7 @@ export function useSoundSettings() {
     setMutedState(next);
     if (!next) {
       // Play a gentle confirmation chime when unmuting
-      setTimeout(() => playSoundCue('option'), 20);
+      setTimeout(() => playSoundCue("option"), 20);
     }
     return next;
   }, []);

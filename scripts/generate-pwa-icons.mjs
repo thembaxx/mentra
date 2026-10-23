@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import zlib from 'zlib';
+import fs from "fs";
+import path from "path";
+import zlib from "zlib";
 
 // Minimal zero-dependency PNG encoder that renders our LearnFlow squircle & maskable icons
 function createPngBuffer(width, height, drawPixel) {
@@ -35,7 +35,7 @@ function createPngBuffer(width, height, drawPixel) {
   function makeChunk(type, data) {
     const len = Buffer.alloc(4);
     len.writeUInt32BE(data.length, 0);
-    const typeBuf = Buffer.from(type, 'ascii');
+    const typeBuf = Buffer.from(type, "ascii");
     const crcBuf = Buffer.alloc(4);
     const combined = Buffer.concat([typeBuf, data]);
     crcBuf.writeUInt32BE(crc32(combined), 0);
@@ -54,9 +54,9 @@ function createPngBuffer(width, height, drawPixel) {
 
   return Buffer.concat([
     signature,
-    makeChunk('IHDR', ihdr),
-    makeChunk('IDAT', compressed),
-    makeChunk('IEND', Buffer.alloc(0)),
+    makeChunk("IHDR", ihdr),
+    makeChunk("IDAT", compressed),
+    makeChunk("IEND", Buffer.alloc(0)),
   ]);
 }
 
@@ -146,24 +146,24 @@ function renderIconPixel(x, y, w, h, isMaskable = false) {
   return [r, g, b, 255];
 }
 
-const pubDir = path.join(process.cwd(), 'public');
+const pubDir = path.join(process.cwd(), "public");
 if (!fs.existsSync(pubDir)) fs.mkdirSync(pubDir, { recursive: true });
 
 fs.writeFileSync(
-  path.join(pubDir, 'pwa-192x192.png'),
-  createPngBuffer(192, 192, (x, y, w, h) => renderIconPixel(x, y, w, h, false))
+  path.join(pubDir, "pwa-192x192.png"),
+  createPngBuffer(192, 192, (x, y, w, h) => renderIconPixel(x, y, w, h, false)),
 );
 fs.writeFileSync(
-  path.join(pubDir, 'pwa-512x512.png'),
-  createPngBuffer(512, 512, (x, y, w, h) => renderIconPixel(x, y, w, h, false))
+  path.join(pubDir, "pwa-512x512.png"),
+  createPngBuffer(512, 512, (x, y, w, h) => renderIconPixel(x, y, w, h, false)),
 );
 fs.writeFileSync(
-  path.join(pubDir, 'pwa-maskable-512x512.png'),
-  createPngBuffer(512, 512, (x, y, w, h) => renderIconPixel(x, y, w, h, true))
+  path.join(pubDir, "pwa-maskable-512x512.png"),
+  createPngBuffer(512, 512, (x, y, w, h) => renderIconPixel(x, y, w, h, true)),
 );
 fs.writeFileSync(
-  path.join(pubDir, 'apple-touch-icon.png'),
-  createPngBuffer(180, 180, (x, y, w, h) => renderIconPixel(x, y, w, h, true))
+  path.join(pubDir, "apple-touch-icon.png"),
+  createPngBuffer(180, 180, (x, y, w, h) => renderIconPixel(x, y, w, h, true)),
 );
 
-console.log('Generated all PWA PNG icons successfully.');
+console.log("Generated all PWA PNG icons successfully.");

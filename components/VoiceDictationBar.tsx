@@ -1,26 +1,13 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import {
-  Mic,
-  MicOff,
-  Square,
-  Volume2,
-  Globe,
-  Check,
-  AlertCircle,
-  Download,
-} from 'lucide-react';
-import { TrackId } from '@/lib/study-data';
-import {
-  SPRING_SNAPPY,
-  SPRING_BOUNCY,
-  SPRING_GENTLE,
-} from './PhysicsUI';
-import { playSoundCue } from '@/lib/sound-effects';
-import { useOpenSourceVoices } from '@/lib/open-source-voices';
-import { OpenSourceVoiceModal } from './OpenSourceVoiceManager';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Mic, MicOff, Square, Volume2, Globe, Check, AlertCircle, Download } from "lucide-react";
+import { TrackId } from "@/lib/study-data";
+import { SPRING_SNAPPY, SPRING_BOUNCY, SPRING_GENTLE } from "./PhysicsUI";
+import { playSoundCue } from "@/lib/sound-effects";
+import { useOpenSourceVoices } from "@/lib/open-source-voices";
+import { OpenSourceVoiceModal } from "./OpenSourceVoiceManager";
 
 // Minimal TypeScript declarations for Web Speech API
 interface SpeechRecognitionAlternative {
@@ -62,7 +49,7 @@ interface SpeechRecognitionInstance extends EventTarget {
 }
 
 function getSpeechRecognitionConstructor(): (new () => SpeechRecognitionInstance) | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   const win = window as unknown as {
     SpeechRecognition?: new () => SpeechRecognitionInstance;
     webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
@@ -70,20 +57,20 @@ function getSpeechRecognitionConstructor(): (new () => SpeechRecognitionInstance
   return win.SpeechRecognition || win.webkitSpeechRecognition || null;
 }
 
-type SASpeechLang = 'en-ZA' | 'zu-ZA' | 'af-ZA';
+type SASpeechLang = "en-ZA" | "zu-ZA" | "af-ZA";
 
 const SAMPLE_VERBAL_REASONING: Record<TrackId, Record<string, string>> = {
   exam: {
     default:
-      'First, I find the x-coordinate of the turning point using x = -b / (2a), which gives x = 3. Substituting (3, 4) into y = x² - 6x + k gives 4 = 9 - 18 + k, so k = 13 and the discriminant Δ = -16 < 0 gives non-real roots.',
+      "First, I find the x-coordinate of the turning point using x = -b / (2a), which gives x = 3. Substituting (3, 4) into y = x² - 6x + k gives 4 = 9 - 18 + k, so k = 13 and the discriminant Δ = -16 < 0 gives non-real roots.",
   },
   code: {
     default:
-      'I will use a two-pointer scan starting at left = 0 and right = n - 1 on the sorted ZAR array. Moving the pointers inward based on their sum compared to target achieves O(n) time complexity and O(1) auxiliary space.',
+      "I will use a two-pointer scan starting at left = 0 and right = n - 1 on the sorted ZAR array. Moving the pointers inward based on their sum compared to target achieves O(n) time complexity and O(1) auxiliary space.",
   },
   lang: {
     default:
-      'Abafundi bayafunda. In isiZulu, Class 1 singular prefix um- changes to Class 2 plural prefix aba-, and the subject concord shifts from u- (uyafunda) to ba- (bayafunda).',
+      "Abafundi bayafunda. In isiZulu, Class 1 singular prefix um- changes to Class 2 plural prefix aba-, and the subject concord shifts from u- (uyafunda) to ba- (bayafunda).",
   },
 };
 
@@ -108,9 +95,9 @@ export function VoiceDictationBar({
 }: VoiceDictationBarProps) {
   const [isListening, setIsListening] = useState<boolean>(false);
   const [isSimulatingVoice, setIsSimulatingVoice] = useState<boolean>(false);
-  const [interimTranscript, setInterimTranscript] = useState<string>('');
+  const [interimTranscript, setInterimTranscript] = useState<string>("");
   const [speechLang, setSpeechLang] = useState<SASpeechLang>(
-    activeTrack === 'lang' ? 'zu-ZA' : 'en-ZA'
+    activeTrack === "lang" ? "zu-ZA" : "en-ZA",
   );
   const [elapsedSecs, setElapsedSecs] = useState<number>(0);
   const [waveBars, setWaveBars] = useState<number[]>([
@@ -119,12 +106,7 @@ export function VoiceDictationBar({
   const [micWarning, setMicWarning] = useState<string | null>(null);
   const [voiceModalOpen, setVoiceModalOpen] = useState<boolean>(false);
 
-  const {
-    activeVoice,
-    installedIds,
-    speakingVoiceId,
-    speakWithVoice,
-  } = useOpenSourceVoices();
+  const { activeVoice, installedIds, speakingVoiceId, speakWithVoice } = useOpenSourceVoices();
 
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -133,7 +115,7 @@ export function VoiceDictationBar({
   const simTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setSpeechLang(activeTrack === 'lang' ? 'zu-ZA' : 'en-ZA');
+    setSpeechLang(activeTrack === "lang" ? "zu-ZA" : "en-ZA");
   }, [activeTrack]);
 
   const stopAudioVisualizer = useCallback(() => {
@@ -163,7 +145,7 @@ export function VoiceDictationBar({
     }
     stopAudioVisualizer();
     setIsListening(false);
-    setInterimTranscript('');
+    setInterimTranscript("");
   }, [stopAudioVisualizer]);
 
   useEffect(() => {
@@ -189,7 +171,7 @@ export function VoiceDictationBar({
           const base = 24 + ((idx * 17) % 35);
           const jitter = Math.floor(Math.random() * 45);
           return Math.min(96, base + jitter);
-        })
+        }),
       );
     }, 130);
 
@@ -200,7 +182,7 @@ export function VoiceDictationBar({
   }, [isListening, isSimulatingVoice]);
 
   const startAudioVisualizer = async () => {
-    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       return;
     }
     try {
@@ -208,8 +190,7 @@ export function VoiceDictationBar({
       mediaStreamRef.current = stream;
       const AudioCtx =
         window.AudioContext ||
-        (window as unknown as { webkitAudioContext?: typeof AudioContext })
-          .webkitAudioContext;
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtx) return;
 
       const ctx = new AudioCtx();
@@ -240,12 +221,12 @@ export function VoiceDictationBar({
   const runSimulatedVerbalWalkthrough = useCallback(() => {
     if (isSimulatingVoice) {
       setIsSimulatingVoice(false);
-      setInterimTranscript('');
+      setInterimTranscript("");
       return;
     }
 
     stopListening();
-    playSoundCue('step_reveal');
+    playSoundCue("step_reveal");
     setMicWarning(null);
     setIsSimulatingVoice(true);
 
@@ -253,20 +234,20 @@ export function VoiceDictationBar({
       SAMPLE_VERBAL_REASONING[activeTrack]?.default ||
       `To solve this ${topic} problem, I first identify the primary invariant, simplify step by step, and verify the boundary condition.`;
 
-    const words = sampleText.split(' ');
+    const words = sampleText.split(" ");
     let idx = 0;
-    let built = '';
+    let built = "";
 
     const stepWord = () => {
       if (idx >= words.length) {
         setIsSimulatingVoice(false);
-        setInterimTranscript('');
+        setInterimTranscript("");
         onAppendTranscript(built.trim());
-        playSoundCue('option');
-        onNotify('Verbal explanation transcribed into your answer box!');
+        playSoundCue("option");
+        onNotify("Verbal explanation transcribed into your answer box!");
         return;
       }
-      built += (idx === 0 ? '' : ' ') + words[idx];
+      built += (idx === 0 ? "" : " ") + words[idx];
       setInterimTranscript(built);
       idx++;
       simTimeoutRef.current = setTimeout(stepWord, 85);
@@ -277,14 +258,14 @@ export function VoiceDictationBar({
 
   const handleToggleListening = async () => {
     if (isListening || isSimulatingVoice) {
-      playSoundCue('tap');
+      playSoundCue("tap");
       if (isSimulatingVoice) {
         if (simTimeoutRef.current) clearTimeout(simTimeoutRef.current);
         if (interimTranscript.trim()) {
           onAppendTranscript(interimTranscript.trim());
         }
         setIsSimulatingVoice(false);
-        setInterimTranscript('');
+        setInterimTranscript("");
       } else {
         stopListening();
       }
@@ -295,9 +276,7 @@ export function VoiceDictationBar({
     const SpeechRec = getSpeechRecognitionConstructor();
 
     if (!SpeechRec) {
-      onNotify(
-        'Browser SpeechRecognition unavailable — streaming simulated verbal walkthrough'
-      );
+      onNotify("Browser SpeechRecognition unavailable — streaming simulated verbal walkthrough");
       runSimulatedVerbalWalkthrough();
       return;
     }
@@ -309,13 +288,13 @@ export function VoiceDictationBar({
       recognition.lang = speechLang;
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        let finalChunk = '';
-        let interimChunk = '';
+        let finalChunk = "";
+        let interimChunk = "";
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const res = event.results[i];
           if (res.isFinal) {
-            finalChunk += res[0].transcript + ' ';
+            finalChunk += res[0].transcript + " ";
           } else {
             interimChunk += res[0].transcript;
           }
@@ -328,12 +307,12 @@ export function VoiceDictationBar({
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        if (event.error === "not-allowed" || event.error === "service-not-allowed") {
           setMicWarning(
-            'Microphone access blocked by browser/frame. Click "Simulate Voice" to test verbal input.'
+            'Microphone access blocked by browser/frame. Click "Simulate Voice" to test verbal input.',
           );
           stopListening();
-        } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        } else if (event.error !== "no-speech" && event.error !== "aborted") {
           setMicWarning(`Voice recognition paused (${event.error}).`);
           stopListening();
         }
@@ -341,13 +320,13 @@ export function VoiceDictationBar({
 
       recognition.onend = () => {
         setIsListening(false);
-        setInterimTranscript('');
+        setInterimTranscript("");
         stopAudioVisualizer();
       };
 
       recognitionRef.current = recognition;
       recognition.start();
-      playSoundCue('step_reveal');
+      playSoundCue("step_reveal");
       setIsListening(true);
       startAudioVisualizer();
       onNotify(`Listening (${speechLang}) — explain your reasoning out loud!`);
@@ -357,16 +336,14 @@ export function VoiceDictationBar({
   };
 
   const cycleSpeechLang = () => {
-    playSoundCue('option');
-    setSpeechLang((prev) =>
-      prev === 'en-ZA' ? 'zu-ZA' : prev === 'zu-ZA' ? 'af-ZA' : 'en-ZA'
-    );
+    playSoundCue("option");
+    setSpeechLang((prev) => (prev === "en-ZA" ? "zu-ZA" : prev === "zu-ZA" ? "af-ZA" : "en-ZA"));
   };
 
   const formatSecs = (s: number) => {
     const mins = Math.floor(s / 60);
     const rem = s % 60;
-    return `${String(mins).padStart(2, '0')}:${String(rem).padStart(2, '0')}`;
+    return `${String(mins).padStart(2, "0")}:${String(rem).padStart(2, "0")}`;
   };
 
   const activeRecording = isListening || isSimulatingVoice;
@@ -379,8 +356,8 @@ export function VoiceDictationBar({
         transition={SPRING_GENTLE}
         className="rounded-2xl p-3.5 space-y-2.5 transition-colors"
         style={{
-          backgroundColor: activeRecording ? 'var(--pks)' : 'var(--bg)',
-          border: activeRecording ? '2px solid var(--pk)' : '1px solid var(--line)',
+          backgroundColor: activeRecording ? "var(--pks)" : "var(--bg)",
+          border: activeRecording ? "2px solid var(--pk)" : "1px solid var(--line)",
         }}
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -393,8 +370,8 @@ export function VoiceDictationBar({
               onClick={handleToggleListening}
               className="px-3.5 py-2 rounded-full text-xs font-extrabold flex items-center gap-2 cursor-pointer shadow-xs"
               style={{
-                backgroundColor: activeRecording ? '#2D2D2B' : 'var(--pk)',
-                color: activeRecording ? '#FFFCF5' : '#2D2D2B',
+                backgroundColor: activeRecording ? "#2D2D2B" : "var(--pk)",
+                color: activeRecording ? "#FFFCF5" : "#2D2D2B",
               }}
             >
               {activeRecording ? (
@@ -421,14 +398,14 @@ export function VoiceDictationBar({
                   });
                   if (!isReadingAloud) {
                     onNotify(
-                      `Reading question with ${activeVoice.displayTitle} (${activeVoice.engine})`
+                      `Reading question with ${activeVoice.displayTitle} (${activeVoice.engine})`,
                     );
                   }
                 }}
                 className="px-3 py-2 rounded-full text-xs font-extrabold flex items-center gap-1.5 cursor-pointer"
                 style={{
-                  backgroundColor: isReadingAloud ? '#2D2D2B' : 'var(--bl)',
-                  color: isReadingAloud ? '#FFFCF5' : '#2D2D2B',
+                  backgroundColor: isReadingAloud ? "#2D2D2B" : "var(--bl)",
+                  color: isReadingAloud ? "#FFFCF5" : "#2D2D2B",
                 }}
                 title={`Read question aloud with ${activeVoice.displayTitle} (${activeVoice.sizeMB} MB)`}
               >
@@ -465,11 +442,7 @@ export function VoiceDictationBar({
                       className="w-1 rounded-full"
                       style={{
                         backgroundColor:
-                          i % 3 === 0
-                            ? '#2D2D2B'
-                            : i % 2 === 0
-                              ? 'var(--gr)'
-                              : 'var(--bl)',
+                          i % 3 === 0 ? "#2D2D2B" : i % 2 === 0 ? "var(--gr)" : "var(--bl)",
                       }}
                     />
                   ))}
@@ -486,32 +459,32 @@ export function VoiceDictationBar({
               title="Cycle SA speech recognition language (en-ZA / zu-ZA / af-ZA)"
               className="px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 cursor-pointer"
               style={{
-                backgroundColor: 'var(--card)',
-                color: 'var(--ink)',
-                border: '1px solid var(--line)',
+                backgroundColor: "var(--card)",
+                color: "var(--ink)",
+                border: "1px solid var(--line)",
               }}
             >
               <Globe className="w-3 h-3" />
               <span>
-                {speechLang === 'zu-ZA'
-                  ? 'isiZulu (zu-ZA)'
-                  : speechLang === 'af-ZA'
-                    ? 'Afrikaans (af-ZA)'
-                    : 'SA English (en-ZA)'}
+                {speechLang === "zu-ZA"
+                  ? "isiZulu (zu-ZA)"
+                  : speechLang === "af-ZA"
+                    ? "Afrikaans (af-ZA)"
+                    : "SA English (en-ZA)"}
               </span>
             </button>
 
             <button
               type="button"
               onClick={() => {
-                playSoundCue('tap');
+                playSoundCue("tap");
                 setVoiceModalOpen(true);
               }}
               title="Download & preview custom open-source South African neural voice packs"
               className="px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 cursor-pointer"
               style={{
-                backgroundColor: 'var(--yl)',
-                color: '#2D2D2B',
+                backgroundColor: "var(--yl)",
+                color: "#2D2D2B",
               }}
             >
               <Download className="w-3 h-3" />
@@ -524,24 +497,24 @@ export function VoiceDictationBar({
               title="Stream a sample verbal explanation if you don't have a microphone handy"
               className="px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1 cursor-pointer"
               style={{
-                backgroundColor: isSimulatingVoice ? 'var(--gr)' : 'var(--card)',
-                color: isSimulatingVoice ? '#2D2D2B' : 'var(--ink)',
-                border: '1px solid var(--line)',
+                backgroundColor: isSimulatingVoice ? "var(--gr)" : "var(--card)",
+                color: isSimulatingVoice ? "#2D2D2B" : "var(--ink)",
+                border: "1px solid var(--line)",
               }}
             >
               <Mic className="w-3 h-3" />
-              <span>{isSimulatingVoice ? 'Simulating...' : 'Simulate Voice'}</span>
+              <span>{isSimulatingVoice ? "Simulating..." : "Simulate Voice"}</span>
             </button>
 
             {currentAnswer.trim().length > 0 && onTriggerGrade && !activeRecording && (
               <button
                 type="button"
                 onClick={() => {
-                  playSoundCue('tap');
+                  playSoundCue("tap");
                   onTriggerGrade();
                 }}
                 className="px-2.5 py-1.5 rounded-xl text-[11px] font-extrabold flex items-center gap-1 cursor-pointer"
-                style={{ backgroundColor: 'var(--gr)', color: '#2D2D2B' }}
+                style={{ backgroundColor: "var(--gr)", color: "#2D2D2B" }}
               >
                 <Check className="w-3 h-3 stroke-[2.5]" />
                 <span>Grade Spoken</span>
@@ -555,7 +528,7 @@ export function VoiceDictationBar({
           {(interimTranscript || activeRecording) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={SPRING_SNAPPY}
               className="overflow-hidden"
@@ -563,18 +536,18 @@ export function VoiceDictationBar({
               <div
                 className="rounded-xl px-3 py-2 text-xs font-medium flex items-center justify-between gap-2"
                 style={{
-                  backgroundColor: 'rgba(255, 252, 245, 0.85)',
-                  color: '#2D2D2B',
-                  border: '1px solid rgba(45,45,43,0.12)',
+                  backgroundColor: "rgba(255, 252, 245, 0.85)",
+                  color: "#2D2D2B",
+                  border: "1px solid rgba(45,45,43,0.12)",
                 }}
               >
                 <span className="stream-cursor">
                   {interimTranscript ||
-                    (speechLang === 'zu-ZA'
-                      ? 'iyalalela... Chaza impendulo yakho ngezwi.'
-                      : speechLang === 'af-ZA'
-                        ? 'Luister tans... Verduidelik jou antwoord hardop.'
-                        : 'Listening... Explain your step-by-step reasoning out loud.')}
+                    (speechLang === "zu-ZA"
+                      ? "iyalalela... Chaza impendulo yakho ngezwi."
+                      : speechLang === "af-ZA"
+                        ? "Luister tans... Verduidelik jou antwoord hardop."
+                        : "Listening... Explain your step-by-step reasoning out loud.")}
                 </span>
                 <span className="text-[10px] font-extrabold uppercase tracking-wider shrink-0 opacity-65">
                   Live Voice
@@ -589,10 +562,10 @@ export function VoiceDictationBar({
           {micWarning && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               className="text-[11px] font-semibold flex items-center justify-between gap-2 pt-0.5"
-              style={{ color: 'var(--ink)' }}
+              style={{ color: "var(--ink)" }}
             >
               <span className="flex items-center gap-1.5">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -648,7 +621,7 @@ export function InlineVoiceMicButton({
 
   const toggleInlineMic = () => {
     if (listening) {
-      playSoundCue('tap');
+      playSoundCue("tap");
       if (recRef.current) {
         try {
           recRef.current.stop();
@@ -662,15 +635,15 @@ export function InlineVoiceMicButton({
 
     const SpeechRec = getSpeechRecognitionConstructor();
     if (!SpeechRec) {
-      playSoundCue('step_reveal');
+      playSoundCue("step_reveal");
       const fallbackQuestion =
-        activeTrack === 'code'
-          ? 'Why does moving the left pointer preserve the O(n) time complexity invariant?'
-          : activeTrack === 'lang'
-            ? 'How does the isiZulu subject concord change from Class 1 singular to Class 2 plural?'
-            : 'Why does Δ < 0 guarantee non-real roots on the NSC Paper 1 parabola?';
+        activeTrack === "code"
+          ? "Why does moving the left pointer preserve the O(n) time complexity invariant?"
+          : activeTrack === "lang"
+            ? "How does the isiZulu subject concord change from Class 1 singular to Class 2 plural?"
+            : "Why does Δ < 0 guarantee non-real roots on the NSC Paper 1 parabola?";
       onTranscript(fallbackQuestion);
-      onNotify('Transcribed spoken follow-up question');
+      onNotify("Transcribed spoken follow-up question");
       return;
     }
 
@@ -678,13 +651,13 @@ export function InlineVoiceMicButton({
       const rec = new SpeechRec();
       rec.continuous = false;
       rec.interimResults = false;
-      rec.lang = activeTrack === 'lang' ? 'zu-ZA' : 'en-ZA';
+      rec.lang = activeTrack === "lang" ? "zu-ZA" : "en-ZA";
 
       rec.onresult = (e: SpeechRecognitionEvent) => {
-        const text = e.results[0]?.[0]?.transcript || '';
+        const text = e.results[0]?.[0]?.transcript || "";
         if (text.trim()) {
           onTranscript(text.trim());
-          playSoundCue('option');
+          playSoundCue("option");
         }
       };
 
@@ -698,9 +671,9 @@ export function InlineVoiceMicButton({
 
       recRef.current = rec;
       rec.start();
-      playSoundCue('step_reveal');
+      playSoundCue("step_reveal");
       setListening(true);
-      onNotify('Listening for your follow-up question...');
+      onNotify("Listening for your follow-up question...");
     } catch {
       setListening(false);
     }
@@ -711,19 +684,15 @@ export function InlineVoiceMicButton({
       type="button"
       whileTap={{ scale: 0.9 }}
       onClick={toggleInlineMic}
-      title={listening ? 'Stop voice dictation' : 'Speak your follow-up question'}
-      aria-label={listening ? 'Stop voice dictation' : 'Speak your follow-up question'}
+      title={listening ? "Stop voice dictation" : "Speak your follow-up question"}
+      aria-label={listening ? "Stop voice dictation" : "Speak your follow-up question"}
       className="w-9 h-9 rounded-full grid place-items-center shrink-0 cursor-pointer transition-colors"
       style={{
-        backgroundColor: listening ? 'var(--pk)' : 'rgba(255, 255, 255, 0.12)',
-        color: listening ? '#2D2D2B' : '#F8F3E7',
+        backgroundColor: listening ? "var(--pk)" : "rgba(255, 255, 255, 0.12)",
+        color: listening ? "#2D2D2B" : "#F8F3E7",
       }}
     >
-      {listening ? (
-        <MicOff className="w-4 h-4 animate-pulse" />
-      ) : (
-        <Mic className="w-4 h-4" />
-      )}
+      {listening ? <MicOff className="w-4 h-4 animate-pulse" /> : <Mic className="w-4 h-4" />}
     </motion.button>
   );
 }

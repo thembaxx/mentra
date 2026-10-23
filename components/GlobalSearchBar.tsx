@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Search,
   X,
@@ -11,7 +11,7 @@ import {
   Sparkles,
   ArrowUpRight,
   Award,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   TrackId,
   INITIAL_QUESTIONS,
@@ -19,11 +19,11 @@ import {
   INITIAL_FLASHCARDS,
   CATALOG_PROGRAMS,
   MENTOR_PROFILES,
-} from '@/lib/study-data';
-import { SPRING_SNAPPY, SPRING_BOUNCY } from './PhysicsUI';
-import { playSoundCue } from '@/lib/sound-effects';
+} from "@/lib/study-data";
+import { SPRING_SNAPPY, SPRING_BOUNCY } from "./PhysicsUI";
+import { playSoundCue } from "@/lib/sound-effects";
 
-export type SearchResultCategory = 'topic' | 'flashcard' | 'program' | 'mentor';
+export type SearchResultCategory = "topic" | "flashcard" | "program" | "mentor";
 
 export interface GlobalSearchResultItem {
   id: string;
@@ -31,18 +31,14 @@ export interface GlobalSearchResultItem {
   title: string;
   subtitle: string;
   badge: string;
-  colorVar: '--pk' | '--yl' | '--gr' | '--bl';
+  colorVar: "--pk" | "--yl" | "--gr" | "--bl";
   track?: TrackId;
   topic?: string;
   programId?: string;
 }
 
 interface GlobalSearchBarProps {
-  onSelectTopicPractice: (
-    track: TrackId,
-    topic: string,
-    mode: 'questions' | 'flashcards'
-  ) => void;
+  onSelectTopicPractice: (track: TrackId, topic: string, mode: "questions" | "flashcards") => void;
   onSelectCatalogProgram: (programId: string, searchQuery: string) => void;
   onSelectCatalogSearch: (searchQuery: string) => void;
 }
@@ -52,9 +48,9 @@ export function GlobalSearchBar({
   onSelectCatalogProgram,
   onSelectCatalogSearch,
 }: GlobalSearchBarProps) {
-  const [query, setQuery] = useState<string>('');
+  const [query, setQuery] = useState<string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [activeCategory, setActiveCategory] = useState<'all' | SearchResultCategory>('all');
+  const [activeCategory, setActiveCategory] = useState<"all" | SearchResultCategory>("all");
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -70,15 +66,15 @@ export function GlobalSearchBar({
       seenTopics.add(`${ps.track}:${ps.topic.toLowerCase()}`);
       items.push({
         id: `ps-${ps.id}`,
-        category: 'topic',
+        category: "topic",
         title: ps.title,
         subtitle: `${ps.topic} · ${ps.completedCount}/${ps.totalCount} completed`,
         badge:
-          ps.track === 'code'
-            ? 'Coding Interview'
-            : ps.track === 'lang'
-              ? 'Languages'
-              : 'Exam Prep',
+          ps.track === "code"
+            ? "Coding Interview"
+            : ps.track === "lang"
+              ? "Languages"
+              : "Exam Prep",
         colorVar: ps.colorVar,
         track: ps.track,
         topic: ps.topic,
@@ -86,18 +82,18 @@ export function GlobalSearchBar({
     });
 
     // Additional curated question topics
-    (['exam', 'code', 'lang'] as TrackId[]).forEach((trk) => {
+    (["exam", "code", "lang"] as TrackId[]).forEach((trk) => {
       INITIAL_QUESTIONS[trk].forEach((q) => {
         const key = `${trk}:${q.topic.toLowerCase()}`;
         if (!seenTopics.has(key)) {
           seenTopics.add(key);
           items.push({
             id: `q-${q.id}`,
-            category: 'topic',
+            category: "topic",
             title: q.topic,
-            subtitle: q.prompt.slice(0, 78) + '...',
+            subtitle: q.prompt.slice(0, 78) + "...",
             badge: `${q.difficulty} · AI Question`,
-            colorVar: trk === 'code' ? '--bl' : trk === 'lang' ? '--yl' : '--pk',
+            colorVar: trk === "code" ? "--bl" : trk === "lang" ? "--yl" : "--pk",
             track: trk,
             topic: q.topic,
           });
@@ -106,11 +102,11 @@ export function GlobalSearchBar({
     });
 
     // 2. 3D Flashcards
-    (['exam', 'code', 'lang'] as TrackId[]).forEach((trk) => {
+    (["exam", "code", "lang"] as TrackId[]).forEach((trk) => {
       INITIAL_FLASHCARDS[trk].forEach((fc) => {
         items.push({
           id: `fc-${fc.id}`,
-          category: 'flashcard',
+          category: "flashcard",
           title: fc.frontTitle,
           subtitle: `${fc.topic} — ${fc.frontPrompt}`,
           badge: `3D Flashcard · ${fc.difficulty}`,
@@ -124,16 +120,16 @@ export function GlobalSearchBar({
     // 3. Curriculum Programs
     CATALOG_PROGRAMS.forEach((prog) => {
       const derivedTrack: TrackId =
-        prog.subject === 'Computer Science'
-          ? 'code'
-          : prog.subject === 'Languages'
-            ? 'lang'
-            : 'exam';
+        prog.subject === "Computer Science"
+          ? "code"
+          : prog.subject === "Languages"
+            ? "lang"
+            : "exam";
       items.push({
         id: `prog-${prog.id}`,
-        category: 'program',
+        category: "program",
         title: prog.title,
-        subtitle: `${prog.subject} (${prog.gradeRange}) · ${prog.syllabus.join(', ')}`,
+        subtitle: `${prog.subject} (${prog.gradeRange}) · ${prog.syllabus.join(", ")}`,
         badge: `Curriculum · ★ ${prog.rating}`,
         colorVar: prog.bgVar,
         track: derivedTrack,
@@ -146,7 +142,7 @@ export function GlobalSearchBar({
     MENTOR_PROFILES.forEach((m) => {
       items.push({
         id: `mentor-${m.id}`,
-        category: 'mentor',
+        category: "mentor",
         title: m.name,
         subtitle: `${m.role} · ${m.subject} (${m.gradeRange})`,
         badge: `Coach · ★ ${m.rating}`,
@@ -161,7 +157,7 @@ export function GlobalSearchBar({
     const trimmed = query.trim().toLowerCase();
     return allSearchItems
       .filter((item) => {
-        if (activeCategory !== 'all' && item.category !== activeCategory) {
+        if (activeCategory !== "all" && item.category !== activeCategory) {
           return false;
         }
         if (!trimmed) return true;
@@ -183,9 +179,9 @@ export function GlobalSearchBar({
   // Global keyboard shortcut: Cmd+K / Ctrl+K or '/' to focus global search
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        playSoundCue('option');
+        playSoundCue("option");
         setIsOpen(true);
         inputRef.current?.focus();
         return;
@@ -194,85 +190,80 @@ export function GlobalSearchBar({
       const target = e.target as HTMLElement | null;
       const isTypingInField =
         target &&
-        (target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.isContentEditable);
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
 
-      if (!isTypingInField && e.key === '/') {
+      if (!isTypingInField && e.key === "/") {
         e.preventDefault();
-        playSoundCue('option');
+        playSoundCue("option");
         setIsOpen(true);
         inputRef.current?.focus();
-      } else if (e.key === 'Escape' && isOpen) {
+      } else if (e.key === "Escape" && isOpen) {
         setIsOpen(false);
         inputRef.current?.blur();
       }
     };
 
-    window.addEventListener('keydown', handleGlobalKeyDown);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, [isOpen]);
 
   // Click outside to close popover
   useEffect(() => {
     if (!isOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
   const handleSelectResult = useCallback(
     (item: GlobalSearchResultItem) => {
-      playSoundCue('tap');
+      playSoundCue("tap");
       setIsOpen(false);
-      if (item.category === 'topic' && item.track) {
-        onSelectTopicPractice(item.track, item.topic || item.title, 'questions');
-      } else if (item.category === 'flashcard' && item.track) {
-        onSelectTopicPractice(item.track, item.topic || item.title, 'flashcards');
-      } else if (item.category === 'program' && item.programId) {
-        onSelectCatalogProgram(item.programId, '');
-      } else if (item.category === 'mentor') {
+      if (item.category === "topic" && item.track) {
+        onSelectTopicPractice(item.track, item.topic || item.title, "questions");
+      } else if (item.category === "flashcard" && item.track) {
+        onSelectTopicPractice(item.track, item.topic || item.title, "flashcards");
+      } else if (item.category === "program" && item.programId) {
+        onSelectCatalogProgram(item.programId, "");
+      } else if (item.category === "mentor") {
         onSelectCatalogSearch(item.title);
       }
     },
-    [onSelectTopicPractice, onSelectCatalogProgram, onSelectCatalogSearch]
+    [onSelectTopicPractice, onSelectCatalogProgram, onSelectCatalogSearch],
   );
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowDown') {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
       if (!isOpen) setIsOpen(true);
-      playSoundCue('option');
+      playSoundCue("option");
       setHighlightedIndex((prev) =>
-        filteredResults.length > 0 ? (prev + 1) % filteredResults.length : 0
+        filteredResults.length > 0 ? (prev + 1) % filteredResults.length : 0,
       );
-    } else if (e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (!isOpen) setIsOpen(true);
-      playSoundCue('option');
+      playSoundCue("option");
       setHighlightedIndex((prev) =>
         filteredResults.length > 0
           ? (prev - 1 + filteredResults.length) % filteredResults.length
-          : 0
+          : 0,
       );
-    } else if (e.key === 'Enter') {
+    } else if (e.key === "Enter") {
       e.preventDefault();
       const chosen = filteredResults[highlightedIndex];
       if (chosen) {
         handleSelectResult(chosen);
       } else if (query.trim()) {
-        playSoundCue('tap');
+        playSoundCue("tap");
         setIsOpen(false);
-        onSelectTopicPractice('exam', query.trim(), 'questions');
+        onSelectTopicPractice("exam", query.trim(), "questions");
       }
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       setIsOpen(false);
       inputRef.current?.blur();
     }
@@ -280,13 +271,13 @@ export function GlobalSearchBar({
 
   const getCategoryIcon = (cat: SearchResultCategory) => {
     switch (cat) {
-      case 'topic':
+      case "topic":
         return <BookOpen className="w-3.5 h-3.5" />;
-      case 'flashcard':
+      case "flashcard":
         return <Layers className="w-3.5 h-3.5" />;
-      case 'program':
+      case "program":
         return <GraduationCap className="w-3.5 h-3.5" />;
-      case 'mentor':
+      case "mentor":
         return <Award className="w-3.5 h-3.5" />;
     }
   };
@@ -306,7 +297,7 @@ export function GlobalSearchBar({
             whileTap={{ scale: 0.93 }}
             transition={SPRING_SNAPPY}
             onClick={() => {
-              playSoundCue('tap');
+              playSoundCue("tap");
               setIsOpen(true);
               setTimeout(() => inputRef.current?.focus(), 30);
             }}
@@ -315,9 +306,9 @@ export function GlobalSearchBar({
             title="Search topics, flashcards, curriculum (⌘K)"
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full grid place-items-center cursor-pointer transition-colors"
             style={{
-              backgroundColor: 'var(--card)',
-              color: 'var(--ink)',
-              border: '1px solid var(--line)',
+              backgroundColor: "var(--card)",
+              color: "var(--ink)",
+              border: "1px solid var(--line)",
             }}
           >
             <Search className="w-4 h-4" />
@@ -326,16 +317,16 @@ export function GlobalSearchBar({
           <motion.div
             key="search-expanded-pill"
             initial={{ opacity: 0, width: 42, scale: 0.96 }}
-            animate={{ opacity: 1, width: 'auto', scale: 1 }}
+            animate={{ opacity: 1, width: "auto", scale: 1 }}
             exit={{ opacity: 0, width: 42, scale: 0.96 }}
             transition={SPRING_SNAPPY}
             className="fixed inset-x-3 top-3 z-50 sm:static sm:inset-auto sm:w-[280px] md:w-[340px] flex items-center gap-2 rounded-full px-3.5 py-2 shadow-lg sm:shadow-none"
             style={{
-              backgroundColor: 'var(--card)',
-              border: '2px solid var(--pk)',
+              backgroundColor: "var(--card)",
+              border: "2px solid var(--pk)",
             }}
           >
-            <Search className="w-4 h-4 shrink-0" style={{ color: 'var(--mute)' }} />
+            <Search className="w-4 h-4 shrink-0" style={{ color: "var(--mute)" }} />
             <input
               ref={inputRef}
               type="text"
@@ -350,20 +341,20 @@ export function GlobalSearchBar({
               aria-haspopup="dialog"
               aria-autocomplete="list"
               className="w-full bg-transparent text-base font-medium focus:outline-none truncate"
-              style={{ color: 'var(--ink)' }}
+              style={{ color: "var(--ink)" }}
             />
 
             {query && (
               <button
                 type="button"
                 onClick={() => {
-                  playSoundCue('tap');
-                  setQuery('');
+                  playSoundCue("tap");
+                  setQuery("");
                   inputRef.current?.focus();
                 }}
                 aria-label="Clear search query"
                 className="p-1 rounded-full cursor-pointer shrink-0"
-                style={{ color: 'var(--mute)' }}
+                style={{ color: "var(--mute)" }}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -372,15 +363,15 @@ export function GlobalSearchBar({
             <button
               type="button"
               onClick={() => {
-                playSoundCue('tap');
+                playSoundCue("tap");
                 setIsOpen(false);
               }}
               aria-label="Close search"
               className="px-2 py-0.5 rounded-full text-[11px] font-bold cursor-pointer shrink-0"
               style={{
-                backgroundColor: 'var(--bg)',
-                color: 'var(--ink)',
-                border: '1px solid var(--line)',
+                backgroundColor: "var(--bg)",
+                color: "var(--ink)",
+                border: "1px solid var(--line)",
               }}
             >
               Esc
@@ -402,20 +393,20 @@ export function GlobalSearchBar({
             aria-label="Search suggestions and filters"
             className="fixed inset-x-3 top-[64px] sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2.5 sm:w-[460px] z-50 rounded-3xl p-4 shadow-2xl space-y-3"
             style={{
-              backgroundColor: 'var(--bg)',
-              color: 'var(--ink)',
-              border: '1.5px solid var(--line)',
+              backgroundColor: "var(--bg)",
+              color: "var(--ink)",
+              border: "1.5px solid var(--line)",
             }}
           >
             {/* Category Filter Pills */}
             <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar pb-1">
               {(
                 [
-                  { id: 'all', label: 'All' },
-                  { id: 'topic', label: 'Practice Topics' },
-                  { id: 'flashcard', label: '3D Flashcards' },
-                  { id: 'program', label: 'Curriculum' },
-                  { id: 'mentor', label: 'Coaches' },
+                  { id: "all", label: "All" },
+                  { id: "topic", label: "Practice Topics" },
+                  { id: "flashcard", label: "3D Flashcards" },
+                  { id: "program", label: "Curriculum" },
+                  { id: "mentor", label: "Coaches" },
                 ] as const
               ).map((cat) => {
                 const active = activeCategory === cat.id;
@@ -424,18 +415,18 @@ export function GlobalSearchBar({
                     key={cat.id}
                     type="button"
                     onClick={() => {
-                      playSoundCue('option');
+                      playSoundCue("option");
                       setActiveCategory(cat.id);
                     }}
                     className="relative px-3 py-1.5 rounded-full text-xs font-bold cursor-pointer whitespace-nowrap shrink-0"
-                    style={{ color: active ? '#2D2D2B' : 'var(--mute)' }}
+                    style={{ color: active ? "#2D2D2B" : "var(--mute)" }}
                   >
                     {active && (
                       <motion.span
                         layoutId="globalSearchCategoryPill"
                         transition={SPRING_BOUNCY}
                         className="absolute inset-0 rounded-full"
-                        style={{ backgroundColor: 'var(--pk)' }}
+                        style={{ backgroundColor: "var(--pk)" }}
                       />
                     )}
                     <span className="relative z-10">{cat.label}</span>
@@ -457,10 +448,8 @@ export function GlobalSearchBar({
                       onClick={() => handleSelectResult(item)}
                       className="w-full rounded-2xl p-3 text-left flex items-center justify-between gap-3 cursor-pointer transition-colors"
                       style={{
-                        backgroundColor: isHighlighted ? 'var(--card)' : 'transparent',
-                        border: isHighlighted
-                          ? '1px solid var(--pk)'
-                          : '1px solid transparent',
+                        backgroundColor: isHighlighted ? "var(--card)" : "transparent",
+                        border: isHighlighted ? "1px solid var(--pk)" : "1px solid transparent",
                       }}
                     >
                       <div className="flex items-center gap-3 min-w-0">
@@ -468,19 +457,14 @@ export function GlobalSearchBar({
                           className="w-9 h-9 rounded-xl grid place-items-center shrink-0"
                           style={{
                             backgroundColor: `var(${item.colorVar})`,
-                            color: '#2D2D2B',
+                            color: "#2D2D2B",
                           }}
                         >
                           {getCategoryIcon(item.category)}
                         </div>
                         <div className="min-w-0">
-                          <div className="font-bold text-xs sm:text-sm truncate">
-                            {item.title}
-                          </div>
-                          <div
-                            className="text-[11px] truncate"
-                            style={{ color: 'var(--mute)' }}
-                          >
+                          <div className="font-bold text-xs sm:text-sm truncate">{item.title}</div>
+                          <div className="text-[11px] truncate" style={{ color: "var(--mute)" }}>
                             {item.subtitle}
                           </div>
                         </div>
@@ -490,17 +474,14 @@ export function GlobalSearchBar({
                         <span
                           className="px-2.5 py-1 rounded-full text-[10px] font-extrabold whitespace-nowrap"
                           style={{
-                            backgroundColor: 'var(--card)',
-                            color: 'var(--ink)',
-                            border: '1px solid var(--line)',
+                            backgroundColor: "var(--card)",
+                            color: "var(--ink)",
+                            border: "1px solid var(--line)",
                           }}
                         >
                           {item.badge}
                         </span>
-                        <ArrowUpRight
-                          className="w-3.5 h-3.5"
-                          style={{ color: 'var(--mute)' }}
-                        />
+                        <ArrowUpRight className="w-3.5 h-3.5" style={{ color: "var(--mute)" }} />
                       </div>
                     </motion.button>
                   );
@@ -508,9 +489,9 @@ export function GlobalSearchBar({
               ) : (
                 <div
                   className="rounded-2xl p-4 text-center text-xs space-y-1"
-                  style={{ backgroundColor: 'var(--card)', color: 'var(--mute)' }}
+                  style={{ backgroundColor: "var(--card)", color: "var(--mute)" }}
                 >
-                  <p className="font-bold" style={{ color: 'var(--ink)' }}>
+                  <p className="font-bold" style={{ color: "var(--ink)" }}>
                     No static matches for “{query}”
                   </p>
                   <p>
@@ -524,17 +505,17 @@ export function GlobalSearchBar({
             {query.trim().length > 0 && (
               <div
                 className="pt-2 border-t flex flex-wrap items-center justify-between gap-2"
-                style={{ borderColor: 'var(--line)' }}
+                style={{ borderColor: "var(--line)" }}
               >
                 <button
                   type="button"
                   onClick={() => {
-                    playSoundCue('tap');
+                    playSoundCue("tap");
                     setIsOpen(false);
-                    onSelectTopicPractice('exam', query.trim(), 'questions');
+                    onSelectTopicPractice("exam", query.trim(), "questions");
                   }}
                   className="flex-1 py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer"
-                  style={{ backgroundColor: 'var(--pk)', color: '#2D2D2B' }}
+                  style={{ backgroundColor: "var(--pk)", color: "#2D2D2B" }}
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span className="truncate">AI Question: “{query.trim()}”</span>
@@ -543,12 +524,12 @@ export function GlobalSearchBar({
                 <button
                   type="button"
                   onClick={() => {
-                    playSoundCue('tap');
+                    playSoundCue("tap");
                     setIsOpen(false);
-                    onSelectTopicPractice('code', query.trim(), 'flashcards');
+                    onSelectTopicPractice("code", query.trim(), "flashcards");
                   }}
                   className="flex-1 py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer"
-                  style={{ backgroundColor: 'var(--yl)', color: '#2D2D2B' }}
+                  style={{ backgroundColor: "var(--yl)", color: "#2D2D2B" }}
                 >
                   <Layers className="w-3.5 h-3.5" />
                   <span className="truncate">3D Flashcard: “{query.trim()}”</span>
@@ -559,7 +540,7 @@ export function GlobalSearchBar({
             {/* Keyboard Hints Footer */}
             <div
               className="flex items-center justify-between text-[10px] font-semibold px-1 pt-0.5"
-              style={{ color: 'var(--mute)' }}
+              style={{ color: "var(--mute)" }}
             >
               <span>↑↓ to navigate · Enter to launch · Esc to close</span>
               <span>{filteredResults.length} results</span>

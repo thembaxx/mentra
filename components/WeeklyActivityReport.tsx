@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useEffect, useMemo } from "react";
+import { motion } from "motion/react";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -15,7 +15,7 @@ import {
   CartesianGrid,
   Tooltip,
   ReferenceLine,
-} from 'recharts';
+} from "recharts";
 import {
   Flame,
   Clock,
@@ -25,18 +25,14 @@ import {
   ArrowUpRight,
   Activity,
   BarChart2,
-} from 'lucide-react';
-import { TrackId } from '@/lib/study-data';
-import { FlowerShape, StarburstShape, SquiggleBoltShape } from './BrandMotifs';
-import {
-  BouncySurface,
-  SPRING_SNAPPY,
-  SPRING_BOUNCY,
-} from './PhysicsUI';
-import { playSoundCue } from '@/lib/sound-effects';
+} from "lucide-react";
+import { TrackId } from "@/lib/study-data";
+import { FlowerShape, StarburstShape, SquiggleBoltShape } from "./BrandMotifs";
+import { BouncySurface, SPRING_SNAPPY, SPRING_BOUNCY } from "./PhysicsUI";
+import { playSoundCue } from "@/lib/sound-effects";
 
-type ReportRange = 'this_week' | 'last_week' | 'month';
-type ChartVisualMode = 'lines' | 'bars';
+type ReportRange = "this_week" | "last_week" | "month";
+type ChartVisualMode = "lines" | "bars";
 
 export interface TooltipSeriesRow {
   label: string;
@@ -66,29 +62,23 @@ export function DirectInspiredTooltipCard({
     <div
       className="rounded-[22px] p-4 sm:p-5 min-w-[248px] sm:min-w-[272px] select-none transition-colors"
       style={{
-        backgroundColor: 'var(--tooltip-bg)',
-        border: '1px solid var(--tooltip-border)',
-        boxShadow: 'var(--tooltip-shadow)',
-        color: 'var(--ink)',
+        backgroundColor: "var(--tooltip-bg)",
+        border: "1px solid var(--tooltip-border)",
+        boxShadow: "var(--tooltip-shadow)",
+        color: "var(--ink)",
       }}
     >
       <div
         className="text-[18px] font-semibold tracking-tight leading-snug tabular-nums"
-        style={{ color: 'var(--ink)' }}
+        style={{ color: "var(--ink)" }}
       >
         {headline}
       </div>
-      <div
-        className="text-[15px] font-normal leading-snug mt-0.5"
-        style={{ color: 'var(--mute)' }}
-      >
+      <div className="text-[15px] font-normal leading-snug mt-0.5" style={{ color: "var(--mute)" }}>
         {dateLabel}
       </div>
 
-      <div
-        className="my-3 h-px w-full"
-        style={{ backgroundColor: 'var(--tooltip-border)' }}
-      />
+      <div className="my-3 h-px w-full" style={{ backgroundColor: "var(--tooltip-border)" }} />
 
       <div className="space-y-2">
         {rows.map((row) => (
@@ -101,17 +91,11 @@ export function DirectInspiredTooltipCard({
                 className="w-3 h-3 rounded-full shrink-0"
                 style={{ backgroundColor: row.color }}
               />
-              <span
-                className="truncate font-normal"
-                style={{ color: 'var(--mute)' }}
-              >
+              <span className="truncate font-normal" style={{ color: "var(--mute)" }}>
                 {row.label}
               </span>
             </div>
-            <span
-              className="font-medium tabular-nums shrink-0"
-              style={{ color: 'var(--ink)' }}
-            >
+            <span className="font-medium tabular-nums shrink-0" style={{ color: "var(--ink)" }}>
               {row.value}
             </span>
           </div>
@@ -157,9 +141,11 @@ export function WeeklyActivityReport({
   onNotify,
 }: WeeklyActivityReportProps) {
   const [mounted, setMounted] = useState(false);
-  const [range, setRange] = useState<ReportRange>('this_week');
-  const [metricFocus, setMetricFocus] = useState<'all' | 'code' | 'exam' | 'lang' | 'review'>('all');
-  const [visualMode, setVisualMode] = useState<ChartVisualMode>('lines');
+  const [range, setRange] = useState<ReportRange>("this_week");
+  const [metricFocus, setMetricFocus] = useState<"all" | "code" | "exam" | "lang" | "review">(
+    "all",
+  );
+  const [visualMode, setVisualMode] = useState<ChartVisualMode>("lines");
 
   useEffect(() => {
     setMounted(true);
@@ -174,11 +160,11 @@ export function WeeklyActivityReport({
     const todayLangMins = Math.max(7, todayQuestions * 3);
     const todayReviewMins = Math.max(18, todayQuestions * 6);
 
-    if (range === 'last_week') {
+    if (range === "last_week") {
       return [
         {
-          day: 'Mon',
-          dateLabel: 'Oct 5, 2026',
+          day: "Mon",
+          dateLabel: "Oct 5, 2026",
           codeMins: 16,
           examMins: 12,
           langMins: 8,
@@ -195,8 +181,8 @@ export function WeeklyActivityReport({
           totalUses: 50,
         },
         {
-          day: 'Tue',
-          dateLabel: 'Oct 6, 2026',
+          day: "Tue",
+          dateLabel: "Oct 6, 2026",
           codeMins: 19,
           examMins: 15,
           langMins: 10,
@@ -213,8 +199,8 @@ export function WeeklyActivityReport({
           totalUses: 57,
         },
         {
-          day: 'Wed',
-          dateLabel: 'Oct 7, 2026',
+          day: "Wed",
+          dateLabel: "Oct 7, 2026",
           codeMins: 22,
           examMins: 11,
           langMins: 9,
@@ -231,8 +217,8 @@ export function WeeklyActivityReport({
           totalUses: 54,
         },
         {
-          day: 'Thu',
-          dateLabel: 'Oct 8, 2026',
+          day: "Thu",
+          dateLabel: "Oct 8, 2026",
           codeMins: 20,
           examMins: 16,
           langMins: 11,
@@ -249,8 +235,8 @@ export function WeeklyActivityReport({
           totalUses: 65,
         },
         {
-          day: 'Fri',
-          dateLabel: 'Oct 9, 2026',
+          day: "Fri",
+          dateLabel: "Oct 9, 2026",
           codeMins: 15,
           examMins: 14,
           langMins: 9,
@@ -267,8 +253,8 @@ export function WeeklyActivityReport({
           totalUses: 48,
         },
         {
-          day: 'Sat',
-          dateLabel: 'Oct 10, 2026',
+          day: "Sat",
+          dateLabel: "Oct 10, 2026",
           codeMins: 26,
           examMins: 20,
           langMins: 14,
@@ -285,8 +271,8 @@ export function WeeklyActivityReport({
           totalUses: 76,
         },
         {
-          day: 'Sun',
-          dateLabel: 'Oct 11, 2026',
+          day: "Sun",
+          dateLabel: "Oct 11, 2026",
           codeMins: 21,
           examMins: 17,
           langMins: 11,
@@ -305,11 +291,11 @@ export function WeeklyActivityReport({
       ];
     }
 
-    if (range === 'month') {
+    if (range === "month") {
       return [
         {
-          day: 'Wk 1',
-          dateLabel: 'Sep 28 – Oct 4, 2026',
+          day: "Wk 1",
+          dateLabel: "Sep 28 – Oct 4, 2026",
           codeMins: 92,
           examMins: 78,
           langMins: 52,
@@ -326,8 +312,8 @@ export function WeeklyActivityReport({
           totalUses: 255,
         },
         {
-          day: 'Wk 2',
-          dateLabel: 'Oct 5 – Oct 11, 2026',
+          day: "Wk 2",
+          dateLabel: "Oct 5 – Oct 11, 2026",
           codeMins: 112,
           examMins: 88,
           langMins: 64,
@@ -344,8 +330,8 @@ export function WeeklyActivityReport({
           totalUses: 309,
         },
         {
-          day: 'Wk 3',
-          dateLabel: 'Oct 12 – Oct 18, 2026',
+          day: "Wk 3",
+          dateLabel: "Oct 12 – Oct 18, 2026",
           codeMins: 128,
           examMins: 96,
           langMins: 72,
@@ -362,14 +348,13 @@ export function WeeklyActivityReport({
           totalUses: 355,
         },
         {
-          day: 'This Wk',
-          dateLabel: 'Oct 19, 2026',
+          day: "This Wk",
+          dateLabel: "Oct 19, 2026",
           codeMins: 124 + todayCodeMins,
           examMins: 94 + todayExamMins,
           langMins: 70 + todayLangMins,
           reviewMins: 140 + todayReviewMins,
-          totalMins:
-            428 + todayCodeMins + todayExamMins + todayLangMins + todayReviewMins,
+          totalMins: 428 + todayCodeMins + todayExamMins + todayLangMins + todayReviewMins,
           questionsAnswered: 39 + todayQuestions,
           dailyTarget: dailyTarget * 7,
           streakDay: streakDays,
@@ -386,8 +371,8 @@ export function WeeklyActivityReport({
     // Default: 'this_week' (Oct 13 – Oct 19, 2026)
     return [
       {
-        day: 'Mon',
-        dateLabel: 'Oct 13, 2026',
+        day: "Mon",
+        dateLabel: "Oct 13, 2026",
         codeMins: 16,
         examMins: 10,
         langMins: 7,
@@ -404,8 +389,8 @@ export function WeeklyActivityReport({
         totalUses: 52,
       },
       {
-        day: 'Tue',
-        dateLabel: 'Oct 14, 2026',
+        day: "Tue",
+        dateLabel: "Oct 14, 2026",
         codeMins: 20,
         examMins: 9,
         langMins: 6,
@@ -422,8 +407,8 @@ export function WeeklyActivityReport({
         totalUses: 59,
       },
       {
-        day: 'Wed',
-        dateLabel: 'Oct 15, 2026',
+        day: "Wed",
+        dateLabel: "Oct 15, 2026",
         codeMins: 14,
         examMins: 6,
         langMins: 5,
@@ -440,8 +425,8 @@ export function WeeklyActivityReport({
         totalUses: 58,
       },
       {
-        day: 'Thu',
-        dateLabel: 'Oct 16, 2026',
+        day: "Thu",
+        dateLabel: "Oct 16, 2026",
         codeMins: 22,
         examMins: 11,
         langMins: 8,
@@ -458,8 +443,8 @@ export function WeeklyActivityReport({
         totalUses: 68,
       },
       {
-        day: 'Fri',
-        dateLabel: 'Oct 17, 2026',
+        day: "Fri",
+        dateLabel: "Oct 17, 2026",
         codeMins: 18,
         examMins: 12,
         langMins: 9,
@@ -476,8 +461,8 @@ export function WeeklyActivityReport({
         totalUses: 59,
       },
       {
-        day: 'Sat',
-        dateLabel: 'Oct 18, 2026',
+        day: "Sat",
+        dateLabel: "Oct 18, 2026",
         codeMins: 25,
         examMins: 14,
         langMins: 10,
@@ -494,14 +479,13 @@ export function WeeklyActivityReport({
         totalUses: 78,
       },
       {
-        day: 'Today',
-        dateLabel: 'Oct 19, 2026',
+        day: "Today",
+        dateLabel: "Oct 19, 2026",
         codeMins: todayCodeMins,
         examMins: todayExamMins,
         langMins: todayLangMins,
         reviewMins: todayReviewMins,
-        totalMins:
-          todayCodeMins + todayExamMins + todayLangMins + todayReviewMins,
+        totalMins: todayCodeMins + todayExamMins + todayLangMins + todayReviewMins,
         questionsAnswered: todayQuestions,
         dailyTarget,
         streakDay: streakDays,
@@ -521,18 +505,15 @@ export function WeeklyActivityReport({
 
   const totalMinutes = useMemo(
     () => chartData.reduce((acc, d) => acc + d.totalMins, 0),
-    [chartData]
+    [chartData],
   );
   const totalQuestions = useMemo(
     () => chartData.reduce((acc, d) => acc + d.questionsAnswered, 0),
-    [chartData]
+    [chartData],
   );
   const avgAccuracy = useMemo(
-    () =>
-      Math.round(
-        chartData.reduce((acc, d) => acc + d.accuracyPct, 0) / chartData.length
-      ),
-    [chartData]
+    () => Math.round(chartData.reduce((acc, d) => acc + d.accuracyPct, 0) / chartData.length),
+    [chartData],
   );
 
   const hoursFormatted = (totalMinutes / 60).toFixed(1);
@@ -544,14 +525,14 @@ export function WeeklyActivityReport({
         <div>
           <div
             className="text-xs font-extrabold uppercase tracking-wider mb-1"
-            style={{ color: 'var(--mute)' }}
+            style={{ color: "var(--mute)" }}
           >
             Learning Telemetry & Momentum
           </div>
           <h2 className="text-3xl sm:text-5xl font-display font-extrabold tracking-tight">
             Weekly Activity Report
           </h2>
-          <p className="text-sm sm:text-base mt-1" style={{ color: 'var(--mute)' }}>
+          <p className="text-sm sm:text-base mt-1" style={{ color: "var(--mute)" }}>
             Theme-aware multi-series telemetry of study sessions, track usage, and streak velocity
           </p>
         </div>
@@ -559,15 +540,15 @@ export function WeeklyActivityReport({
         {/* Timeframe Segmented Switcher */}
         <div
           className="inline-flex items-center p-1.5 rounded-full"
-          style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+          style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
           role="tablist"
           aria-label="Activity report timeframe"
         >
           {(
             [
-              { id: 'this_week', label: 'This Week' },
-              { id: 'last_week', label: 'Last Week' },
-              { id: 'month', label: '4-Week Trend' },
+              { id: "this_week", label: "This Week" },
+              { id: "last_week", label: "Last Week" },
+              { id: "month", label: "4-Week Trend" },
             ] as const
           ).map((item) => {
             const active = range === item.id;
@@ -578,20 +559,20 @@ export function WeeklyActivityReport({
                 role="tab"
                 aria-selected={active}
                 onClick={() => {
-                  playSoundCue('option');
+                  playSoundCue("option");
                   setRange(item.id);
                 }}
                 whileTap={{ scale: 0.95 }}
                 transition={SPRING_SNAPPY}
                 className="relative px-4 py-2 rounded-full text-xs sm:text-sm font-bold cursor-pointer whitespace-nowrap"
-                style={{ color: active ? '#2D2D2B' : 'var(--ink)' }}
+                style={{ color: active ? "#2D2D2B" : "var(--ink)" }}
               >
                 {active && (
                   <motion.span
                     layoutId="reportTimeframePill"
                     transition={SPRING_BOUNCY}
                     className="absolute inset-0 rounded-full"
-                    style={{ backgroundColor: 'var(--pk)' }}
+                    style={{ backgroundColor: "var(--pk)" }}
                   />
                 )}
                 <span className="relative z-10">{item.label}</span>
@@ -604,13 +585,10 @@ export function WeeklyActivityReport({
       {/* 4 Summary KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         <BouncySurface
-          style={{ backgroundColor: 'var(--bl)', color: '#2D2D2B' }}
+          style={{ backgroundColor: "var(--bl)", color: "#2D2D2B" }}
           className="rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between min-h-[144px]"
         >
-          <FlowerShape
-            className="w-20 h-20 absolute -right-4 -top-4 opacity-35"
-            color="#FFFCF5"
-          />
+          <FlowerShape className="w-20 h-20 absolute -right-4 -top-4 opacity-35" color="#FFFCF5" />
           <div className="flex items-center gap-2 text-xs font-extrabold opacity-80">
             <Clock className="w-4 h-4" />
             <span>Time Spent</span>
@@ -626,7 +604,7 @@ export function WeeklyActivityReport({
         </BouncySurface>
 
         <BouncySurface
-          style={{ backgroundColor: 'var(--pk)', color: '#2D2D2B' }}
+          style={{ backgroundColor: "var(--pk)", color: "#2D2D2B" }}
           className="rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between min-h-[144px]"
         >
           <StarburstShape
@@ -648,7 +626,7 @@ export function WeeklyActivityReport({
         </BouncySurface>
 
         <BouncySurface
-          style={{ backgroundColor: 'var(--yl)', color: '#2D2D2B' }}
+          style={{ backgroundColor: "var(--yl)", color: "#2D2D2B" }}
           className="rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between min-h-[144px]"
         >
           <SquiggleBoltShape
@@ -664,14 +642,12 @@ export function WeeklyActivityReport({
             <div className="font-display font-extrabold text-3xl sm:text-4xl tracking-tight tabular-nums">
               {streakDays} days
             </div>
-            <div className="text-xs font-bold opacity-80 mt-0.5">
-              Personal best momentum
-            </div>
+            <div className="text-xs font-bold opacity-80 mt-0.5">Personal best momentum</div>
           </div>
         </BouncySurface>
 
         <BouncySurface
-          style={{ backgroundColor: 'var(--gr)', color: '#2D2D2B' }}
+          style={{ backgroundColor: "var(--gr)", color: "#2D2D2B" }}
           className="rounded-3xl p-5 relative overflow-hidden flex flex-col justify-between min-h-[144px]"
         >
           <StarburstShape
@@ -696,15 +672,16 @@ export function WeeklyActivityReport({
       {/* Main Chart 1: Multi-Series Telemetry with Direct-Inspired Custom Tooltip */}
       <div
         className="rounded-[32px] p-5 sm:p-7 space-y-5 transition-colors"
-        style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+        style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="text-xl sm:text-2xl font-display font-extrabold">
               Track Usage & Study Minutes Breakdown
             </h3>
-            <p className="text-xs sm:text-sm" style={{ color: 'var(--mute)' }}>
-              Hover or tap any day to inspect the multi-series breakdown across Runtime/Coding, STEM, Verification, and Review
+            <p className="text-xs sm:text-sm" style={{ color: "var(--mute)" }}>
+              Hover or tap any day to inspect the multi-series breakdown across Runtime/Coding,
+              STEM, Verification, and Review
             </p>
           </div>
 
@@ -712,18 +689,18 @@ export function WeeklyActivityReport({
             {/* Visual Mode Switcher: Multi-Line vs Stacked Bars */}
             <div
               className="inline-flex items-center p-1 rounded-xl"
-              style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--line)' }}
+              style={{ backgroundColor: "var(--bg)", border: "1px solid var(--line)" }}
             >
               <button
                 type="button"
                 onClick={() => {
-                  playSoundCue('option');
-                  setVisualMode('lines');
+                  playSoundCue("option");
+                  setVisualMode("lines");
                 }}
                 className="px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
                 style={{
-                  backgroundColor: visualMode === 'lines' ? 'var(--card)' : 'transparent',
-                  color: visualMode === 'lines' ? 'var(--ink)' : 'var(--mute)',
+                  backgroundColor: visualMode === "lines" ? "var(--card)" : "transparent",
+                  color: visualMode === "lines" ? "var(--ink)" : "var(--mute)",
                 }}
               >
                 <Activity className="w-3.5 h-3.5" />
@@ -732,13 +709,13 @@ export function WeeklyActivityReport({
               <button
                 type="button"
                 onClick={() => {
-                  playSoundCue('option');
-                  setVisualMode('bars');
+                  playSoundCue("option");
+                  setVisualMode("bars");
                 }}
                 className="px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
                 style={{
-                  backgroundColor: visualMode === 'bars' ? 'var(--card)' : 'transparent',
-                  color: visualMode === 'bars' ? 'var(--ink)' : 'var(--mute)',
+                  backgroundColor: visualMode === "bars" ? "var(--card)" : "transparent",
+                  color: visualMode === "bars" ? "var(--ink)" : "var(--mute)",
                 }}
               >
                 <BarChart2 className="w-3.5 h-3.5" />
@@ -749,15 +726,15 @@ export function WeeklyActivityReport({
             {/* Track Filter Controls */}
             <div
               className="inline-flex flex-wrap items-center p-1 rounded-xl gap-1"
-              style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--line)' }}
+              style={{ backgroundColor: "var(--bg)", border: "1px solid var(--line)" }}
             >
               {(
                 [
-                  { id: 'all', label: 'All Series', dotColor: null },
-                  { id: 'code', label: 'Runtime & Code', dotColor: 'var(--series-blue)' },
-                  { id: 'exam', label: 'STEM Best Practices', dotColor: 'var(--series-orange)' },
-                  { id: 'lang', label: 'Verification & FAL', dotColor: 'var(--series-green)' },
-                  { id: 'review', label: 'Other & Flashcards', dotColor: 'var(--series-pink)' },
+                  { id: "all", label: "All Series", dotColor: null },
+                  { id: "code", label: "Runtime & Code", dotColor: "var(--series-blue)" },
+                  { id: "exam", label: "STEM Best Practices", dotColor: "var(--series-orange)" },
+                  { id: "lang", label: "Verification & FAL", dotColor: "var(--series-green)" },
+                  { id: "review", label: "Other & Flashcards", dotColor: "var(--series-pink)" },
                 ] as const
               ).map((f) => {
                 const active = metricFocus === f.id;
@@ -766,13 +743,13 @@ export function WeeklyActivityReport({
                     key={f.id}
                     type="button"
                     onClick={() => {
-                      playSoundCue('option');
+                      playSoundCue("option");
                       setMetricFocus(f.id);
                     }}
                     className="px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer flex items-center gap-1.5 transition-all active:scale-95"
                     style={{
-                      backgroundColor: active ? 'var(--ink)' : 'transparent',
-                      color: active ? 'var(--bg)' : 'var(--mute)',
+                      backgroundColor: active ? "var(--ink)" : "transparent",
+                      color: active ? "var(--bg)" : "var(--mute)",
                     }}
                   >
                     {f.dotColor && (
@@ -792,11 +769,8 @@ export function WeeklyActivityReport({
         <div className="h-[320px] w-full">
           {mounted ? (
             <ResponsiveContainer width="100%" height="100%">
-              {visualMode === 'lines' ? (
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 14, right: 16, left: -12, bottom: 4 }}
-                >
+              {visualMode === "lines" ? (
+                <LineChart data={chartData} margin={{ top: 14, right: 16, left: -12, bottom: 4 }}>
                   <CartesianGrid
                     strokeDasharray="4 4"
                     vertical={false}
@@ -806,65 +780,62 @@ export function WeeklyActivityReport({
                     dataKey="day"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: 'var(--mute)', fontSize: 12, fontWeight: 700 }}
+                    tick={{ fill: "var(--mute)", fontSize: 12, fontWeight: 700 }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
                     unit="m"
-                    tick={{ fill: 'var(--mute)', fontSize: 12, fontWeight: 600 }}
+                    tick={{ fill: "var(--mute)", fontSize: 12, fontWeight: 600 }}
                   />
                   <Tooltip
                     cursor={{
-                      stroke: 'var(--chart-cursor)',
+                      stroke: "var(--chart-cursor)",
                       strokeWidth: 1.5,
-                      strokeDasharray: '4 4',
+                      strokeDasharray: "4 4",
                     }}
                     content={({ active, payload }) => {
                       if (!active || !payload || !payload.length) return null;
                       const point = payload[0].payload as ActivityDayPoint;
                       const rows: TooltipSeriesRow[] = [
-                        ...(metricFocus === 'all' || metricFocus === 'code'
+                        ...(metricFocus === "all" || metricFocus === "code"
                           ? [
                               {
-                                label: 'Runtime & Coding',
+                                label: "Runtime & Coding",
                                 value: point.codeMins,
-                                color: 'var(--series-blue)',
+                                color: "var(--series-blue)",
                               },
                             ]
                           : []),
-                        ...(metricFocus === 'all' || metricFocus === 'exam'
+                        ...(metricFocus === "all" || metricFocus === "exam"
                           ? [
                               {
-                                label: 'STEM Best Practices',
+                                label: "STEM Best Practices",
                                 value: point.examMins,
-                                color: 'var(--series-orange)',
+                                color: "var(--series-orange)",
                               },
                             ]
                           : []),
-                        ...(metricFocus === 'all' || metricFocus === 'lang'
+                        ...(metricFocus === "all" || metricFocus === "lang"
                           ? [
                               {
-                                label: 'Verification & FAL',
+                                label: "Verification & FAL",
                                 value: point.langMins,
-                                color: 'var(--series-green)',
+                                color: "var(--series-green)",
                               },
                             ]
                           : []),
-                        ...(metricFocus === 'all' || metricFocus === 'review'
+                        ...(metricFocus === "all" || metricFocus === "review"
                           ? [
                               {
-                                label: 'Other & Flashcards',
+                                label: "Other & Flashcards",
                                 value: point.reviewMins,
-                                color: 'var(--series-pink)',
+                                color: "var(--series-pink)",
                               },
                             ]
                           : []),
                       ];
-                      const displayedTotal = rows.reduce(
-                        (acc, r) => acc + Number(r.value),
-                        0
-                      );
+                      const displayedTotal = rows.reduce((acc, r) => acc + Number(r.value), 0);
                       return (
                         <DirectInspiredTooltipCard
                           headline={`${displayedTotal} mins`}
@@ -874,7 +845,7 @@ export function WeeklyActivityReport({
                       );
                     }}
                   />
-                  {(metricFocus === 'all' || metricFocus === 'code') && (
+                  {(metricFocus === "all" || metricFocus === "code") && (
                     <Line
                       type="monotone"
                       dataKey="codeMins"
@@ -883,21 +854,21 @@ export function WeeklyActivityReport({
                       strokeWidth={2.75}
                       dot={{
                         r: 4,
-                        fill: 'var(--series-blue)',
-                        stroke: 'var(--card)',
+                        fill: "var(--series-blue)",
+                        stroke: "var(--card)",
                         strokeWidth: 2,
                       }}
                       activeDot={{
                         r: 6,
-                        fill: 'var(--series-blue)',
-                        stroke: 'var(--tooltip-bg)',
+                        fill: "var(--series-blue)",
+                        stroke: "var(--tooltip-bg)",
                         strokeWidth: 2.5,
                       }}
                       isAnimationActive
                       animationDuration={650}
                     />
                   )}
-                  {(metricFocus === 'all' || metricFocus === 'exam') && (
+                  {(metricFocus === "all" || metricFocus === "exam") && (
                     <Line
                       type="monotone"
                       dataKey="examMins"
@@ -906,21 +877,21 @@ export function WeeklyActivityReport({
                       strokeWidth={2.75}
                       dot={{
                         r: 4,
-                        fill: 'var(--series-orange)',
-                        stroke: 'var(--card)',
+                        fill: "var(--series-orange)",
+                        stroke: "var(--card)",
                         strokeWidth: 2,
                       }}
                       activeDot={{
                         r: 6,
-                        fill: 'var(--series-orange)',
-                        stroke: 'var(--tooltip-bg)',
+                        fill: "var(--series-orange)",
+                        stroke: "var(--tooltip-bg)",
                         strokeWidth: 2.5,
                       }}
                       isAnimationActive
                       animationDuration={720}
                     />
                   )}
-                  {(metricFocus === 'all' || metricFocus === 'lang') && (
+                  {(metricFocus === "all" || metricFocus === "lang") && (
                     <Line
                       type="monotone"
                       dataKey="langMins"
@@ -929,21 +900,21 @@ export function WeeklyActivityReport({
                       strokeWidth={2.75}
                       dot={{
                         r: 4,
-                        fill: 'var(--series-green)',
-                        stroke: 'var(--card)',
+                        fill: "var(--series-green)",
+                        stroke: "var(--card)",
                         strokeWidth: 2,
                       }}
                       activeDot={{
                         r: 6,
-                        fill: 'var(--series-green)',
-                        stroke: 'var(--tooltip-bg)',
+                        fill: "var(--series-green)",
+                        stroke: "var(--tooltip-bg)",
                         strokeWidth: 2.5,
                       }}
                       isAnimationActive
                       animationDuration={800}
                     />
                   )}
-                  {(metricFocus === 'all' || metricFocus === 'review') && (
+                  {(metricFocus === "all" || metricFocus === "review") && (
                     <Line
                       type="monotone"
                       dataKey="reviewMins"
@@ -952,14 +923,14 @@ export function WeeklyActivityReport({
                       strokeWidth={2.75}
                       dot={{
                         r: 4,
-                        fill: 'var(--series-pink)',
-                        stroke: 'var(--card)',
+                        fill: "var(--series-pink)",
+                        stroke: "var(--card)",
                         strokeWidth: 2,
                       }}
                       activeDot={{
                         r: 6,
-                        fill: 'var(--series-pink)',
-                        stroke: 'var(--tooltip-bg)',
+                        fill: "var(--series-pink)",
+                        stroke: "var(--tooltip-bg)",
                         strokeWidth: 2.5,
                       }}
                       isAnimationActive
@@ -981,14 +952,14 @@ export function WeeklyActivityReport({
                     dataKey="day"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: 'var(--mute)', fontSize: 12, fontWeight: 700 }}
+                    tick={{ fill: "var(--mute)", fontSize: 12, fontWeight: 700 }}
                   />
                   <YAxis
                     yAxisId="left"
                     axisLine={false}
                     tickLine={false}
                     unit="m"
-                    tick={{ fill: 'var(--mute)', fontSize: 12, fontWeight: 600 }}
+                    tick={{ fill: "var(--mute)", fontSize: 12, fontWeight: 600 }}
                   />
                   <YAxis
                     yAxisId="right"
@@ -997,47 +968,47 @@ export function WeeklyActivityReport({
                     axisLine={false}
                     tickLine={false}
                     unit="%"
-                    tick={{ fill: 'var(--mute)', fontSize: 12, fontWeight: 600 }}
+                    tick={{ fill: "var(--mute)", fontSize: 12, fontWeight: 600 }}
                   />
                   <Tooltip
-                    cursor={{ fill: 'var(--chart-cursor)' }}
+                    cursor={{ fill: "var(--chart-cursor)" }}
                     content={({ active, payload }) => {
                       if (!active || !payload || !payload.length) return null;
                       const point = payload[0].payload as ActivityDayPoint;
                       const rows: TooltipSeriesRow[] = [
-                        ...(metricFocus === 'all' || metricFocus === 'code'
+                        ...(metricFocus === "all" || metricFocus === "code"
                           ? [
                               {
-                                label: 'Runtime & Coding',
+                                label: "Runtime & Coding",
                                 value: `${point.codeMins}m`,
-                                color: 'var(--series-blue)',
+                                color: "var(--series-blue)",
                               },
                             ]
                           : []),
-                        ...(metricFocus === 'all' || metricFocus === 'exam'
+                        ...(metricFocus === "all" || metricFocus === "exam"
                           ? [
                               {
-                                label: 'STEM Best Practices',
+                                label: "STEM Best Practices",
                                 value: `${point.examMins}m`,
-                                color: 'var(--series-orange)',
+                                color: "var(--series-orange)",
                               },
                             ]
                           : []),
-                        ...(metricFocus === 'all' || metricFocus === 'lang'
+                        ...(metricFocus === "all" || metricFocus === "lang"
                           ? [
                               {
-                                label: 'Verification & FAL',
+                                label: "Verification & FAL",
                                 value: `${point.langMins}m`,
-                                color: 'var(--series-green)',
+                                color: "var(--series-green)",
                               },
                             ]
                           : []),
-                        ...(metricFocus === 'all' || metricFocus === 'review'
+                        ...(metricFocus === "all" || metricFocus === "review"
                           ? [
                               {
-                                label: 'Other & Flashcards',
+                                label: "Other & Flashcards",
                                 value: `${point.reviewMins}m`,
-                                color: 'var(--series-pink)',
+                                color: "var(--series-pink)",
                               },
                             ]
                           : []),
@@ -1051,43 +1022,43 @@ export function WeeklyActivityReport({
                       );
                     }}
                   />
-                  {(metricFocus === 'all' || metricFocus === 'code') && (
+                  {(metricFocus === "all" || metricFocus === "code") && (
                     <Bar
                       yAxisId="left"
                       dataKey="codeMins"
                       name="Runtime & Coding"
                       stackId="mins"
                       fill="var(--series-blue)"
-                      radius={metricFocus === 'code' ? [10, 10, 0, 0] : [0, 0, 0, 0]}
+                      radius={metricFocus === "code" ? [10, 10, 0, 0] : [0, 0, 0, 0]}
                       isAnimationActive
                       animationDuration={650}
                     />
                   )}
-                  {(metricFocus === 'all' || metricFocus === 'exam') && (
+                  {(metricFocus === "all" || metricFocus === "exam") && (
                     <Bar
                       yAxisId="left"
                       dataKey="examMins"
                       name="STEM Best Practices"
                       stackId="mins"
                       fill="var(--series-orange)"
-                      radius={metricFocus === 'exam' ? [10, 10, 0, 0] : [0, 0, 0, 0]}
+                      radius={metricFocus === "exam" ? [10, 10, 0, 0] : [0, 0, 0, 0]}
                       isAnimationActive
                       animationDuration={720}
                     />
                   )}
-                  {(metricFocus === 'all' || metricFocus === 'lang') && (
+                  {(metricFocus === "all" || metricFocus === "lang") && (
                     <Bar
                       yAxisId="left"
                       dataKey="langMins"
                       name="Verification & FAL"
                       stackId="mins"
                       fill="var(--series-green)"
-                      radius={metricFocus === 'lang' ? [10, 10, 0, 0] : [0, 0, 0, 0]}
+                      radius={metricFocus === "lang" ? [10, 10, 0, 0] : [0, 0, 0, 0]}
                       isAnimationActive
                       animationDuration={800}
                     />
                   )}
-                  {(metricFocus === 'all' || metricFocus === 'review') && (
+                  {(metricFocus === "all" || metricFocus === "review") && (
                     <Bar
                       yAxisId="left"
                       dataKey="reviewMins"
@@ -1106,8 +1077,8 @@ export function WeeklyActivityReport({
                     name="Rubric Accuracy (%)"
                     stroke="var(--ink)"
                     strokeWidth={2.5}
-                    dot={{ r: 4, fill: 'var(--card)', stroke: 'var(--ink)', strokeWidth: 2 }}
-                    activeDot={{ r: 6, fill: 'var(--ink)', stroke: 'var(--card)', strokeWidth: 2 }}
+                    dot={{ r: 4, fill: "var(--card)", stroke: "var(--ink)", strokeWidth: 2 }}
+                    activeDot={{ r: 6, fill: "var(--ink)", stroke: "var(--card)", strokeWidth: 2 }}
                     isAnimationActive
                     animationDuration={900}
                   />
@@ -1125,21 +1096,18 @@ export function WeeklyActivityReport({
         {/* Chart 2: Daily Interactive Uses & Questions Solved vs. Target (6 cols) */}
         <div
           className="lg:col-span-6 rounded-[32px] p-5 sm:p-6 space-y-4 transition-colors"
-          style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+          style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
         >
           <div className="flex items-center justify-between gap-2">
             <div>
               <h3 className="text-xl font-display font-extrabold">
                 Questions & Skill Uses vs. Daily Goal
               </h3>
-              <p className="text-xs" style={{ color: 'var(--mute)' }}>
+              <p className="text-xs" style={{ color: "var(--mute)" }}>
                 Dashed line marks your daily target ({dailyTarget} questions/day)
               </p>
             </div>
-            <span
-              className="text-xs font-bold tabular-nums"
-              style={{ color: 'var(--mute)' }}
-            >
+            <span className="text-xs font-bold tabular-nums" style={{ color: "var(--mute)" }}>
               {totalQuestions} solved · Target {dailyTarget}/day
             </span>
           </div>
@@ -1147,10 +1115,7 @@ export function WeeklyActivityReport({
           <div className="h-[255px] w-full">
             {mounted ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={chartData}
-                  margin={{ top: 10, right: 12, left: -18, bottom: 0 }}
-                >
+                <AreaChart data={chartData} margin={{ top: 10, right: 12, left: -18, bottom: 0 }}>
                   <defs>
                     <linearGradient id="questionsPinkGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="var(--series-pink)" stopOpacity={0.45} />
@@ -1166,18 +1131,18 @@ export function WeeklyActivityReport({
                     dataKey="day"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: 'var(--mute)', fontSize: 12, fontWeight: 700 }}
+                    tick={{ fill: "var(--mute)", fontSize: 12, fontWeight: 700 }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: 'var(--mute)', fontSize: 12, fontWeight: 600 }}
+                    tick={{ fill: "var(--mute)", fontSize: 12, fontWeight: 600 }}
                   />
                   <Tooltip
                     cursor={{
-                      stroke: 'var(--chart-cursor)',
+                      stroke: "var(--chart-cursor)",
                       strokeWidth: 1.5,
-                      strokeDasharray: '4 4',
+                      strokeDasharray: "4 4",
                     }}
                     content={({ active, payload }) => {
                       if (!active || !payload || !payload.length) return null;
@@ -1188,24 +1153,24 @@ export function WeeklyActivityReport({
                           dateLabel={point.dateLabel}
                           rows={[
                             {
-                              label: 'Runtime',
+                              label: "Runtime",
                               value: point.runtimeUses,
-                              color: 'var(--series-blue)',
+                              color: "var(--series-blue)",
                             },
                             {
-                              label: 'STEM Best Practices',
+                              label: "STEM Best Practices",
                               value: point.stemDrills,
-                              color: 'var(--series-orange)',
+                              color: "var(--series-orange)",
                             },
                             {
-                              label: 'Verification',
+                              label: "Verification",
                               value: point.verificationChecks,
-                              color: 'var(--series-green)',
+                              color: "var(--series-green)",
                             },
                             {
-                              label: 'Other',
+                              label: "Other",
                               value: point.otherPractice,
-                              color: 'var(--series-pink)',
+                              color: "var(--series-pink)",
                             },
                           ]}
                         />
@@ -1213,7 +1178,7 @@ export function WeeklyActivityReport({
                     }}
                   />
                   <ReferenceLine
-                    y={range === 'month' ? dailyTarget * 7 : dailyTarget}
+                    y={range === "month" ? dailyTarget * 7 : dailyTarget}
                     stroke="var(--series-green)"
                     strokeDasharray="6 4"
                     strokeWidth={2}
@@ -1228,14 +1193,14 @@ export function WeeklyActivityReport({
                     fill="url(#questionsPinkGrad)"
                     dot={{
                       r: 4,
-                      fill: 'var(--series-pink)',
-                      stroke: 'var(--card)',
+                      fill: "var(--series-pink)",
+                      stroke: "var(--card)",
                       strokeWidth: 2,
                     }}
                     activeDot={{
                       r: 6,
-                      fill: 'var(--series-pink)',
-                      stroke: 'var(--tooltip-bg)',
+                      fill: "var(--series-pink)",
+                      stroke: "var(--tooltip-bg)",
                       strokeWidth: 2.5,
                     }}
                     isAnimationActive
@@ -1253,9 +1218,9 @@ export function WeeklyActivityReport({
         <div
           className="lg:col-span-6 rounded-[32px] p-5 sm:p-6 space-y-4 transition-colors"
           style={{
-            backgroundColor: 'var(--card)',
-            color: 'var(--ink)',
-            border: '1px solid var(--line)',
+            backgroundColor: "var(--card)",
+            color: "var(--ink)",
+            border: "1px solid var(--line)",
           }}
         >
           <div className="flex items-center justify-between gap-2">
@@ -1263,15 +1228,15 @@ export function WeeklyActivityReport({
               <h3 className="text-xl font-display font-extrabold">
                 Cumulative Streak & Mastery Curve
               </h3>
-              <p className="text-xs" style={{ color: 'var(--mute)' }}>
+              <p className="text-xs" style={{ color: "var(--mute)" }}>
                 Unbroken daily habit momentum ending at Day #{streakDays}
               </p>
             </div>
             <span
               className="text-xs font-bold flex items-center gap-1 tabular-nums"
-              style={{ color: 'var(--mute)' }}
+              style={{ color: "var(--mute)" }}
             >
-              <TrendingUp className="w-3.5 h-3.5" style={{ color: 'var(--series-orange)' }} />
+              <TrendingUp className="w-3.5 h-3.5" style={{ color: "var(--series-orange)" }} />
               <span>{streakDays}-Day Streak</span>
             </span>
           </div>
@@ -1279,10 +1244,7 @@ export function WeeklyActivityReport({
           <div className="h-[255px] w-full">
             {mounted ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={chartData}
-                  margin={{ top: 10, right: 12, left: -18, bottom: 0 }}
-                >
+                <AreaChart data={chartData} margin={{ top: 10, right: 12, left: -18, bottom: 0 }}>
                   <defs>
                     <linearGradient id="streakBlueGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="var(--series-blue)" stopOpacity={0.38} />
@@ -1298,18 +1260,18 @@ export function WeeklyActivityReport({
                     dataKey="day"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: 'var(--mute)', fontSize: 12, fontWeight: 700 }}
+                    tick={{ fill: "var(--mute)", fontSize: 12, fontWeight: 700 }}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: 'var(--mute)', fontSize: 12, fontWeight: 600 }}
+                    tick={{ fill: "var(--mute)", fontSize: 12, fontWeight: 600 }}
                   />
                   <Tooltip
                     cursor={{
-                      stroke: 'var(--chart-cursor)',
+                      stroke: "var(--chart-cursor)",
                       strokeWidth: 1.5,
-                      strokeDasharray: '4 4',
+                      strokeDasharray: "4 4",
                     }}
                     content={({ active, payload }) => {
                       if (!active || !payload || !payload.length) return null;
@@ -1320,24 +1282,24 @@ export function WeeklyActivityReport({
                           dateLabel={point.dateLabel}
                           rows={[
                             {
-                              label: 'Consecutive Days',
+                              label: "Consecutive Days",
                               value: point.streakDay,
-                              color: 'var(--series-blue)',
+                              color: "var(--series-blue)",
                             },
                             {
-                              label: 'Rubric Accuracy',
+                              label: "Rubric Accuracy",
                               value: `${point.accuracyPct}%`,
-                              color: 'var(--series-orange)',
+                              color: "var(--series-orange)",
                             },
                             {
-                              label: 'Questions Solved',
+                              label: "Questions Solved",
                               value: point.questionsAnswered,
-                              color: 'var(--series-green)',
+                              color: "var(--series-green)",
                             },
                             {
-                              label: 'Focus Minutes',
+                              label: "Focus Minutes",
                               value: `${point.totalMins}m`,
-                              color: 'var(--series-pink)',
+                              color: "var(--series-pink)",
                             },
                           ]}
                         />
@@ -1354,14 +1316,14 @@ export function WeeklyActivityReport({
                     fill="url(#streakBlueGrad)"
                     dot={{
                       r: 4,
-                      fill: 'var(--series-blue)',
-                      stroke: 'var(--card)',
+                      fill: "var(--series-blue)",
+                      stroke: "var(--card)",
                       strokeWidth: 2,
                     }}
                     activeDot={{
                       r: 6,
-                      fill: 'var(--series-blue)',
-                      stroke: 'var(--tooltip-bg)',
+                      fill: "var(--series-blue)",
+                      stroke: "var(--tooltip-bg)",
                       strokeWidth: 2.5,
                     }}
                     isAnimationActive
@@ -1379,15 +1341,16 @@ export function WeeklyActivityReport({
       {/* Actionable AI Study Recommendations Based on Weekly Telemetry */}
       <div
         className="rounded-3xl p-5 sm:p-6 space-y-4 transition-colors"
-        style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+        style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 className="text-xl font-display font-extrabold">
               Recommended Next Sprints from Your Telemetry
             </h3>
-            <p className="text-xs sm:text-sm" style={{ color: 'var(--mute)' }}>
-              Click any topic below to launch targeted AI practice and boost your weekly mastery curve
+            <p className="text-xs sm:text-sm" style={{ color: "var(--mute)" }}>
+              Click any topic below to launch targeted AI practice and boost your weekly mastery
+              curve
             </p>
           </div>
         </div>
@@ -1395,25 +1358,25 @@ export function WeeklyActivityReport({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {[
             {
-              track: 'exam' as TrackId,
-              topic: 'Probability & combinatorics',
-              label: 'NSC / IEB STEM',
-              stat: '84% accuracy · +6% potential gain',
-              dotColor: 'var(--series-orange)',
+              track: "exam" as TrackId,
+              topic: "Probability & combinatorics",
+              label: "NSC / IEB STEM",
+              stat: "84% accuracy · +6% potential gain",
+              dotColor: "var(--series-orange)",
             },
             {
-              track: 'code' as TrackId,
-              topic: 'Dynamic programming',
-              label: 'Coding & CAPS IT',
-              stat: '79% accuracy · High-yield topic',
-              dotColor: 'var(--series-blue)',
+              track: "code" as TrackId,
+              topic: "Dynamic programming",
+              label: "Coding & CAPS IT",
+              stat: "79% accuracy · High-yield topic",
+              dotColor: "var(--series-blue)",
             },
             {
-              track: 'lang' as TrackId,
-              topic: 'Afrikaans & isiZulu FAL',
-              label: 'SA Languages',
-              stat: '88% accuracy · Ready for Hard level',
-              dotColor: 'var(--series-green)',
+              track: "lang" as TrackId,
+              topic: "Afrikaans & isiZulu FAL",
+              label: "SA Languages",
+              stat: "88% accuracy · Ready for Hard level",
+              dotColor: "var(--series-green)",
             },
           ].map((rec) => (
             <BouncySurface
@@ -1423,29 +1386,27 @@ export function WeeklyActivityReport({
                 onNotify(`Launched recommended drill: ${rec.topic}`);
               }}
               style={{
-                backgroundColor: 'var(--bg)',
-                border: '1px solid var(--line)',
+                backgroundColor: "var(--bg)",
+                border: "1px solid var(--line)",
               }}
               className="rounded-2xl p-4 flex items-center justify-between gap-3 cursor-pointer"
             >
               <div className="space-y-1 min-w-0">
-                <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--mute)' }}>
+                <div className="flex items-center gap-1.5 text-xs" style={{ color: "var(--mute)" }}>
                   <span
                     className="w-2.5 h-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: rec.dotColor }}
                   />
                   <span>{rec.label}</span>
                 </div>
-                <div className="font-display font-extrabold text-base truncate">
-                  {rec.topic}
-                </div>
-                <div className="text-xs" style={{ color: 'var(--mute)' }}>
+                <div className="font-display font-extrabold text-base truncate">{rec.topic}</div>
+                <div className="text-xs" style={{ color: "var(--mute)" }}>
                   {rec.stat}
                 </div>
               </div>
               <div
                 className="w-9 h-9 rounded-full grid place-items-center shrink-0"
-                style={{ backgroundColor: 'var(--card)' }}
+                style={{ backgroundColor: "var(--card)" }}
               >
                 <ArrowUpRight className="w-4 h-4" />
               </div>

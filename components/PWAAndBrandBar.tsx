@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Download,
   Share2,
@@ -25,31 +25,23 @@ import {
   ArrowUpRight,
   SlidersHorizontal,
   Palette,
-} from 'lucide-react';
-import {
-  usePWAInstall,
-  useOnlineStatus,
-  useNativeCapabilities,
-} from '@/hooks/usePWAInstall';
-import {
-  BrandSquircleLogo,
-  BrandLogoVariant,
-  BRAND_IDENTITY_PRESETS,
-} from './BrandMotifs';
-import { SpringButton, BouncySurface, SPRING_SNAPPY, SPRING_BOUNCY } from './PhysicsUI';
-import { useSoundSettings, SoundCueType } from '@/lib/sound-effects';
-import { HOMEWORK_ORDER_STORAGE_KEY } from './CatalogAndHomework';
-import { OpenSourceVoicePackList } from './OpenSourceVoiceManager';
+} from "lucide-react";
+import { usePWAInstall, useOnlineStatus, useNativeCapabilities } from "@/hooks/usePWAInstall";
+import { BrandSquircleLogo, BrandLogoVariant, BRAND_IDENTITY_PRESETS } from "./BrandMotifs";
+import { SpringButton, BouncySurface, SPRING_SNAPPY, SPRING_BOUNCY } from "./PhysicsUI";
+import { useSoundSettings, SoundCueType } from "@/lib/sound-effects";
+import { HOMEWORK_ORDER_STORAGE_KEY } from "./CatalogAndHomework";
+import { OpenSourceVoicePackList } from "./OpenSourceVoiceManager";
 
-export type ThemeMode = 'system' | 'light' | 'dark';
-type SettingsTab = 'study' | 'appearance' | 'system';
-type SACurriculumStream = 'CAPS (DBE NSC)' | 'IEB' | 'NBT University Entry';
+export type ThemeMode = "system" | "light" | "dark";
+type SettingsTab = "study" | "appearance" | "system";
+type SACurriculumStream = "CAPS (DBE NSC)" | "IEB" | "NBT University Entry";
 
 const GOAL_PRESETS = [3, 5, 10, 15, 20];
 const POMODORO_PRESETS = [
-  { mins: 15, label: '15m Sprint', desc: 'Fast recall burst' },
-  { mins: 25, label: '25m Classic', desc: 'Standard Pomodoro' },
-  { mins: 45, label: '45m Deep Work', desc: 'Exam simulation' },
+  { mins: 15, label: "15m Sprint", desc: "Fast recall burst" },
+  { mins: 25, label: "25m Classic", desc: "Standard Pomodoro" },
+  { mins: 45, label: "45m Deep Work", desc: "Exam simulation" },
 ];
 
 export function OfflineIndicator() {
@@ -65,7 +57,7 @@ export function OfflineIndicator() {
           transition={SPRING_SNAPPY}
           role="status"
           className="fixed bottom-24 left-4 z-50 flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold shadow-lg"
-          style={{ backgroundColor: 'var(--yl)', color: '#2D2D2B' }}
+          style={{ backgroundColor: "var(--yl)", color: "#2D2D2B" }}
         >
           <WifiOff className="w-3.5 h-3.5 shrink-0" />
           <span>Offline Mode — Cached study sets & local AI fallback active</span>
@@ -119,7 +111,7 @@ export function PWAInstallButton({
         aria-label={`Install ${brandName} Progressive Web App`}
       >
         <Download className="w-3.5 h-3.5" />
-        <span>{isIOS ? 'Install on iOS' : 'Install App'}</span>
+        <span>{isIOS ? "Install on iOS" : "Install App"}</span>
       </SpringButton>
 
       <AnimatePresence>
@@ -129,7 +121,7 @@ export function PWAInstallButton({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ backgroundColor: 'rgba(28, 28, 26, 0.62)' }}
+            style={{ backgroundColor: "rgba(28, 28, 26, 0.62)" }}
             onClick={() => setShowIOSGuide(false)}
           >
             <motion.div
@@ -140,19 +132,17 @@ export function PWAInstallButton({
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md rounded-3xl p-6 space-y-5 shadow-2xl"
               style={{
-                backgroundColor: 'var(--bg)',
-                color: 'var(--ink)',
-                border: '1px solid var(--line)',
+                backgroundColor: "var(--bg)",
+                color: "var(--ink)",
+                border: "1px solid var(--line)",
               }}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <BrandSquircleLogo variant={brandVariant} size="lg" />
                   <div>
-                    <h3 className="font-display font-extrabold text-xl">
-                      Install {brandName}
-                    </h3>
-                    <p className="text-xs" style={{ color: 'var(--mute)' }}>
+                    <h3 className="font-display font-extrabold text-xl">Install {brandName}</h3>
+                    <p className="text-xs" style={{ color: "var(--mute)" }}>
                       Full-screen standalone PWA · Offline ready
                     </p>
                   </div>
@@ -161,7 +151,7 @@ export function PWAInstallButton({
                   type="button"
                   onClick={() => setShowIOSGuide(false)}
                   className="p-2 rounded-full cursor-pointer"
-                  style={{ backgroundColor: 'var(--card)' }}
+                  style={{ backgroundColor: "var(--card)" }}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -169,7 +159,7 @@ export function PWAInstallButton({
 
               <div
                 className="rounded-2xl p-4 space-y-2.5 text-sm"
-                style={{ backgroundColor: 'var(--card)' }}
+                style={{ backgroundColor: "var(--card)" }}
               >
                 <div className="font-bold flex items-center gap-2">
                   <Smartphone className="w-4 h-4" />
@@ -177,16 +167,19 @@ export function PWAInstallButton({
                 </div>
                 <ol
                   className="list-decimal list-inside space-y-1.5 text-xs sm:text-sm"
-                  style={{ color: 'var(--mute)' }}
+                  style={{ color: "var(--mute)" }}
                 >
                   <li>
-                    On <strong>iOS Safari</strong>: Tap the <strong>Share</strong> icon in the browser bar, then select <strong>Add to Home Screen</strong>.
+                    On <strong>iOS Safari</strong>: Tap the <strong>Share</strong> icon in the
+                    browser bar, then select <strong>Add to Home Screen</strong>.
                   </li>
                   <li>
-                    On <strong>Chrome / Edge / Desktop</strong>: Click the install badge in the address bar (or open inside a top-level tab if viewing in a preview frame).
+                    On <strong>Chrome / Edge / Desktop</strong>: Click the install badge in the
+                    address bar (or open inside a top-level tab if viewing in a preview frame).
                   </li>
                   <li>
-                    Launch <strong>{brandName}</strong> directly from your home screen with adaptive status-bar theming and offline practice.
+                    Launch <strong>{brandName}</strong> directly from your home screen with adaptive
+                    status-bar theming and offline practice.
                   </li>
                 </ol>
               </div>
@@ -203,11 +196,7 @@ export function PWAInstallButton({
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Customize App Icon & Brand</span>
                 </SpringButton>
-                <SpringButton
-                  size="sm"
-                  variant="pink"
-                  onClick={() => setShowIOSGuide(false)}
-                >
+                <SpringButton size="sm" variant="pink" onClick={() => setShowIOSGuide(false)}>
                   Got it
                 </SpringButton>
               </div>
@@ -252,22 +241,18 @@ export function BrandAndNativeStudioModal({
   onOpenPlansView?: () => void;
   onNotify: (msg: string) => void;
 }) {
-  const [activeTab, setActiveTab] = useState<SettingsTab>('study');
+  const [activeTab, setActiveTab] = useState<SettingsTab>("study");
   const [pomodoroDefaultMins, setPomodoroDefaultMins] = useState<number>(25);
-  const [saCurriculum, setSaCurriculum] = useState<SACurriculumStream>('CAPS (DBE NSC)');
+  const [saCurriculum, setSaCurriculum] = useState<SACurriculumStream>("CAPS (DBE NSC)");
 
   const { swRegistered, isInstalled } = usePWAInstall();
-  const {
-    triggerHaptic,
-    shareStudyProgress,
-    wakeLockActive,
-    toggleFocusWakeLock,
-  } = useNativeCapabilities();
+  const { triggerHaptic, shareStudyProgress, wakeLockActive, toggleFocusWakeLock } =
+    useNativeCapabilities();
   const { muted: audioMuted, toggleMute: toggleAudioMute, playSound } = useSoundSettings();
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const savedPom = localStorage.getItem('learnflow-pomodoro-default-mins');
+    if (typeof window === "undefined") return;
+    const savedPom = localStorage.getItem("learnflow-pomodoro-default-mins");
     if (savedPom) {
       const parsed = parseInt(savedPom, 10);
       if (!isNaN(parsed)) setPomodoroDefaultMins(parsed);
@@ -276,33 +261,33 @@ export function BrandAndNativeStudioModal({
 
   const handleSelectPomodoroDefault = (mins: number) => {
     triggerHaptic(10);
-    playSound('option');
+    playSound("option");
     setPomodoroDefaultMins(mins);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('learnflow-pomodoro-default-mins', String(mins));
-      window.dispatchEvent(new Event('learnflow-pomodoro-updated'));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("learnflow-pomodoro-default-mins", String(mins));
+      window.dispatchEvent(new Event("learnflow-pomodoro-updated"));
     }
     onNotify(`Default Pomodoro focus sprint set to ${mins} minutes`);
   };
 
   const handleResetHomeworkQueue = () => {
     triggerHaptic(10);
-    playSound('tap');
-    if (typeof window !== 'undefined') {
+    playSound("tap");
+    if (typeof window !== "undefined") {
       localStorage.removeItem(HOMEWORK_ORDER_STORAGE_KEY);
-      window.dispatchEvent(new Event('learnflow-homework-order-updated'));
+      window.dispatchEvent(new Event("learnflow-homework-order-updated"));
     }
-    onNotify('Homework priority queue order reset to default');
+    onNotify("Homework priority queue order reset to default");
   };
 
   const currentBrand =
     BRAND_IDENTITY_PRESETS.find((b) => b.id === brandVariant) || BRAND_IDENTITY_PRESETS[0];
 
   const soundPreviewButtons: { label: string; cue: SoundCueType }[] = [
-    { label: 'Button Tap', cue: 'tap' },
-    { label: 'Quiz Mastered', cue: 'grade_success' },
-    { label: 'Step Unfold', cue: 'step_reveal' },
-    { label: 'Daily Goal Fanfare', cue: 'goal_reached' },
+    { label: "Button Tap", cue: "tap" },
+    { label: "Quiz Mastered", cue: "grade_success" },
+    { label: "Step Unfold", cue: "step_reveal" },
+    { label: "Daily Goal Fanfare", cue: "goal_reached" },
   ];
 
   return (
@@ -313,7 +298,7 @@ export function BrandAndNativeStudioModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ backgroundColor: 'rgba(28, 28, 26, 0.65)' }}
+          style={{ backgroundColor: "rgba(28, 28, 26, 0.65)" }}
           onClick={onClose}
         >
           <motion.div
@@ -324,9 +309,9 @@ export function BrandAndNativeStudioModal({
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-3xl rounded-[32px] p-5 sm:p-7 space-y-6 shadow-2xl max-h-[90dvh] overflow-y-auto"
             style={{
-              backgroundColor: 'var(--bg)',
-              color: 'var(--ink)',
-              border: '1px solid var(--line)',
+              backgroundColor: "var(--bg)",
+              color: "var(--ink)",
+              border: "1px solid var(--line)",
             }}
           >
             {/* Header */}
@@ -337,7 +322,7 @@ export function BrandAndNativeStudioModal({
                   <h2 className="font-display font-extrabold text-2xl sm:text-3xl">
                     Settings & Study Preferences
                   </h2>
-                  <p className="text-xs sm:text-sm" style={{ color: 'var(--mute)' }}>
+                  <p className="text-xs sm:text-sm" style={{ color: "var(--mute)" }}>
                     Study goals, membership plan, theme sync, brand icons & audio cues
                   </p>
                 </div>
@@ -346,7 +331,7 @@ export function BrandAndNativeStudioModal({
                 type="button"
                 onClick={onClose}
                 className="p-2 rounded-full cursor-pointer"
-                style={{ backgroundColor: 'var(--card)' }}
+                style={{ backgroundColor: "var(--card)" }}
                 aria-label="Close Settings"
               >
                 <X className="w-5 h-5" />
@@ -356,15 +341,15 @@ export function BrandAndNativeStudioModal({
             {/* Settings Category Tabs */}
             <div
               className="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl"
-              style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+              style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
               role="tablist"
               aria-label="Settings Categories"
             >
               {(
                 [
-                  { id: 'study', label: 'Study & SA Stream', icon: SlidersHorizontal },
-                  { id: 'appearance', label: 'Theme & Brand', icon: Palette },
-                  { id: 'system', label: 'Voices, Audio & PWA', icon: Volume2 },
+                  { id: "study", label: "Study & SA Stream", icon: SlidersHorizontal },
+                  { id: "appearance", label: "Theme & Brand", icon: Palette },
+                  { id: "system", label: "Voices, Audio & PWA", icon: Volume2 },
                 ] as const
               ).map((tab) => {
                 const Icon = tab.icon;
@@ -378,18 +363,18 @@ export function BrandAndNativeStudioModal({
                     whileTap={{ scale: 0.96 }}
                     transition={SPRING_SNAPPY}
                     onClick={() => {
-                      playSound('option');
+                      playSound("option");
                       setActiveTab(tab.id);
                     }}
                     className="relative py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm font-bold cursor-pointer"
-                    style={{ color: active ? '#2D2D2B' : 'var(--ink)' }}
+                    style={{ color: active ? "#2D2D2B" : "var(--ink)" }}
                   >
                     {active && (
                       <motion.span
                         layoutId="settingsModalTabPill"
                         transition={SPRING_BOUNCY}
                         className="absolute inset-0 rounded-xl"
-                        style={{ backgroundColor: 'var(--pk)' }}
+                        style={{ backgroundColor: "var(--pk)" }}
                       />
                     )}
                     <Icon className="w-4 h-4 relative z-10 shrink-0" />
@@ -400,7 +385,7 @@ export function BrandAndNativeStudioModal({
             </div>
 
             {/* TAB 1: STUDY GOALS, FOCUS TIMER, HOMEWORK QUEUE & PRO PLANS */}
-            {activeTab === 'study' && (
+            {activeTab === "study" && (
               <motion.div
                 key="tab-study"
                 initial={{ opacity: 0, y: 8 }}
@@ -412,26 +397,24 @@ export function BrandAndNativeStudioModal({
                 <div
                   className="rounded-3xl p-5 flex flex-wrap items-center justify-between gap-4"
                   style={{
-                    backgroundColor: isPro ? 'var(--gr)' : '#2D2D2B',
-                    color: isPro ? '#2D2D2B' : '#FFFCF5',
+                    backgroundColor: isPro ? "var(--gr)" : "#2D2D2B",
+                    color: isPro ? "#2D2D2B" : "#FFFCF5",
                   }}
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider opacity-85">
                       <Crown className="w-4 h-4" />
-                      <span>
-                        {isPro ? `${currentBrand.name} Pro Active` : 'Starter Free Plan'}
-                      </span>
+                      <span>{isPro ? `${currentBrand.name} Pro Active` : "Starter Free Plan"}</span>
                     </div>
                     <h3 className="font-display font-extrabold text-xl">
                       {isPro
-                        ? 'Unlimited AI questions & step-by-step tutor unlocked'
+                        ? "Unlimited AI questions & step-by-step tutor unlocked"
                         : `${freeQuestionsLeft} of 5 free daily AI questions remaining`}
                     </h3>
                     <p className="text-xs opacity-80">
                       {isPro
-                        ? 'Thank you for supporting adaptive AI learning.'
-                        : 'Upgrade to Pro for unlimited questions, full rubric breakdowns & exam mocks.'}
+                        ? "Thank you for supporting adaptive AI learning."
+                        : "Upgrade to Pro for unlimited questions, full rubric breakdowns & exam mocks."}
                     </p>
                   </div>
 
@@ -452,7 +435,7 @@ export function BrandAndNativeStudioModal({
                     {onOpenPlansView && (
                       <SpringButton
                         size="sm"
-                        variant={isPro ? 'card' : 'pink'}
+                        variant={isPro ? "card" : "pink"}
                         onClick={() => {
                           onOpenPlansView();
                           onClose();
@@ -468,7 +451,7 @@ export function BrandAndNativeStudioModal({
                 {/* Daily Study Goal Target & Progress Reset */}
                 <div
                   className="rounded-3xl p-5 sm:p-6 space-y-4 w-full"
-                  style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                  style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="space-y-1">
@@ -476,11 +459,11 @@ export function BrandAndNativeStudioModal({
                         <Target className="w-4 h-4 shrink-0" />
                         <span>Daily Study Goal Target</span>
                       </h3>
-                      <p className="text-xs sm:text-sm" style={{ color: 'var(--mute)' }}>
-                        Today’s progress:{' '}
-                        <strong style={{ color: 'var(--ink)' }}>
+                      <p className="text-xs sm:text-sm" style={{ color: "var(--mute)" }}>
+                        Today’s progress:{" "}
+                        <strong style={{ color: "var(--ink)" }}>
                           {dailyCompleted} / {dailyTarget}
-                        </strong>{' '}
+                        </strong>{" "}
                         questions completed
                       </p>
                     </div>
@@ -489,13 +472,13 @@ export function BrandAndNativeStudioModal({
                       <div className="flex items-center justify-between sm:justify-end gap-2.5 shrink-0">
                         <div
                           className="inline-flex items-center gap-1.5 p-1 rounded-2xl"
-                          style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--line)' }}
+                          style={{ backgroundColor: "var(--bg)", border: "1px solid var(--line)" }}
                         >
                           <button
                             type="button"
                             onClick={() => onUpdateDailyTarget(Math.max(1, dailyTarget - 1))}
                             className="w-9 h-9 rounded-xl grid place-items-center cursor-pointer transition-transform active:scale-90"
-                            style={{ backgroundColor: 'var(--card)' }}
+                            style={{ backgroundColor: "var(--card)" }}
                             aria-label="Decrease daily target"
                           >
                             <Minus className="w-4 h-4" />
@@ -507,7 +490,7 @@ export function BrandAndNativeStudioModal({
                             type="button"
                             onClick={() => onUpdateDailyTarget(Math.min(50, dailyTarget + 1))}
                             className="w-9 h-9 rounded-xl grid place-items-center cursor-pointer transition-transform active:scale-90"
-                            style={{ backgroundColor: 'var(--card)' }}
+                            style={{ backgroundColor: "var(--card)" }}
                             aria-label="Increase daily target"
                           >
                             <Plus className="w-4 h-4" />
@@ -515,11 +498,7 @@ export function BrandAndNativeStudioModal({
                         </div>
 
                         {onResetTodayProgress && dailyCompleted > 0 && (
-                          <SpringButton
-                            size="sm"
-                            variant="soft"
-                            onClick={onResetTodayProgress}
-                          >
+                          <SpringButton size="sm" variant="soft" onClick={onResetTodayProgress}>
                             <RotateCcw className="w-3.5 h-3.5" />
                             <span>Reset ({dailyCompleted})</span>
                           </SpringButton>
@@ -531,7 +510,7 @@ export function BrandAndNativeStudioModal({
                   {/* Full-Width Progress Bar */}
                   <div
                     className="w-full h-2.5 rounded-full overflow-hidden p-0.5"
-                    style={{ backgroundColor: 'var(--bg)', border: '1px solid var(--line)' }}
+                    style={{ backgroundColor: "var(--bg)", border: "1px solid var(--line)" }}
                   >
                     <motion.div
                       initial={false}
@@ -541,8 +520,7 @@ export function BrandAndNativeStudioModal({
                       transition={SPRING_SNAPPY}
                       className="h-full rounded-full"
                       style={{
-                        backgroundColor:
-                          dailyCompleted >= dailyTarget ? 'var(--gr)' : 'var(--pk)',
+                        backgroundColor: dailyCompleted >= dailyTarget ? "var(--gr)" : "var(--pk)",
                       }}
                     />
                   </div>
@@ -559,11 +537,9 @@ export function BrandAndNativeStudioModal({
                             onClick={() => onUpdateDailyTarget(preset)}
                             className="w-full py-2.5 px-2 rounded-xl text-xs sm:text-sm font-extrabold cursor-pointer tabular-nums text-center whitespace-nowrap transition-transform active:scale-95"
                             style={{
-                              backgroundColor: active ? 'var(--yl)' : 'var(--bg)',
-                              color: active ? '#2D2D2B' : 'var(--ink)',
-                              border: active
-                                ? '2px solid #2D2D2B'
-                                : '1px solid var(--line)',
+                              backgroundColor: active ? "var(--yl)" : "var(--bg)",
+                              color: active ? "#2D2D2B" : "var(--ink)",
+                              border: active ? "2px solid #2D2D2B" : "1px solid var(--line)",
                             }}
                           >
                             {preset} Qs
@@ -577,14 +553,14 @@ export function BrandAndNativeStudioModal({
                 {/* Default Pomodoro Focus Timer Preset */}
                 <div
                   className="rounded-2xl p-4 sm:p-5 space-y-3"
-                  style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                  style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
                 >
                   <div>
                     <h3 className="font-display font-extrabold text-lg flex items-center gap-2">
                       <Clock className="w-4 h-4" />
                       <span>Default Pomodoro Focus Sprint</span>
                     </h3>
-                    <p className="text-xs" style={{ color: 'var(--mute)' }}>
+                    <p className="text-xs" style={{ color: "var(--mute)" }}>
                       Sets the default countdown interval in the AI Practice studio
                     </p>
                   </div>
@@ -599,14 +575,12 @@ export function BrandAndNativeStudioModal({
                           onClick={() => handleSelectPomodoroDefault(preset.mins)}
                           className="p-3 rounded-xl text-left cursor-pointer transition-transform active:scale-95"
                           style={{
-                            backgroundColor: active ? 'var(--bl)' : 'var(--bg)',
-                            color: active ? '#2D2D2B' : 'var(--ink)',
-                            border: active ? '2px solid #2D2D2B' : '1px solid var(--line)',
+                            backgroundColor: active ? "var(--bl)" : "var(--bg)",
+                            color: active ? "#2D2D2B" : "var(--ink)",
+                            border: active ? "2px solid #2D2D2B" : "1px solid var(--line)",
                           }}
                         >
-                          <div className="font-display font-extrabold text-sm">
-                            {preset.label}
-                          </div>
+                          <div className="font-display font-extrabold text-sm">{preset.label}</div>
                           <div className="text-[11px] opacity-75">{preset.desc}</div>
                         </button>
                       );
@@ -617,48 +591,47 @@ export function BrandAndNativeStudioModal({
                 {/* South African Curriculum Stream Selector */}
                 <div
                   className="rounded-2xl p-4 sm:p-5 space-y-3"
-                  style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                  style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
                 >
                   <div>
                     <h3 className="font-display font-extrabold text-lg">
                       South African Curriculum Stream
                     </h3>
-                    <p className="text-xs" style={{ color: 'var(--mute)' }}>
-                      Tailors STEM formulas, marking rubrics, and past-paper style to your SA exam board
+                    <p className="text-xs" style={{ color: "var(--mute)" }}>
+                      Tailors STEM formulas, marking rubrics, and past-paper style to your SA exam
+                      board
                     </p>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {(
-                      [
-                        {
-                          id: 'CAPS (DBE NSC)' as const,
-                          desc: 'National Senior Certificate Paper 1 & 2',
-                        },
-                        {
-                          id: 'IEB' as const,
-                          desc: 'Independent Examinations Board + AP Maths',
-                        },
-                        {
-                          id: 'NBT University Entry' as const,
-                          desc: 'NBT MAT & AQL for UCT, Wits, UP, Maties',
-                        },
-                      ]
-                    ).map((stream) => {
+                    {[
+                      {
+                        id: "CAPS (DBE NSC)" as const,
+                        desc: "National Senior Certificate Paper 1 & 2",
+                      },
+                      {
+                        id: "IEB" as const,
+                        desc: "Independent Examinations Board + AP Maths",
+                      },
+                      {
+                        id: "NBT University Entry" as const,
+                        desc: "NBT MAT & AQL for UCT, Wits, UP, Maties",
+                      },
+                    ].map((stream) => {
                       const active = saCurriculum === stream.id;
                       return (
                         <button
                           key={stream.id}
                           type="button"
                           onClick={() => {
-                            playSound('option');
+                            playSound("option");
                             setSaCurriculum(stream.id);
                             onNotify(`Curriculum stream set to ${stream.id}`);
                           }}
                           className="p-3 rounded-xl text-left cursor-pointer transition-transform active:scale-95"
                           style={{
-                            backgroundColor: active ? 'var(--gr)' : 'var(--bg)',
-                            color: active ? '#2D2D2B' : 'var(--ink)',
-                            border: active ? '2px solid #2D2D2B' : '1px solid var(--line)',
+                            backgroundColor: active ? "var(--gr)" : "var(--bg)",
+                            color: active ? "#2D2D2B" : "var(--ink)",
+                            border: active ? "2px solid #2D2D2B" : "1px solid var(--line)",
                           }}
                         >
                           <div className="font-display font-extrabold text-xs sm:text-sm">
@@ -674,21 +647,17 @@ export function BrandAndNativeStudioModal({
                 {/* Homework Priority Queue Reset */}
                 <div
                   className="rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3"
-                  style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                  style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
                 >
                   <div>
                     <div className="font-display font-extrabold text-base">
                       Homework Priority Queue Order
                     </div>
-                    <p className="text-xs" style={{ color: 'var(--mute)' }}>
+                    <p className="text-xs" style={{ color: "var(--mute)" }}>
                       Restore the default priority sequence for your drag-and-drop homework cards
                     </p>
                   </div>
-                  <SpringButton
-                    size="sm"
-                    variant="soft"
-                    onClick={handleResetHomeworkQueue}
-                  >
+                  <SpringButton size="sm" variant="soft" onClick={handleResetHomeworkQueue}>
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Reset Homework Order</span>
                   </SpringButton>
@@ -697,7 +666,7 @@ export function BrandAndNativeStudioModal({
             )}
 
             {/* TAB 2: APPEARANCE, THEME SYNC & BRAND IDENTITY */}
-            {activeTab === 'appearance' && (
+            {activeTab === "appearance" && (
               <motion.div
                 key="tab-appearance"
                 initial={{ opacity: 0, y: 8 }}
@@ -711,20 +680,20 @@ export function BrandAndNativeStudioModal({
                     <h3 className="font-display font-extrabold text-lg">
                       Seamless Browser & OS Theme Sync
                     </h3>
-                    <span className="text-xs" style={{ color: 'var(--mute)' }}>
+                    <span className="text-xs" style={{ color: "var(--mute)" }}>
                       Syncs status bar, overscroll & color-scheme
                     </span>
                   </div>
 
                   <div
                     className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl"
-                    style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                    style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
                   >
                     {(
                       [
-                        { id: 'system', label: 'System Auto', icon: Monitor },
-                        { id: 'light', label: 'Warm Cream', icon: Sun },
-                        { id: 'dark', label: 'Obsidian Ink', icon: Moon },
+                        { id: "system", label: "System Auto", icon: Monitor },
+                        { id: "light", label: "Warm Cream", icon: Sun },
+                        { id: "dark", label: "Obsidian Ink", icon: Moon },
                       ] as const
                     ).map((mode) => {
                       const Icon = mode.icon;
@@ -736,13 +705,13 @@ export function BrandAndNativeStudioModal({
                           whileTap={{ scale: 0.95 }}
                           onClick={() => {
                             triggerHaptic(10);
-                            playSound('option');
+                            playSound("option");
                             onSelectThemeMode(mode.id);
                           }}
                           className="py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold cursor-pointer"
                           style={{
-                            backgroundColor: active ? 'var(--yl)' : 'transparent',
-                            color: active ? '#2D2D2B' : 'var(--ink)',
+                            backgroundColor: active ? "var(--yl)" : "transparent",
+                            color: active ? "#2D2D2B" : "var(--ink)",
                           }}
                         >
                           <Icon className="w-4 h-4 shrink-0" />
@@ -759,7 +728,7 @@ export function BrandAndNativeStudioModal({
                     <h3 className="font-display font-extrabold text-lg">
                       Brand Identity & Squircle App Icon
                     </h3>
-                    <span className="text-xs font-semibold" style={{ color: 'var(--mute)' }}>
+                    <span className="text-xs font-semibold" style={{ color: "var(--mute)" }}>
                       Active: {currentBrand.name}
                     </span>
                   </div>
@@ -776,8 +745,8 @@ export function BrandAndNativeStudioModal({
                             onNotify(`Switched brand identity to ${preset.name}`);
                           }}
                           style={{
-                            backgroundColor: active ? 'var(--pks)' : 'var(--card)',
-                            border: active ? '2px solid var(--pk)' : '1px solid var(--line)',
+                            backgroundColor: active ? "var(--pks)" : "var(--card)",
+                            border: active ? "2px solid var(--pk)" : "1px solid var(--line)",
                           }}
                           className="rounded-2xl p-4 flex items-center gap-3.5 cursor-pointer"
                         >
@@ -791,7 +760,7 @@ export function BrandAndNativeStudioModal({
                             </div>
                             <p
                               className="text-xs font-medium truncate"
-                              style={{ color: 'var(--mute)' }}
+                              style={{ color: "var(--mute)" }}
                             >
                               {preset.inspirationNote}
                             </p>
@@ -805,7 +774,7 @@ export function BrandAndNativeStudioModal({
             )}
 
             {/* TAB 3: OPEN-SOURCE NEURAL VOICES, AUDIO CUES & NATIVE PWA CAPABILITIES */}
-            {activeTab === 'system' && (
+            {activeTab === "system" && (
               <motion.div
                 key="tab-system"
                 initial={{ opacity: 0, y: 8 }}
@@ -816,7 +785,7 @@ export function BrandAndNativeStudioModal({
                 {/* Open-Source Neural Voice Pack Manager (Download Size, Progress & Preview) */}
                 <div
                   className="rounded-3xl p-4 sm:p-5"
-                  style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                  style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
                 >
                   <OpenSourceVoicePackList onNotify={onNotify} compact />
                 </div>
@@ -828,22 +797,23 @@ export function BrandAndNativeStudioModal({
                       <h3 className="font-display font-extrabold text-lg">
                         Subtle Audio Cues & Sound Feedback
                       </h3>
-                      <p className="text-xs" style={{ color: 'var(--mute)' }}>
-                        Synthesized harmonic cues for button presses, quiz grading & daily study goals
+                      <p className="text-xs" style={{ color: "var(--mute)" }}>
+                        Synthesized harmonic cues for button presses, quiz grading & daily study
+                        goals
                       </p>
                     </div>
 
                     <SpringButton
                       size="sm"
-                      variant={audioMuted ? 'card' : 'green'}
+                      variant={audioMuted ? "card" : "green"}
                       soundCue={false}
                       onClick={() => {
                         triggerHaptic(10);
                         const nowMuted = toggleAudioMute();
                         onNotify(
                           nowMuted
-                            ? 'Interaction audio cues muted'
-                            : 'Interaction audio cues enabled'
+                            ? "Interaction audio cues muted"
+                            : "Interaction audio cues enabled",
                         );
                       }}
                     >
@@ -863,9 +833,9 @@ export function BrandAndNativeStudioModal({
 
                   <div
                     className="rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-2"
-                    style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                    style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
                   >
-                    <span className="text-xs font-semibold" style={{ color: 'var(--mute)' }}>
+                    <span className="text-xs font-semibold" style={{ color: "var(--mute)" }}>
                       Test sound cues:
                     </span>
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -879,9 +849,9 @@ export function BrandAndNativeStudioModal({
                           onClick={() => playSound(item.cue)}
                           className="px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed"
                           style={{
-                            backgroundColor: 'var(--bg)',
-                            color: 'var(--ink)',
-                            border: '1px solid var(--line)',
+                            backgroundColor: "var(--bg)",
+                            color: "var(--ink)",
+                            border: "1px solid var(--line)",
                           }}
                         >
                           {item.label}
@@ -900,7 +870,7 @@ export function BrandAndNativeStudioModal({
                     <PWAInstallButton
                       brandVariant={brandVariant}
                       brandName={currentBrand.name}
-                      onOpenBrandStudio={() => setActiveTab('appearance')}
+                      onOpenBrandStudio={() => setActiveTab("appearance")}
                       onNotify={onNotify}
                     />
                   </div>
@@ -913,8 +883,8 @@ export function BrandAndNativeStudioModal({
                         triggerHaptic(15);
                         onNotify(
                           active
-                            ? 'Study Focus WakeLock ON: Screen will stay awake during practice'
-                            : 'Study Focus WakeLock OFF'
+                            ? "Study Focus WakeLock ON: Screen will stay awake during practice"
+                            : "Study Focus WakeLock OFF",
                         );
                       }}
                       className="justify-between py-3 px-4"
@@ -923,7 +893,7 @@ export function BrandAndNativeStudioModal({
                         <Zap className="w-4 h-4" />
                         <span>Screen WakeLock</span>
                       </span>
-                      <span className="font-bold">{wakeLockActive ? 'ON' : 'OFF'}</span>
+                      <span className="font-bold">{wakeLockActive ? "ON" : "OFF"}</span>
                     </SpringButton>
 
                     <SpringButton
@@ -933,12 +903,12 @@ export function BrandAndNativeStudioModal({
                         triggerHaptic([12, 40, 12]);
                         const res = await shareStudyProgress(
                           `${currentBrand.name} Study Streak`,
-                          `Practicing adaptive AI questions on ${currentBrand.name}!`
+                          `Practicing adaptive AI questions on ${currentBrand.name}!`,
                         );
                         onNotify(
-                          res === 'shared'
-                            ? 'Shared via native OS share sheet!'
-                            : 'Study link copied to clipboard!'
+                          res === "shared"
+                            ? "Shared via native OS share sheet!"
+                            : "Study link copied to clipboard!",
                         );
                       }}
                       className="justify-center py-3 px-4"
@@ -949,11 +919,11 @@ export function BrandAndNativeStudioModal({
 
                     <div
                       className="rounded-full px-4 py-3 text-xs font-semibold flex items-center justify-between"
-                      style={{ backgroundColor: 'var(--card)', border: '1px solid var(--line)' }}
+                      style={{ backgroundColor: "var(--card)", border: "1px solid var(--line)" }}
                     >
                       <span>Service Worker</span>
                       <span className="font-bold">
-                        {isInstalled ? 'Standalone' : swRegistered ? 'Active' : 'Ready'}
+                        {isInstalled ? "Standalone" : swRegistered ? "Active" : "Ready"}
                       </span>
                     </div>
                   </div>
@@ -966,4 +936,3 @@ export function BrandAndNativeStudioModal({
     </AnimatePresence>
   );
 }
-

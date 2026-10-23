@@ -1,9 +1,11 @@
 # Mentra visual learning and motion quality
 
 ## Design intent
+
 Keep Mentra's existing warm cream, yellow, blue, green and pink palette, typography, spring motion, and dark-mode support. The reference images inspire clear diagram-first learning but are not reproduced as static screenshots. Accessible, manipulable models are more helpful than ornamental animation.
 
 ## Implemented
+
 - **Interactive visual lab** beside the existing practice question. It is only offered for clearly related exam topics, so an unrelated graph is never presented as if it were the AI question's solution.
 - **Quadratic functions:** responsive SVG plot, reference parabola, turning point and symmetry guide, horizontal/vertical sliders, reflection toggle, reset action and live statement of the number of real roots. The starting example uses the existing exam parabola with vertex (3, 4).
 - **Trigonometry:** synchronized cosine wave and unit circle, angle slider, live sin/cos values, play/pause animation.
