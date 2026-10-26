@@ -16,7 +16,7 @@
     "test": "npm run test:visualizations"
   },
   "dependencies": {
-    "@google/genai": "^2.4.0",
+    "@google/genai": "^2.31.0",
     "@types/canvas-confetti": "^1.9.0",
     "@types/katex": "^0.16.8",
     "@types/three": "^0.186.0",
