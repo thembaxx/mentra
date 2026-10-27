@@ -182,6 +182,24 @@ export function HeroThreeScene({
     waveGroup.add(boltKnob);
     rootGroup.add(waveGroup);
 
+    // Original, low-polygon study-book vignette balances the existing hero shapes.
+    // No externally licensed GLB assets are bundled with the public repository.
+    const bookGeometry = new THREE.BoxGeometry(0.96, 0.15, 0.7);
+    const bookGroup = new THREE.Group();
+    bookGroup.position.set(-2.25, -1.4, -0.15);
+    [
+      { y: 0, angle: -0.22, material: matGreen },
+      { y: 0.18, angle: 0.16, material: matCream },
+      { y: 0.36, angle: -0.1, material: matPink },
+    ].forEach(({ y, angle, material }) => {
+      const book = new THREE.Mesh(bookGeometry, material);
+      book.position.y = y;
+      book.rotation.y = angle;
+      book.castShadow = !isHeadless;
+      bookGroup.add(book);
+    });
+    rootGroup.add(bookGroup);
+
     // 4. Instanced Orbiting Knowledge Nodes (24 spheres)
     const nodeCount = 24;
     const nodeGeo = new THREE.SphereGeometry(0.11, 16, 16);
@@ -306,6 +324,7 @@ export function HeroThreeScene({
       cancelAnimationFrame(frameId);
       window.removeEventListener("resize", handleResize);
       renderer.domElement.removeEventListener("webglcontextlost", handleCanvasLoss);
+      bookGeometry.dispose();
       petalGeo.dispose();
       coreGeo.dispose();
       rayGeo.dispose();
