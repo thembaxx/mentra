@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Home,
@@ -39,6 +39,15 @@ import { GlobalSearchBar } from "@/components/GlobalSearchBar";
 import { WeeklyActivityReport } from "@/components/WeeklyActivityReport";
 import { useNativeCapabilities } from "@/hooks/usePWAInstall";
 
+import {
+  STUDY_ACTIVITY_KEY,
+  emptyStudyActivity,
+  parseStudyActivity,
+  recordQuestionCompletion,
+  resetTodayCounter,
+  studyActivitySummary,
+} from "@/lib/study-activity";
+
 type ViewId = "home" | "practice" | "catalog" | "activity" | "plans";
 
 export default function LearnFlowApp() {
@@ -58,9 +67,13 @@ export default function LearnFlowApp() {
 
   // Daily Study Goal & Streak Tracking state
   const [dailyTarget, setDailyTarget] = useState<number>(5);
-  const [dailyCompleted, setDailyCompleted] = useState<number>(3);
-  const [streakDays, setStreakDays] = useState<number>(7);
-  const [celebratedToday, setCelebratedToday] = useState<boolean>(false);
+  const [activity, setActivity] = useState(emptyStudyActivity);
+  const activityRef = useRef(activity);
+  const [clock, setClock] = useState(Date.now);
+  const summary = studyActivitySummary(activity, dailyTarget, clock);
+  const dailyCompleted = summary.dailyCompleted;
+  const streakDays = summary.streakDays;
+  const celebratedToday = summary.achievedToday;
 
   // Paywall & Toast states
   const [paywallOpen, setPaywallOpen] = useState<boolean>(false);
@@ -120,16 +133,12 @@ export default function LearnFlowApp() {
       if (!isNaN(parsed) && parsed >= 1 && parsed <= 50) setDailyTarget(parsed);
     }
 
-    const savedCompleted = localStorage.getItem("learnflow-daily-completed");
-    if (savedCompleted) {
-      const parsed = parseInt(savedCompleted, 10);
-      if (!isNaN(parsed) && parsed >= 0) setDailyCompleted(parsed);
-    }
-
-    const savedStreak = localStorage.getItem("learnflow-streak-days");
-    if (savedStreak) {
-      const parsed = parseInt(savedStreak, 10);
-      if (!isNaN(parsed) && parsed >= 1) setStreakDays(parsed);
+    try {
+      const restored = parseStudyActivity(localStorage.getItem(STUDY_ACTIVITY_KEY));
+      activityRef.current = restored;
+      setActivity(restored);
+    } catch {
+      showToast("Practice is available; this browser could not read saved activity.");
     }
 
     // Handle native PWA launcher shortcut URLs (/?track=exam | code | lang)
@@ -164,59 +173,69 @@ export default function LearnFlowApp() {
     return () => clearTimeout(timer);
   }, [toastMessage]);
 
-  const handleUpdateDailyTarget = useCallback(
-    (newTarget: number) => {
-      triggerHaptic(10);
-      setDailyTarget(newTarget);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("learnflow-daily-target", String(newTarget));
-      }
-      if (dailyCompleted >= newTarget && !celebratedToday) {
-        setCelebratedToday(true);
-        fireLearnFlowConfetti();
-        showToast(`Daily goal of ${newTarget} questions achieved! Streak extended!`);
-      } else {
-        showToast(`Daily study target updated to ${newTarget} questions/day`);
+  useEffect(() => {
+    const refresh = () => setClock(Date.now());
+    const timer = window.setInterval(refresh, 30_000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, []);
+
+  const saveActivity = useCallback(
+    (next: ReturnType<typeof emptyStudyActivity>) => {
+      activityRef.current = next;
+      setActivity(next);
+      setClock(Date.now());
+      try {
+        localStorage.setItem(STUDY_ACTIVITY_KEY, JSON.stringify(next));
+      } catch {
+        showToast("Activity is only in this session. Browser storage could not save it.");
       }
     },
-    [dailyCompleted, celebratedToday, showToast, triggerHaptic],
+    [showToast],
   );
 
-  const handleIncrementDailyCompleted = useCallback(() => {
-    triggerHaptic(15);
-    setDailyCompleted((prev) => {
-      const next = prev + 1;
-      if (typeof window !== "undefined") {
-        localStorage.setItem("learnflow-daily-completed", String(next));
+  const handleUpdateDailyTarget = useCallback(
+    (newTarget: number) => {
+      if (!Number.isInteger(newTarget) || newTarget < 1 || newTarget > 50) return;
+      setDailyTarget(newTarget);
+      try {
+        localStorage.setItem("learnflow-daily-target", String(newTarget));
+      } catch {
+        showToast("Daily target could not be saved on this device.");
+        return;
       }
-      if (next >= dailyTarget && prev < dailyTarget) {
-        setCelebratedToday(true);
-        setStreakDays((s) => {
-          const nextStreak = s + 1;
-          if (typeof window !== "undefined") {
-            localStorage.setItem("learnflow-streak-days", String(nextStreak));
-          }
-          return nextStreak;
-        });
-        fireLearnFlowConfetti();
-        showToast(`Daily study goal complete (${next}/${dailyTarget})! Streak extended!`);
-      } else {
-        showToast(`Progress logged: ${next} of ${dailyTarget} daily questions completed`);
+      showToast(`Daily target updated to ${newTarget}. Recorded study days stay unchanged.`);
+    },
+    [showToast],
+  );
+
+  const handleIncrementDailyCompleted = useCallback(
+    (questionId: string) => {
+      const result = recordQuestionCompletion(activityRef.current, questionId, dailyTarget);
+      saveActivity(result.activity);
+      if (!result.newCompletion) {
+        showToast("This question is already recorded for today.");
+        return;
       }
-      return next;
-    });
-    setHeroPulse((p) => p + 1);
-  }, [dailyTarget, showToast, triggerHaptic]);
+      triggerHaptic(15);
+      if (result.goalJustAchieved) fireLearnFlowConfetti();
+      showToast(
+        result.goalJustAchieved
+          ? "Today's practice goal is complete."
+          : "Practice attempt recorded; correctness is shown separately.",
+      );
+      setHeroPulse((p) => p + 1);
+    },
+    [dailyTarget, saveActivity, showToast, triggerHaptic],
+  );
 
   const handleResetTodayProgress = useCallback(() => {
-    triggerHaptic(10);
-    setDailyCompleted(0);
-    setCelebratedToday(false);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("learnflow-daily-completed", "0");
-    }
-    showToast("Reset today's study goal counter");
-  }, [showToast, triggerHaptic]);
+    saveActivity(resetTodayCounter(activityRef.current));
+    showToast("Visible counter reset. Recorded questions and earned study days are retained.");
+  }, [saveActivity, showToast]);
 
   const handleSelectThemeMode = (mode: ThemeMode) => {
     setThemeMode(mode);
@@ -260,7 +279,7 @@ export default function LearnFlowApp() {
     setIsPro(true);
     setPaywallOpen(false);
     fireLearnFlowConfetti();
-    showToast("Pro 7-day trial started! Unlimited AI questions & step-by-step tutor unlocked.");
+    showToast("Pro preview enabled for this session. No subscription or trial has started.");
   }, [showToast, triggerHaptic]);
 
   const navigateToPractice = (
@@ -285,7 +304,7 @@ export default function LearnFlowApp() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const goalCompletedToday = dailyCompleted >= dailyTarget;
+  const goalCompletedToday = summary.achievedToday;
 
   return (
     <div className="min-h-[100dvh] pb-32">
@@ -581,12 +600,28 @@ export default function LearnFlowApp() {
 
                   {/* Daily Study Goal Tracker Card with Visual Progress Ring & Confetti */}
                   <DailyStudyGoalCard
+                    totalCompletedToday={summary.totalCompletedToday}
+                    weeklyActivity={Array.from({ length: 7 }, (_, index) => {
+                      const date = new Date(
+                        Date.parse(summary.today + "T12:00:00Z") - (6 - index) * 86_400_000,
+                      );
+                      const day = date.toISOString().slice(0, 10);
+                      return {
+                        date: day,
+                        label: date.toLocaleDateString("en-ZA", {
+                          weekday: "short",
+                          timeZone: "Africa/Johannesburg",
+                        }),
+                        count: activity.days[day]?.questionIds.length ?? 0,
+                        achieved: activity.days[day]?.achieved ?? false,
+                      };
+                    })}
                     completedCount={dailyCompleted}
                     targetCount={dailyTarget}
                     streakDays={streakDays}
                     goalCompletedToday={goalCompletedToday}
                     onUpdateTarget={handleUpdateDailyTarget}
-                    onIncrementCompleted={handleIncrementDailyCompleted}
+                    onIncrementCompleted={() => navigateToPractice(activeTrack)}
                     onResetTodayProgress={handleResetTodayProgress}
                     onStartPractice={() => navigateToPractice(activeTrack)}
                   />
