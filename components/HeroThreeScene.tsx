@@ -49,7 +49,7 @@ export function HeroThreeScene({
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
-    renderer.setPixelRatio(isHeadless ? 1 : Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(isHeadless ? 1 : Math.min(window.devicePixelRatio, 1.5));
     renderer.shadowMap.enabled = !isHeadless;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -246,10 +246,19 @@ export function HeroThreeScene({
 
     renderer.compile(scene, camera);
 
+    let contextLost = false;
     const handleCanvasLoss = (e: Event) => {
       e.preventDefault();
+      contextLost = true;
+      cancelAnimationFrame(frameId);
+      frameId = 0;
+    };
+    const handleCanvasRestore = () => {
+      contextLost = false;
+      updateLoop();
     };
     renderer.domElement.addEventListener("webglcontextlost", handleCanvasLoss);
+    renderer.domElement.addEventListener("webglcontextrestored", handleCanvasRestore);
 
     const handleResize = () => {
       if (!container) return;
@@ -259,16 +268,22 @@ export function HeroThreeScene({
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
+    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(handleResize);
+    resizeObserver?.observe(container);
     window.addEventListener("resize", handleResize);
 
     const clock = new THREE.Clock();
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let inViewport = true;
+    let elapsed = 0;
     let frameId = 0;
     let rotBoost = 0;
 
     const animate = () => {
-      frameId = requestAnimationFrame(animate);
+      frameId = 0;
+      if (contextLost || document.hidden || !inViewport || reduceMotion.matches) return;
       const dt = Math.min(clock.getDelta(), 0.05);
-      const elapsed = clock.getElapsedTime();
+      elapsed += dt;
 
       // Smoothly decay click/action impulse
       impulseRef.current = THREE.MathUtils.damp(impulseRef.current, 0, 3.2, dt);
@@ -316,14 +331,40 @@ export function HeroThreeScene({
       nodesInstanced.instanceMatrix.needsUpdate = true;
 
       renderer.render(scene, camera);
+      frameId = requestAnimationFrame(animate);
     };
 
-    animate();
+    // Render only while the sculpture is visible and the user allows motion.
+    const updateLoop = () => {
+      cancelAnimationFrame(frameId);
+      frameId = 0;
+      if (contextLost) return;
+      if (document.hidden || !inViewport || reduceMotion.matches) {
+        renderer.render(scene, camera);
+        return;
+      }
+      // Discard elapsed idle time before restarting the animation clock.
+      clock.getDelta();
+      frameId = requestAnimationFrame(animate);
+    };
+    const observer = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(
+      ([entry]) => { inViewport = entry.isIntersecting; updateLoop(); },
+      { threshold: 0.01 },
+    );
+    observer?.observe(container);
+    document.addEventListener("visibilitychange", updateLoop);
+    reduceMotion.addEventListener("change", updateLoop);
+    updateLoop();
 
     return () => {
       cancelAnimationFrame(frameId);
+      observer?.disconnect();
+      resizeObserver?.disconnect();
+      document.removeEventListener("visibilitychange", updateLoop);
+      reduceMotion.removeEventListener("change", updateLoop);
       window.removeEventListener("resize", handleResize);
       renderer.domElement.removeEventListener("webglcontextlost", handleCanvasLoss);
+      renderer.domElement.removeEventListener("webglcontextrestored", handleCanvasRestore);
       bookGeometry.dispose();
       petalGeo.dispose();
       coreGeo.dispose();
@@ -367,7 +408,8 @@ export function HeroThreeScene({
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
       onClick={handleClickBounce}
-      title="Click or move cursor to interact with 3D study sculptures"
+      title="Decorative 3D study sculpture. Move pointer to gently interact."
+      aria-hidden="true"
       className="absolute inset-0 z-[1] cursor-grab active:cursor-grabbing"
     />
   );
