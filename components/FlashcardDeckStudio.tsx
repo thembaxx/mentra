@@ -44,7 +44,7 @@ interface FlashcardDeckStudioProps {
   onChangeCustomTopic: (val: string) => void;
   onConsumeQuota: () => boolean;
   onNotify: (msg: string) => void;
-  onCardMastered?: () => void;
+  onCardMastered?: (cardId: string) => void;
 }
 
 export function FlashcardDeckStudio({
@@ -139,7 +139,7 @@ export function FlashcardDeckStudio({
 
       if (direction === "right") {
         const firstMastery = !masteredIds[cardId];
-        if (firstMastery) onCardMastered?.();
+        if (firstMastery) onCardMastered?.(currentCard.id);
         if (
           firstMastery &&
           fullTrackDeck.every((card) => card.id === cardId || masteredIds[card.id])

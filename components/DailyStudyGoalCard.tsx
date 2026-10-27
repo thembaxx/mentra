@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import confetti from "canvas-confetti";
 import {
@@ -26,11 +26,10 @@ import {
 } from "lucide-react";
 import { FlowerShape, StarburstShape } from "./BrandMotifs";
 import { SpringButton, SPRING_SNAPPY, SPRING_BOUNCY } from "./PhysicsUI";
-import { DirectInspiredTooltipCard } from "./WeeklyActivityReport";
+
 import { playSoundCue } from "@/lib/sound-effects";
 
 const PRESET_TARGETS = [3, 5, 10, 15, 20];
-const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export function fireLearnFlowConfetti() {
   if (typeof window === "undefined") return;
@@ -70,6 +69,8 @@ export function fireLearnFlowConfetti() {
 
 interface DailyStudyGoalCardProps {
   completedCount: number;
+  weeklyActivity: { date: string; label: string; count: number; achieved: boolean }[];
+  totalCompletedToday: number;
   targetCount: number;
   streakDays: number;
   goalCompletedToday: boolean;
@@ -82,6 +83,8 @@ interface DailyStudyGoalCardProps {
 
 export function DailyStudyGoalCard({
   completedCount,
+  weeklyActivity,
+  totalCompletedToday,
   targetCount,
   streakDays,
   goalCompletedToday,
@@ -101,79 +104,6 @@ export function DailyStudyGoalCard({
   const progressRatio = Math.min(1, targetCount > 0 ? completedCount / targetCount : 0);
   const progressPercent = Math.round(progressRatio * 100);
   const remaining = Math.max(0, targetCount - completedCount);
-
-  const miniTrendData = useMemo(() => {
-    const todayRuntime = Math.max(10, completedCount * 4 + 2);
-    const todayBestPractices = Math.max(4, completedCount * 2);
-    const todayVerification = Math.max(3, completedCount * 2 - 1);
-    const todayOther = Math.max(18, completedCount * 7 + 4);
-
-    return [
-      {
-        day: "Mon",
-        dateLabel: "Oct 13, 2026",
-        runtime: 12,
-        bestPractices: 8,
-        verification: 5,
-        other: 27,
-        totalUses: 52,
-      },
-      {
-        day: "Tue",
-        dateLabel: "Oct 14, 2026",
-        runtime: 15,
-        bestPractices: 7,
-        verification: 6,
-        other: 31,
-        totalUses: 59,
-      },
-      {
-        day: "Wed",
-        dateLabel: "Oct 15, 2026",
-        runtime: 14,
-        bestPractices: 6,
-        verification: 5,
-        other: 33,
-        totalUses: 58,
-      },
-      {
-        day: "Thu",
-        dateLabel: "Oct 16, 2026",
-        runtime: 18,
-        bestPractices: 9,
-        verification: 7,
-        other: 34,
-        totalUses: 68,
-      },
-      {
-        day: "Fri",
-        dateLabel: "Oct 17, 2026",
-        runtime: 16,
-        bestPractices: 8,
-        verification: 6,
-        other: 29,
-        totalUses: 59,
-      },
-      {
-        day: "Sat",
-        dateLabel: "Oct 18, 2026",
-        runtime: 21,
-        bestPractices: 11,
-        verification: 8,
-        other: 38,
-        totalUses: 78,
-      },
-      {
-        day: "Today",
-        dateLabel: "Oct 19, 2026",
-        runtime: todayRuntime,
-        bestPractices: todayBestPractices,
-        verification: todayVerification,
-        other: todayOther,
-        totalUses: todayRuntime + todayBestPractices + todayVerification + todayOther,
-      },
-    ];
-  }, [completedCount]);
 
   return (
     <div
@@ -209,11 +139,7 @@ export function DailyStudyGoalCard({
                 onIncrementCompleted();
               }
             }}
-            title={
-              goalCompletedToday
-                ? "Click to celebrate your daily goal!"
-                : "Click to log +1 completed practice question"
-            }
+            title={goalCompletedToday ? "Click to celebrate your daily goal!" : "Open practice"}
             className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full grid place-items-center shrink-0 cursor-pointer select-none shadow-sm"
             style={{
               background: `conic-gradient(${
@@ -263,8 +189,8 @@ export function DailyStudyGoalCard({
 
             <p className="text-xs sm:text-sm leading-relaxed" style={{ color: "var(--mute)" }}>
               {goalCompletedToday
-                ? `You completed ${completedCount} of ${targetCount} target questions today and extended your ${streakDays}-day streak.`
-                : "Complete questions in AI Practice or log quick drills to keep your streak alive."}
+                ? `You have completed ${totalCompletedToday} distinct questions today. Your earned goal remains recorded if you reset the visible counter.`
+                : "Complete questions in AI Practice or attempt different questions to keep your streak alive."}
             </p>
           </div>
         </div>
@@ -275,7 +201,7 @@ export function DailyStudyGoalCard({
           style={{ backgroundColor: "var(--bg)", border: "1px solid var(--line)" }}
         >
           <div className="flex items-center justify-between text-xs font-semibold">
-            <span style={{ color: "var(--mute)" }}>This week’s momentum</span>
+            <span style={{ color: "var(--mute)" }}>Last seven days (SAST)</span>
             <button
               type="button"
               onClick={() => setIsEditingGoal((v) => !v)}
@@ -289,13 +215,16 @@ export function DailyStudyGoalCard({
 
           {/* 7-Day Streak Row */}
           <div className="grid grid-cols-7 gap-1.5 pt-0.5">
-            {WEEK_DAYS.map((day, idx) => {
-              const isPastCompleted = idx < 6;
-              const isToday = idx === 6;
-              const isDone = isPastCompleted || (isToday && goalCompletedToday);
+            {weeklyActivity.map((day, idx) => {
+              const isToday = idx === weeklyActivity.length - 1;
+              const isDone = day.achieved;
 
               return (
-                <div key={day} className="flex flex-col items-center gap-1">
+                <div
+                  key={day.date}
+                  title={`${day.date}: ${day.count} distinct questions`}
+                  className="flex flex-col items-center gap-1"
+                >
                   <motion.div
                     animate={isToday && goalCompletedToday ? { scale: [1, 1.18, 1] } : { scale: 1 }}
                     transition={SPRING_BOUNCY}
@@ -316,7 +245,7 @@ export function DailyStudyGoalCard({
                     className="text-[10px] font-bold"
                     style={{ color: isToday ? "var(--ink)" : "var(--mute)" }}
                   >
-                    {isToday ? "Today" : day}
+                    {isToday ? "Today" : day.label}
                   </span>
                 </div>
               );
@@ -424,7 +353,7 @@ export function DailyStudyGoalCard({
               ) : (
                 <>
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Log +1 done</span>
+                  <span>Open practice</span>
                 </>
               )}
             </SpringButton>
@@ -468,44 +397,23 @@ export function DailyStudyGoalCard({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 shrink-0" style={{ color: "var(--series-blue)" }} />
-            <span className="text-sm font-display font-extrabold">Weekly Skill Telemetry</span>
+            <span className="text-sm font-display font-extrabold">Distinct practice questions</span>
             <span aria-hidden="true" style={{ color: "var(--mute)" }}>
               ·
             </span>
             <span className="text-xs" style={{ color: "var(--mute)" }}>
-              Hover any day for detailed breakdown
+              Recorded attempts; no inferred study time
             </span>
-          </div>
-
-          {/* Series Legend (Clean unboxed inline metadata with colored dots) */}
-          <div
-            className="flex flex-wrap items-center gap-4 text-xs"
-            style={{ color: "var(--mute)" }}
-          >
-            {[
-              { label: "Runtime", color: "var(--series-blue)" },
-              { label: "STEM Best Practices", color: "var(--series-orange)" },
-              { label: "Verification", color: "var(--series-green)" },
-              { label: "Other", color: "var(--series-pink)" },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center gap-1.5">
-                <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: item.color }}
-                />
-                <span>{item.label}</span>
-              </div>
-            ))}
           </div>
         </div>
 
         <div className="h-[185px] w-full">
           {mounted ? (
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={miniTrendData} margin={{ top: 8, right: 14, left: -22, bottom: 0 }}>
+              <LineChart data={weeklyActivity} margin={{ top: 8, right: 14, left: -22, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="var(--chart-grid)" />
                 <XAxis
-                  dataKey="day"
+                  dataKey="label"
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: "var(--mute)", fontSize: 12, fontWeight: 600 }}
@@ -515,128 +423,14 @@ export function DailyStudyGoalCard({
                   tickLine={false}
                   tick={{ fill: "var(--mute)", fontSize: 11, fontWeight: 600 }}
                 />
-                <Tooltip
-                  cursor={{
-                    stroke: "var(--chart-cursor)",
-                    strokeWidth: 1.5,
-                    strokeDasharray: "4 4",
-                  }}
-                  content={({ active, payload }) => {
-                    if (!active || !payload || !payload.length) return null;
-                    const pt = payload[0].payload;
-                    return (
-                      <DirectInspiredTooltipCard
-                        headline={`${pt.totalUses} uses`}
-                        dateLabel={pt.dateLabel}
-                        rows={[
-                          {
-                            label: "Runtime",
-                            value: pt.runtime,
-                            color: "var(--series-blue)",
-                          },
-                          {
-                            label: "STEM Best Practices",
-                            value: pt.bestPractices,
-                            color: "var(--series-orange)",
-                          },
-                          {
-                            label: "Verification",
-                            value: pt.verification,
-                            color: "var(--series-green)",
-                          },
-                          {
-                            label: "Other",
-                            value: pt.other,
-                            color: "var(--series-pink)",
-                          },
-                        ]}
-                      />
-                    );
-                  }}
-                />
+                <Tooltip />
                 <Line
                   type="monotone"
-                  dataKey="runtime"
-                  name="Runtime"
+                  dataKey="count"
+                  name="Questions attempted"
                   stroke="var(--series-blue)"
                   strokeWidth={2.5}
-                  dot={{
-                    r: 3.5,
-                    fill: "var(--series-blue)",
-                    stroke: "var(--bg)",
-                    strokeWidth: 1.5,
-                  }}
-                  activeDot={{
-                    r: 5.5,
-                    fill: "var(--series-blue)",
-                    stroke: "var(--tooltip-bg)",
-                    strokeWidth: 2,
-                  }}
-                  isAnimationActive
-                  animationDuration={650}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="bestPractices"
-                  name="STEM Best Practices"
-                  stroke="var(--series-orange)"
-                  strokeWidth={2.5}
-                  dot={{
-                    r: 3.5,
-                    fill: "var(--series-orange)",
-                    stroke: "var(--bg)",
-                    strokeWidth: 1.5,
-                  }}
-                  activeDot={{
-                    r: 5.5,
-                    fill: "var(--series-orange)",
-                    stroke: "var(--tooltip-bg)",
-                    strokeWidth: 2,
-                  }}
-                  isAnimationActive
-                  animationDuration={720}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="verification"
-                  name="Verification"
-                  stroke="var(--series-green)"
-                  strokeWidth={2.5}
-                  dot={{
-                    r: 3.5,
-                    fill: "var(--series-green)",
-                    stroke: "var(--bg)",
-                    strokeWidth: 1.5,
-                  }}
-                  activeDot={{
-                    r: 5.5,
-                    fill: "var(--series-green)",
-                    stroke: "var(--tooltip-bg)",
-                    strokeWidth: 2,
-                  }}
-                  isAnimationActive
-                  animationDuration={780}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="other"
-                  name="Other"
-                  stroke="var(--series-pink)"
-                  strokeWidth={2.5}
-                  dot={{
-                    r: 3.5,
-                    fill: "var(--series-pink)",
-                    stroke: "var(--bg)",
-                    strokeWidth: 1.5,
-                  }}
-                  activeDot={{
-                    r: 5.5,
-                    fill: "var(--series-pink)",
-                    stroke: "var(--tooltip-bg)",
-                    strokeWidth: 2,
-                  }}
-                  isAnimationActive
-                  animationDuration={840}
+                  dot={{ r: 3.5 }}
                 />
               </LineChart>
             </ResponsiveContainer>

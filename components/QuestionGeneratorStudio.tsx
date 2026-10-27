@@ -22,6 +22,7 @@ import {
   Square,
 } from "lucide-react";
 import { TrackId, DifficultyLevel, PracticeQuestion, INITIAL_QUESTIONS } from "@/lib/study-data";
+import { assessAnswer } from "@/lib/answer-assessment";
 import {
   SpringButton,
   ShakeContainer,
@@ -76,7 +77,7 @@ interface QuestionGeneratorStudioProps {
   onNotify: (msg: string) => void;
   initialTopicFilter?: string;
   initialPracticeMode?: "questions" | "flashcards";
-  onQuestionCompleted?: () => void;
+  onQuestionCompleted?: (questionId: string) => void;
 }
 
 export function QuestionGeneratorStudio({
@@ -115,7 +116,7 @@ export function QuestionGeneratorStudio({
   // Grading & step-by-step tutor state
   const [score, setScore] = useState<number | null>(null);
   const [feedbackText, setFeedbackText] = useState<string>(
-    "Submit an answer or select an option and I will grade it instantly.",
+    "Select an answer for an answer-key check, or write a response for guided self-review.",
   );
   const [isStreamingFeedback, setIsStreamingFeedback] = useState<boolean>(false);
   const [stepsText, setStepsText] = useState<string>("");
@@ -207,7 +208,9 @@ export function QuestionGeneratorStudio({
     setScore(null);
     setSelectedOption(null);
     setUserAnswer("");
-    setFeedbackText("Submit an answer or select an option and I will grade it instantly.");
+    setFeedbackText(
+      "Select an answer for an answer-key check, or write a response for guided self-review.",
+    );
     setIsStreamingFeedback(false);
     setStepsText("");
     setIsStreamingSteps(false);
@@ -245,7 +248,14 @@ export function QuestionGeneratorStudio({
           .map((s) => s.trim())
           .filter(Boolean)
       : undefined;
-    const correctIdx = idxMatch?.[1] ? parseInt(idxMatch[1], 10) : 0;
+    const suggestedIdx = idxMatch?.[1] ? parseInt(idxMatch[1], 10) : undefined;
+    const correctIdx =
+      suggestedIdx !== undefined &&
+      parsedOptions &&
+      suggestedIdx >= 0 &&
+      suggestedIdx < parsedOptions.length
+        ? suggestedIdx
+        : undefined;
     const hintText = (
       hintMatch?.[1] ||
       `Break the ${topicUsed} problem into smaller invariants and verify with boundary cases.`
@@ -256,7 +266,7 @@ export function QuestionGeneratorStudio({
     ).trim();
 
     const keywords: string[] = [];
-    if (parsedOptions && parsedOptions[correctIdx]) {
+    if (parsedOptions && correctIdx !== undefined && parsedOptions[correctIdx]) {
       keywords.push(parsedOptions[correctIdx].toLowerCase());
     }
     const numbersInSteps = stepsContent.match(/\b\d+(?:\.\d+)?\b/g);
@@ -384,7 +394,9 @@ export function QuestionGeneratorStudio({
       setDisplayedQuestionText(newQuestionObj.prompt);
       setIsStreamingQuestion(false);
       setIsGeneratingFromAI(false);
-      setFeedbackText("Submit an answer or select an option and I will grade it instantly.");
+      setFeedbackText(
+        "Select an answer for an answer-key check, or write a response for guided self-review.",
+      );
 
       setQuestionsByTrack((prev) => {
         const updatedTrackList = [...prev[activeTrack], newQuestionObj];
@@ -436,36 +448,18 @@ export function QuestionGeneratorStudio({
     setIsStreamingFeedback(true);
     setFeedbackText("");
 
-    const lowerAns = combinedAnswer.toLowerCase();
-    const isExactOptionMatch =
-      selectedOption !== null &&
-      currentQuestion.correctOptionIndex !== undefined &&
-      selectedOption === currentQuestion.correctOptionIndex;
-
-    const hasOkKeyword = currentQuestion.okKeywords.some((k) => lowerAns.includes(k.toLowerCase()));
-    const hasPartialKeyword = currentQuestion.partialKeywords.some((k) =>
-      lowerAns.includes(k.toLowerCase()),
-    );
-
-    const computedScore =
-      isExactOptionMatch || hasOkKeyword ? 10 : hasPartialKeyword || trimmed.length > 25 ? 6 : 3;
-
-    setScore(computedScore);
-    onQuestionCompleted?.();
-    if (computedScore >= 8) {
-      playSoundCue("grade_success");
-    } else if (computedScore >= 5) {
-      playSoundCue("grade_partial");
-    } else {
-      setTutorShakeKey((k) => k + 1);
+    const assessment = assessAnswer(currentQuestion, selectedOption, trimmed);
+    setScore(assessment.score);
+    const fallbackFeedback = assessment.feedback;
+    // Participation and answer correctness are separate. Stable IDs prevent repeat credit.
+    onQuestionCompleted?.(currentQuestion.id);
+    if (assessment.score !== null) {
+      setFeedbackText(assessment.feedback);
+      setIsStreamingFeedback(false);
+      if (assessment.status === "correct") playSoundCue("grade_success");
+      else setTutorShakeKey((k) => k + 1);
+      return;
     }
-
-    const fallbackFeedback =
-      computedScore >= 9
-        ? `SCORE: 10/10\nSpot on! You nailed the core invariant for ${currentQuestion.topic}. Your reasoning directly establishes the correct result.`
-        : computedScore >= 6
-          ? `SCORE: ${computedScore}/10\nClose! You captured part of the setup, but check your final transformation step. Hint: ${currentQuestion.hint}`
-          : `SCORE: ${computedScore}/10\nNot quite there yet. Re-examine the relationship in the prompt and try another angle. Hint: ${currentQuestion.hint}`;
 
     try {
       const response = await fetch("/api/tutor", {
@@ -499,13 +493,10 @@ export function QuestionGeneratorStudio({
         }
         acc += decoder.decode(value, { stream: true });
 
-        const scoreMatch = acc.match(/SCORE:\s*(\d+)\s*\/\s*10/i);
-        if (scoreMatch) {
-          const parsedScore = Math.min(10, Math.max(1, parseInt(scoreMatch[1], 10)));
-          setScore(parsedScore);
-        }
         const cleanedFeedback = acc.replace(/^SCORE:\s*\d+\s*\/\s*10\s*/i, "");
-        setFeedbackText(cleanedFeedback || "Grading response...");
+        setFeedbackText(
+          "AI feedback · response remains ungraded. " + (cleanedFeedback || "Reviewing reasoning…"),
+        );
       }
 
       if (streamRunIdRef.current === runId) {
@@ -779,7 +770,11 @@ export function QuestionGeneratorStudio({
         <PomodoroFocusTimer
           activeTrackLabel={trackMeta.find((t) => t.id === activeTrack)?.label || "Study"}
           onNotify={onNotify}
-          onSprintCompleted={onQuestionCompleted}
+          onSprintCompleted={() =>
+            onNotify(
+              "Focus session complete. Question progress counts reviewed attempts separately.",
+            )
+          }
         />
 
         {practiceMode === "flashcards" ? (
@@ -790,7 +785,7 @@ export function QuestionGeneratorStudio({
             onChangeCustomTopic={setCustomTopic}
             onConsumeQuota={onConsumeQuota}
             onNotify={onNotify}
-            onCardMastered={onQuestionCompleted}
+            onCardMastered={(cardId) => onQuestionCompleted?.(`card:${cardId}`)}
           />
         ) : (
           <>
