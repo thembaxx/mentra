@@ -94,6 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning>
         {children}
         <Analytics />
+        <a href="/vision/index.html" style={{ display: 'block', width: 'fit-content', margin: '16px auto', padding: '12px 18px', border: '1px solid currentColor', borderRadius: 999, fontSize: 14, textDecoration: 'none' }}>Try on-device vision (preview)</a>
       </body>
     </html>
   );
