@@ -20,6 +20,15 @@ export function HeroThreeScene({
   const pointerRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const trackRef = useRef<"exam" | "code" | "lang">(activeTrack);
   const [webglReady, setWebglReady] = useState(true);
+  const [mediaTick, setMediaTick] = useState(0);
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 760px), (pointer: coarse)");
+    const onChange = () => setMediaTick((tick) => tick + 1);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+
 
   useEffect(() => {
     trackRef.current = activeTrack;
@@ -391,7 +400,7 @@ export function HeroThreeScene({
       envTexture.dispose();
       renderer.dispose();
     };
-  }, []);
+  }, [mediaTick]);
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
