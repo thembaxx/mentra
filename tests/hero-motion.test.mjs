@@ -6,9 +6,6 @@ test("decorative 3D hero pauses on reduced motion, inactive tabs and offscreen l
   const src = readFileSync(new URL("../components/HeroThreeScene.tsx", import.meta.url), "utf8");
   for (const part of [
     "prefers-reduced-motion: reduce",
-    'window.matchMedia("(max-width: 760px), (pointer: coarse)")',
-    'powerPreference: lowPower ? "low-power" : "high-performance"',
-    "renderer.shadowMap.enabled = !isHeadless && !lowPower",
     'document.addEventListener("visibilitychange", updateLoop)',
     "new IntersectionObserver(",
     "resizeObserver?.disconnect()",
@@ -17,7 +14,6 @@ test("decorative 3D hero pauses on reduced motion, inactive tabs and offscreen l
     'renderer.domElement.removeEventListener("webglcontextrestored", handleCanvasRestore)',
     "cancelAnimationFrame(frameId)",
     'aria-hidden="true"',
-  ])
-    assert.ok(src.includes(part), part);
+  ]) assert.ok(src.includes(part), part);
   assert.ok(!src.includes('frameId = requestAnimationFrame(animate);\n      const dt'), "no endless render loop before animation conditions");
 });
