@@ -6,6 +6,9 @@ test("decorative 3D hero pauses on reduced motion, inactive tabs and offscreen l
   const src = readFileSync(new URL("../components/HeroThreeScene.tsx", import.meta.url), "utf8");
   for (const part of [
     "prefers-reduced-motion: reduce",
+    'window.matchMedia("(max-width: 760px), (pointer: coarse)")',
+    'powerPreference: lowPower ? "low-power" : "high-performance"',
+    "renderer.shadowMap.enabled = !isHeadless && !lowPower",
     'document.addEventListener("visibilitychange", updateLoop)',
     "new IntersectionObserver(",
     "resizeObserver?.disconnect()",
