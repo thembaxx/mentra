@@ -271,7 +271,8 @@ export function HeroThreeScene({
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
-    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(handleResize);
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(handleResize);
     resizeObserver?.observe(container);
     window.addEventListener("resize", handleResize);
 
@@ -350,10 +351,16 @@ export function HeroThreeScene({
       clock.getDelta();
       frameId = requestAnimationFrame(animate);
     };
-    const observer = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(
-      ([entry]) => { inViewport = entry.isIntersecting; updateLoop(); },
-      { threshold: 0.01 },
-    );
+    const observer =
+      typeof IntersectionObserver === "undefined"
+        ? null
+        : new IntersectionObserver(
+            ([entry]) => {
+              inViewport = entry.isIntersecting;
+              updateLoop();
+            },
+            { threshold: 0.01 },
+          );
     observer?.observe(container);
     document.addEventListener("visibilitychange", updateLoop);
     reduceMotion.addEventListener("change", updateLoop);
