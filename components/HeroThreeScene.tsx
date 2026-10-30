@@ -20,6 +20,14 @@ export function HeroThreeScene({
   const pointerRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const trackRef = useRef<"exam" | "code" | "lang">(activeTrack);
   const [webglReady, setWebglReady] = useState(true);
+  const [mediaTick, setMediaTick] = useState(0);
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 760px), (pointer: coarse)");
+    const onChange = () => setMediaTick((tick) => tick + 1);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
 
   useEffect(() => {
     trackRef.current = activeTrack;
@@ -30,12 +38,14 @@ export function HeroThreeScene({
     const container = mountRef.current;
     if (!container) return;
 
+    // The hero is decorative: on touch/mobile, prefer battery life and a smaller GPU buffer.
+    const lowPower = window.matchMedia("(max-width: 760px), (pointer: coarse)").matches;
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
-        antialias: true,
+        antialias: !lowPower,
         alpha: true,
-        powerPreference: "high-performance",
+        powerPreference: lowPower ? "low-power" : "high-performance",
       });
     } catch {
       setWebglReady(false);
@@ -49,8 +59,9 @@ export function HeroThreeScene({
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
-    renderer.setPixelRatio(isHeadless ? 1 : Math.min(window.devicePixelRatio, 1.5));
-    renderer.shadowMap.enabled = !isHeadless;
+    const maxDpr = lowPower ? 1 : 1.5;
+    renderer.setPixelRatio(isHeadless ? 1 : Math.min(window.devicePixelRatio || 1, maxDpr));
+    renderer.shadowMap.enabled = !isHeadless && !lowPower;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     const width = container.clientWidth || 640;
@@ -75,7 +86,7 @@ export function HeroThreeScene({
 
     const keyLight = new THREE.DirectionalLight(0xfff6e0, 2.2);
     keyLight.position.set(5, 7, 6);
-    keyLight.castShadow = !isHeadless;
+    keyLight.castShadow = !isHeadless && !lowPower;
     keyLight.shadow.bias = -0.0005;
     keyLight.shadow.normalBias = 0.02;
     scene.add(keyLight);
@@ -268,7 +279,8 @@ export function HeroThreeScene({
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
-    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(handleResize);
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(handleResize);
     resizeObserver?.observe(container);
     window.addEventListener("resize", handleResize);
 
@@ -347,10 +359,16 @@ export function HeroThreeScene({
       clock.getDelta();
       frameId = requestAnimationFrame(animate);
     };
-    const observer = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(
-      ([entry]) => { inViewport = entry.isIntersecting; updateLoop(); },
-      { threshold: 0.01 },
-    );
+    const observer =
+      typeof IntersectionObserver === "undefined"
+        ? null
+        : new IntersectionObserver(
+            ([entry]) => {
+              inViewport = entry.isIntersecting;
+              updateLoop();
+            },
+            { threshold: 0.01 },
+          );
     observer?.observe(container);
     document.addEventListener("visibilitychange", updateLoop);
     reduceMotion.addEventListener("change", updateLoop);
@@ -381,7 +399,7 @@ export function HeroThreeScene({
       envTexture.dispose();
       renderer.dispose();
     };
-  }, []);
+  }, [mediaTick]);
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
