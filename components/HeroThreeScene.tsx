@@ -51,7 +51,9 @@ export function HeroThreeScene({
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
-    renderer.setPixelRatio(isHeadless ? 1 : Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.5));
+    renderer.setPixelRatio(
+      isHeadless ? 1 : Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.5),
+    );
     renderer.shadowMap.enabled = !isHeadless && !lowPower;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
