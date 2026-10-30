@@ -30,12 +30,14 @@ export function HeroThreeScene({
     const container = mountRef.current;
     if (!container) return;
 
+    // The hero is decorative: on touch/mobile, prefer battery life and a smaller GPU buffer.
+    const lowPower = window.matchMedia("(max-width: 760px), (pointer: coarse)").matches;
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
-        antialias: true,
+        antialias: !lowPower,
         alpha: true,
-        powerPreference: "high-performance",
+        powerPreference: lowPower ? "low-power" : "high-performance",
       });
     } catch {
       setWebglReady(false);
@@ -49,8 +51,8 @@ export function HeroThreeScene({
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
-    renderer.setPixelRatio(isHeadless ? 1 : Math.min(window.devicePixelRatio, 1.5));
-    renderer.shadowMap.enabled = !isHeadless;
+    renderer.setPixelRatio(isHeadless ? 1 : Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.5));
+    renderer.shadowMap.enabled = !isHeadless && !lowPower;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     const width = container.clientWidth || 640;
@@ -75,7 +77,7 @@ export function HeroThreeScene({
 
     const keyLight = new THREE.DirectionalLight(0xfff6e0, 2.2);
     keyLight.position.set(5, 7, 6);
-    keyLight.castShadow = !isHeadless;
+    keyLight.castShadow = !isHeadless && !lowPower;
     keyLight.shadow.bias = -0.0005;
     keyLight.shadow.normalBias = 0.02;
     scene.add(keyLight);
