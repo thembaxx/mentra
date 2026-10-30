@@ -29,7 +29,6 @@ export function HeroThreeScene({
     return () => query.removeEventListener("change", onChange);
   }, []);
 
-
   useEffect(() => {
     trackRef.current = activeTrack;
     impulseRef.current = Math.min(impulseRef.current + 0.85, 2.2);
