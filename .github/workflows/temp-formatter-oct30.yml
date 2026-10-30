@@ -1,0 +1,20 @@
+name: Temporary formatter diff inspection
+on:
+  push:
+    branches:
+      - perf/mobile-study-hero-oct30
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Show proposed Oxfmt diff without modifying repository
+        run: |
+          npx oxfmt --write components/HeroThreeScene.tsx tests/hero-motion.test.mjs
+          git diff -- components/HeroThreeScene.tsx tests/hero-motion.test.mjs
