@@ -104,7 +104,7 @@ export function GuidedFigure({ mode, children }: { mode: GuidedFigureMode; child
                         type="button"
                         className={choiceClass}
                         aria-pressed={transfer === index}
-                        disabled={transfer !== null}
+                        disabled={transfer === lesson.transferCorrect}
                         onClick={() => setTransfer(index)}
                       >
                         {choice}
