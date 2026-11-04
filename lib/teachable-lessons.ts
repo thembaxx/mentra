@@ -25,7 +25,7 @@ export const FIGURE_LESSONS = {
     question: "As an angle grows from 0° to 90°, what happens to sin θ?",
     choices: ["It increases to 1", "It decreases to −1"],
     correct: 0,
-    instruction: "Move the angle slider from 0° toward 90° and compare the circle with the graph.",
+    instruction: "Move the angle slider from 0° toward 90° and watch the sin θ readout and the circle’s vertical coordinate.",
     explanation:
       "Sine is the vertical coordinate on the unit circle, rising from 0 to 1 in the first quadrant.",
     transfer: "At 90°, what is cos θ?",
@@ -81,7 +81,7 @@ export const FIGURE_LESSONS = {
     correct: 0,
     instruction: "Keep mass fixed and change the net force; read the acceleration.",
     explanation: "Newton's second law gives acceleration = net force / mass.",
-    transfer: "With net force fixed, increasing mass does what to acceleration?",
+    transfer: "With a fixed positive net force, increasing mass does what to acceleration?",
     transferChoices: ["Decreases it", "Increases it"],
     transferCorrect: 0,
   },
