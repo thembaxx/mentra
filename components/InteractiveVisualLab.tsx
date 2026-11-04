@@ -25,6 +25,7 @@ import {
   MoleculeModel,
 } from "./ExpandedVisualModels";
 import { MathText } from "./MathRenderer";
+import { GuidedFigure } from "./GuidedFigure";
 
 export type VisualizationMode = QuestionVisualization["type"];
 
@@ -1074,35 +1075,37 @@ export function InteractiveVisualLab({
           </button>
         ))}
       </div>
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={mode}
-          initial={reduceMotion ? false : { opacity: 0, y: 7 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={reduceMotion ? undefined : { opacity: 0, y: -5 }}
-          transition={{ duration: 0.2 }}
-        >
-          {mode === "quadratic" ? (
-            <QuadraticModel data={exact?.type === "quadratic" ? exact : null} />
-          ) : mode === "trigonometry" ? (
-            <TrigModel data={exact?.type === "trigonometry" ? exact : null} />
-          ) : mode === "atom" ? (
-            <AtomModel data={exact?.type === "atom" ? exact : null} />
-          ) : mode === "linear" ? (
-            <LinearModel data={exact?.type === "linear" ? exact : null} />
-          ) : mode === "doppler" ? (
-            <DopplerModel data={exact?.type === "doppler" ? exact : null} />
-          ) : mode === "right_triangle" ? (
-            <RightTriangleModel data={exact?.type === "right_triangle" ? exact : null} />
-          ) : mode === "forces" ? (
-            <ForcesModel data={exact?.type === "forces" ? exact : null} />
-          ) : mode === "binomial" ? (
-            <BinomialModel data={exact?.type === "binomial" ? exact : null} />
-          ) : (
-            <MoleculeModel data={exact?.type === "molecule" ? exact : null} />
-          )}
-        </motion.div>
-      </AnimatePresence>
+      <GuidedFigure key={mode} mode={mode}>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={mode}
+            initial={reduceMotion ? false : { opacity: 0, y: 7 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduceMotion ? undefined : { opacity: 0, y: -5 }}
+            transition={{ duration: 0.2 }}
+          >
+            {mode === "quadratic" ? (
+              <QuadraticModel data={exact?.type === "quadratic" ? exact : null} />
+            ) : mode === "trigonometry" ? (
+              <TrigModel data={exact?.type === "trigonometry" ? exact : null} />
+            ) : mode === "atom" ? (
+              <AtomModel data={exact?.type === "atom" ? exact : null} />
+            ) : mode === "linear" ? (
+              <LinearModel data={exact?.type === "linear" ? exact : null} />
+            ) : mode === "doppler" ? (
+              <DopplerModel data={exact?.type === "doppler" ? exact : null} />
+            ) : mode === "right_triangle" ? (
+              <RightTriangleModel data={exact?.type === "right_triangle" ? exact : null} />
+            ) : mode === "forces" ? (
+              <ForcesModel data={exact?.type === "forces" ? exact : null} />
+            ) : mode === "binomial" ? (
+              <BinomialModel data={exact?.type === "binomial" ? exact : null} />
+            ) : (
+              <MoleculeModel data={exact?.type === "molecule" ? exact : null} />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </GuidedFigure>
       <p
         className="border-t pt-3 text-[11px] leading-relaxed visual-lab-muted"
         style={{ borderColor: "var(--line)" }}
