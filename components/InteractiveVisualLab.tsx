@@ -25,6 +25,7 @@ import {
   MoleculeModel,
 } from "./ExpandedVisualModels";
 import { MathText } from "./MathRenderer";
+import { GuidedFigure } from "./GuidedFigure";
 
 export type VisualizationMode = QuestionVisualization["type"];
 
@@ -1074,6 +1075,7 @@ export function InteractiveVisualLab({
           </button>
         ))}
       </div>
+      <GuidedFigure key={mode} mode={mode}>
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={mode}
@@ -1103,6 +1105,7 @@ export function InteractiveVisualLab({
           )}
         </motion.div>
       </AnimatePresence>
+      </GuidedFigure>
       <p
         className="border-t pt-3 text-[11px] leading-relaxed visual-lab-muted"
         style={{ borderColor: "var(--line)" }}
