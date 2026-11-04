@@ -143,7 +143,7 @@ export function PWAInstallButton({
                   <div>
                     <h3 className="font-display font-extrabold text-xl">Install {brandName}</h3>
                     <p className="text-xs" style={{ color: "var(--mute)" }}>
-                      Full-screen standalone PWA · Offline ready
+                      Standalone app window · Offline-ready features
                     </p>
                   </div>
                 </div>

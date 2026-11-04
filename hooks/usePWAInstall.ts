@@ -31,6 +31,7 @@ export function usePWAInstall() {
     const checkStandalone = () => {
       const standalone =
         mediaStandalone.matches ||
+        window.matchMedia("(display-mode: fullscreen)").matches ||
         (window.navigator as unknown as { standalone?: boolean }).standalone === true;
       setIsInstalled(standalone);
     };
