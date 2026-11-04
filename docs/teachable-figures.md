@@ -13,4 +13,5 @@ The existing interactive visual lab stays available without a learning gate. Sel
 Upstream method: https://github.com/ywEdAi/teachable-figures (predict / try / explain). The code here is an original React integration, not a vendored copy of the upstream skill.
 
 ## Validation
+
 Run \`npm run test:visualizations\`, \`npm run typecheck\`, \`npm run lint\`, \`npm run format:check\`, and \`npm run build\`. Manually check guided steps and ordinary mode on 320px, 390px and desktop, with keyboard and reduced motion.

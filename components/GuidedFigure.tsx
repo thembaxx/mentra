@@ -4,13 +4,7 @@ import { useState, type ReactNode } from "react";
 import { RotateCcw } from "lucide-react";
 import { FIGURE_LESSONS, type GuidedFigureMode } from "@/lib/teachable-lessons";
 
-export function GuidedFigure({
-  mode,
-  children,
-}: {
-  mode: GuidedFigureMode;
-  children: ReactNode;
-}) {
+export function GuidedFigure({ mode, children }: { mode: GuidedFigureMode; children: ReactNode }) {
   const [guided, setGuided] = useState(false);
   const [prediction, setPrediction] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
@@ -40,12 +34,20 @@ export function GuidedFigure({
           {guided ? "Exit guide" : "Start guide"}
         </button>
       </div>
-      {!guided ? children : (
+      {!guided ? (
+        children
+      ) : (
         <div className="space-y-4">
           <section aria-label="Predict" className="visual-lab-insight space-y-3 rounded-xl p-4">
-            <p className="text-xs font-bold uppercase tracking-wide visual-lab-muted">1 · Predict</p>
+            <p className="text-xs font-bold uppercase tracking-wide visual-lab-muted">
+              1 · Predict
+            </p>
             <h4 className="text-base font-bold">{lesson.question}</h4>
-            <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Choose your prediction">
+            <div
+              className="grid gap-2 sm:grid-cols-2"
+              role="group"
+              aria-label="Choose your prediction"
+            >
               {lesson.choices.map((choice, index) => (
                 <button
                   type="button"
@@ -63,7 +65,9 @@ export function GuidedFigure({
           {prediction !== null && (
             <>
               <section aria-label="Try" className="space-y-3">
-                <p className="text-xs font-bold uppercase tracking-wide visual-lab-muted">2 · Try</p>
+                <p className="text-xs font-bold uppercase tracking-wide visual-lab-muted">
+                  2 · Try
+                </p>
                 <p className="text-sm visual-lab-muted">{lesson.instruction}</p>
                 {children}
                 {!revealed && (
@@ -77,14 +81,23 @@ export function GuidedFigure({
                 )}
               </section>
               {revealed && (
-                <section aria-label="Explain" className="visual-lab-insight space-y-3 rounded-xl p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide visual-lab-muted">3 · Explain</p>
+                <section
+                  aria-label="Explain"
+                  className="visual-lab-insight space-y-3 rounded-xl p-4"
+                >
+                  <p className="text-xs font-bold uppercase tracking-wide visual-lab-muted">
+                    3 · Explain
+                  </p>
                   <p role="status" className="text-sm font-bold">
                     {prediction === lesson.correct ? "Prediction matched." : "Prediction differed."}
                   </p>
                   <p className="text-sm">{lesson.explanation}</p>
                   <h4 className="text-sm font-bold">{lesson.transfer}</h4>
-                  <div role="group" aria-label="Apply what you learned" className="grid gap-2 sm:grid-cols-2">
+                  <div
+                    role="group"
+                    aria-label="Apply what you learned"
+                    className="grid gap-2 sm:grid-cols-2"
+                  >
                     {lesson.transferChoices.map((choice, index) => (
                       <button
                         key={choice}

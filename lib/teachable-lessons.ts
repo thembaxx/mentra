@@ -15,7 +15,8 @@ export const FIGURE_LESSONS = {
     choices: ["Up", "Down"],
     correct: 0,
     instruction: "Move the vertical-shift slider. Watch the turning point and equation.",
-    explanation: "In vertex form, increasing k shifts the whole parabola upward; its shape does not change.",
+    explanation:
+      "In vertex form, increasing k shifts the whole parabola upward; its shape does not change.",
     transfer: "What happens if the coefficient a becomes negative?",
     transferChoices: ["The parabola opens down", "The parabola becomes a line"],
     transferCorrect: 0,
@@ -25,7 +26,8 @@ export const FIGURE_LESSONS = {
     choices: ["It increases to 1", "It decreases to −1"],
     correct: 0,
     instruction: "Move the angle slider from 0° toward 90° and compare the circle with the graph.",
-    explanation: "Sine is the vertical coordinate on the unit circle, rising from 0 to 1 in the first quadrant.",
+    explanation:
+      "Sine is the vertical coordinate on the unit circle, rising from 0 to 1 in the first quadrant.",
     transfer: "At 90°, what is cos θ?",
     transferChoices: ["0", "1"],
     transferCorrect: 0,
@@ -45,7 +47,8 @@ export const FIGURE_LESSONS = {
     choices: ["The line moves up", "The line becomes steeper"],
     correct: 0,
     instruction: "Change the intercept while keeping the slope fixed.",
-    explanation: "The intercept controls the line's vertical position; slope controls its rate of change.",
+    explanation:
+      "The intercept controls the line's vertical position; slope controls its rate of change.",
     transfer: "If the slope doubles, what changes?",
     transferChoices: ["Its steepness", "Only its intercept"],
     transferCorrect: 0,
@@ -55,7 +58,8 @@ export const FIGURE_LESSONS = {
     choices: ["It becomes higher", "It becomes lower"],
     correct: 0,
     instruction: "Select 'Toward listener', then adjust source speed and compare frequencies.",
-    explanation: "Approaching wavefronts arrive more frequently, making the observed frequency higher.",
+    explanation:
+      "Approaching wavefronts arrive more frequently, making the observed frequency higher.",
     transfer: "If the source moves away, does observed frequency rise or fall?",
     transferChoices: ["Fall", "Rise"],
     transferCorrect: 0,
@@ -65,7 +69,8 @@ export const FIGURE_LESSONS = {
     choices: ["It gets longer", "It stays constant"],
     correct: 0,
     instruction: "Increase both leg lengths and read the resulting hypotenuse.",
-    explanation: "The Pythagorean relation c² = a² + b² makes c increase when either positive leg increases.",
+    explanation:
+      "The Pythagorean relation c² = a² + b² makes c increase when either positive leg increases.",
     transfer: "If both legs double, how does the hypotenuse change?",
     transferChoices: ["It doubles", "It quadruples"],
     transferCorrect: 0,
@@ -95,7 +100,8 @@ export const FIGURE_LESSONS = {
     choices: ["Carbon dioxide", "Water"],
     correct: 0,
     instruction: "Switch between water and carbon dioxide. Inspect the angle and central atom.",
-    explanation: "CO₂ is linear (180°); water is bent (about 104.5°) because of electron-pair geometry.",
+    explanation:
+      "CO₂ is linear (180°); water is bent (about 104.5°) because of electron-pair geometry.",
     transfer: "Does rotating the drawing change the molecule's chemical formula?",
     transferChoices: ["No", "Yes"],
     transferCorrect: 0,
