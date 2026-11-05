@@ -314,7 +314,7 @@ export default function LearnFlowApp() {
       <div className="max-w-[1120px] mx-auto px-4 sm:px-6">
         {/* Top Navigation Header with Global Search Bar */}
         <header
-          className="flex items-center justify-between gap-3 sm:gap-5 py-4 border-b"
+          className="flex flex-wrap items-center justify-between gap-x-2 gap-y-3 sm:gap-5 py-4 border-b"
           style={{ borderColor: "var(--line)" }}
         >
           {/* Zone 1: Brand Wordmark + Tactile Squircle Logo */}
@@ -324,7 +324,7 @@ export default function LearnFlowApp() {
             whileTap={{ scale: 0.96 }}
             transition={SPRING_SNAPPY}
             onClick={() => navigateView("home")}
-            className="flex items-center gap-2.5 sm:gap-3 font-display font-extrabold text-xl sm:text-[26px] tracking-tight whitespace-nowrap shrink-0 cursor-pointer"
+            className="flex min-w-0 items-center gap-2 sm:gap-3 font-display font-extrabold text-lg sm:text-[26px] tracking-tight whitespace-nowrap shrink-0 cursor-pointer"
           >
             <BrandSquircleLogo variant={brandVariant} size="md" />
             <span>{currentBrand.name}</span>
@@ -369,7 +369,7 @@ export default function LearnFlowApp() {
           </nav>
 
           {/* Zone 3: Search Icon Trigger, Plans & Settings Actions */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
             <GlobalSearchBar
               onSelectTopicPractice={(track, topic, mode) => {
                 navigateToPractice(track, topic, mode);
@@ -407,7 +407,7 @@ export default function LearnFlowApp() {
               aria-label="Open Pro Plans & Membership"
             >
               <Crown className="w-3.5 h-3.5 shrink-0" />
-              <span>{isPro ? "Pro Active" : "Plans"}</span>
+              <span className="hidden sm:inline">{isPro ? "Pro Active" : "Plans"}</span>
             </motion.button>
 
             <motion.button
@@ -507,7 +507,9 @@ export default function LearnFlowApp() {
                     transition={SPRING_BOUNCY}
                     className="relative z-10 font-display font-extrabold select-none pointer-events-none my-4"
                     style={{
-                      fontSize: "clamp(64px, 16vw, 195px)",
+                      fontSize: "clamp(38px, 14vw, 195px)",
+                      maxWidth: "100%",
+                      overflowWrap: "anywhere",
                       color: "#FFFCF5",
                       letterSpacing: "-0.06em",
                       lineHeight: 0.86,
