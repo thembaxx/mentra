@@ -30,21 +30,16 @@ try {
       await page.evaluate(async () => {
         await document.fonts.ready;
       });
-      await page.waitForFunction(
-        () => {
-          const section = document.querySelector("main > section");
-          const heading = document.querySelector("main h1");
-          return Boolean(
-            section &&
-              heading &&
-              [section, heading].every(
-                (element) => Number.parseFloat(getComputedStyle(element).opacity) >= 0.99,
-              ),
-          );
-        },
-        undefined,
-        { timeout: 15000 },
-      );
+      await page.waitForFunction(() => {
+        const section = document.querySelector("main > section");
+        const heading = document.querySelector("main h1");
+        return (
+          section &&
+          heading &&
+          getComputedStyle(section).opacity === "1" &&
+          getComputedStyle(heading).opacity === "1"
+        );
+      });
 
       const result = await page.evaluate(() => {
         const viewport = document.documentElement.clientWidth;
