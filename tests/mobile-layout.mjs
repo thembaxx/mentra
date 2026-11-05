@@ -24,6 +24,28 @@ try {
       await page.locator('nav[aria-label="Bottom Dock Navigation"]').waitFor();
       await page.locator(".grid.grid-cols-7").first().waitFor();
 
+      // Motion springs are JavaScript-driven: screenshot animations: "disabled"
+      // does not guarantee that the landing view has reached full opacity.
+      // Wait for the visible final state so captured evidence is reproducible.
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+      });
+      await page.waitForFunction(
+        () => {
+          const section = document.querySelector("main > section");
+          const heading = document.querySelector("main h1");
+          return Boolean(
+            section &&
+              heading &&
+              [section, heading].every(
+                (element) => Number.parseFloat(getComputedStyle(element).opacity) >= 0.99,
+              ),
+          );
+        },
+        undefined,
+        { timeout: 15000 },
+      );
+
       const result = await page.evaluate(() => {
         const viewport = document.documentElement.clientWidth;
         const bound = (selector) => {
