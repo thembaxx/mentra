@@ -8,7 +8,10 @@
  */
 export function HeroFallbackArt() {
   return (
-    <div className="absolute inset-0 z-[1] grid place-items-center overflow-hidden pointer-events-none" aria-hidden="true">
+    <div
+      className="absolute inset-0 z-[1] grid place-items-center overflow-hidden pointer-events-none"
+      aria-hidden="true"
+    >
       <svg
         viewBox="0 0 640 420"
         preserveAspectRatio="xMidYMid meet"
@@ -66,9 +69,31 @@ export function HeroFallbackArt() {
             <circle cx="-6" cy="-7" r="6" fill="#F6F9E8" opacity=".75" />
           </g>
           <g transform="translate(428 307)">
-            <path d="M-100 18 C-72 -77 -26 -74 -3 10 S69 82 101 -10" fill="none" stroke="#69864E" strokeWidth="27" strokeLinecap="round" />
-            <path d="M-100 14 C-72 -77 -26 -74 -3 10 S69 78 101 -14" fill="none" stroke="#BCD4A1" strokeWidth="6" strokeLinecap="round" opacity=".9" />
-            <ellipse cx="0" cy="0" rx="54" ry="22" fill="none" stroke="url(#mentra-cream)" strokeWidth="13" transform="rotate(-24)" />
+            <path
+              d="M-100 18 C-72 -77 -26 -74 -3 10 S69 82 101 -10"
+              fill="none"
+              stroke="#69864E"
+              strokeWidth="27"
+              strokeLinecap="round"
+            />
+            <path
+              d="M-100 14 C-72 -77 -26 -74 -3 10 S69 78 101 -14"
+              fill="none"
+              stroke="#BCD4A1"
+              strokeWidth="6"
+              strokeLinecap="round"
+              opacity=".9"
+            />
+            <ellipse
+              cx="0"
+              cy="0"
+              rx="54"
+              ry="22"
+              fill="none"
+              stroke="url(#mentra-cream)"
+              strokeWidth="13"
+              transform="rotate(-24)"
+            />
           </g>
           <g transform="translate(173 311) rotate(-12)">
             <rect x="-60" y="4" width="124" height="23" rx="7" fill="#98AE78" />
