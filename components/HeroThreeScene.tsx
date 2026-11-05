@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { HeroFallbackArt } from "./HeroFallbackArt";
 
 const _tempVec = new THREE.Vector3();
 const _dummyObj = new THREE.Object3D();
@@ -417,7 +418,7 @@ export function HeroThreeScene({
   };
 
   if (!webglReady) {
-    return null;
+    return <HeroFallbackArt />;
   }
 
   return (
