@@ -1,6 +1,11 @@
 name: WebGL fallback browser QA
 on:
   pull_request:
+    paths:
+      - "components/HeroFallbackArt.tsx"
+      - "components/HeroThreeScene.tsx"
+      - "scripts/verify-hero-fallback.mjs"
+      - ".github/workflows/hero-fallback-browser.yml"
   workflow_dispatch:
 permissions:
   contents: read
