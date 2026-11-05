@@ -76,7 +76,6 @@ try {
           `Offscreen at ${width}px: ${element.selector} (${element.left}..${element.right})`,
         );
       }
-
     } finally {
       await page.close();
     }
