@@ -125,7 +125,7 @@ export function DailyStudyGoalCard({
 
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
         {/* Left: Visual Conic Progress Ring + Goal Status (5 cols) */}
-        <div className="lg:col-span-5 flex items-center gap-5">
+        <div className="lg:col-span-5 min-w-0 flex flex-col items-start gap-4 min-[380px]:flex-row min-[380px]:items-center sm:gap-5">
           {/* Animated Conic Progress Ring */}
           <motion.div
             key={`${completedCount}-${targetCount}-${goalCompletedToday}`}
@@ -197,10 +197,10 @@ export function DailyStudyGoalCard({
 
         {/* Middle: 7-Day Weekly Streak Visualizer & Target Customization (4 cols) */}
         <div
-          className="lg:col-span-4 rounded-2xl p-4 space-y-3"
+          className="lg:col-span-4 min-w-0 rounded-2xl p-3 sm:p-4 space-y-3"
           style={{ backgroundColor: "var(--bg)", border: "1px solid var(--line)" }}
         >
-          <div className="flex items-center justify-between text-xs font-semibold">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold">
             <span style={{ color: "var(--mute)" }}>Last seven days (SAST)</span>
             <button
               type="button"
@@ -214,7 +214,7 @@ export function DailyStudyGoalCard({
           </div>
 
           {/* 7-Day Streak Row */}
-          <div className="grid grid-cols-7 gap-1.5 pt-0.5">
+          <div className="grid min-w-0 grid-cols-7 gap-1 sm:gap-1.5 pt-0.5">
             {weeklyActivity.map((day, idx) => {
               const isToday = idx === weeklyActivity.length - 1;
               const isDone = day.achieved;
@@ -228,7 +228,7 @@ export function DailyStudyGoalCard({
                   <motion.div
                     animate={isToday && goalCompletedToday ? { scale: [1, 1.18, 1] } : { scale: 1 }}
                     transition={SPRING_BOUNCY}
-                    className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold"
+                    className="w-full min-w-0 max-w-8 aspect-square rounded-lg sm:rounded-xl flex items-center justify-center text-xs font-extrabold"
                     style={{
                       backgroundColor: isDone
                         ? isToday
