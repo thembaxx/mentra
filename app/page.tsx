@@ -495,7 +495,9 @@ export default function LearnFlowApp() {
                       style={{ backgroundColor: "rgba(255, 252, 245, 0.88)", color: "#2D2D2B" }}
                     >
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span className="min-w-0 break-words">Adaptive AI Studio · {currentBrand.tagline}</span>
+                      <span className="min-w-0 break-words">
+                        Adaptive AI Studio · {currentBrand.tagline}
+                      </span>
                     </span>
                   </div>
 
