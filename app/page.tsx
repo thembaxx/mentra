@@ -311,10 +311,10 @@ export default function LearnFlowApp() {
       {/* Offline Connectivity Banner */}
       <OfflineIndicator />
 
-      <div className="max-w-[1120px] mx-auto px-4 sm:px-6">
+      <div className="mx-auto w-full min-w-0 max-w-[1120px] px-3 min-[360px]:px-4 sm:px-6">
         {/* Top Navigation Header with Global Search Bar */}
         <header
-          className="flex flex-wrap items-center justify-between gap-x-2 gap-y-3 sm:gap-5 py-4 border-b"
+          className="flex min-w-0 flex-wrap items-center justify-between gap-x-2 gap-y-3 border-b py-4 sm:gap-5"
           style={{ borderColor: "var(--line)" }}
         >
           {/* Zone 1: Brand Wordmark + Tactile Squircle Logo */}
@@ -448,7 +448,7 @@ export default function LearnFlowApp() {
               >
                 {/* Hero Card with Background Geometric Shapes + Live Interactive Three.js 3D Scene */}
                 <div
-                  className="relative overflow-hidden rounded-[32px] min-h-[430px] sm:min-h-[460px] p-6 sm:p-8 flex flex-col justify-between"
+                  className="relative flex min-w-0 flex-col justify-between overflow-hidden rounded-[28px] p-4 min-h-[430px] min-[360px]:p-6 sm:min-h-[460px] sm:rounded-[32px] sm:p-8"
                   style={{ backgroundColor: "var(--bl)", color: "#2D2D2B" }}
                 >
                   {/* CSS Geometric Backdrop Layers matching attached HTML */}
@@ -491,11 +491,11 @@ export default function LearnFlowApp() {
                   {/* Clean Hero Top Status Badge (Settings, Audio, Theme & PWA moved to Settings Modal) */}
                   <div className="relative z-10 flex items-center justify-between gap-2">
                     <span
-                      className="px-3.5 py-1.5 rounded-full text-xs font-extrabold inline-flex items-center gap-1.5"
+                      className="inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-extrabold sm:px-3.5"
                       style={{ backgroundColor: "rgba(255, 252, 245, 0.88)", color: "#2D2D2B" }}
                     >
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>Adaptive AI Studio · {currentBrand.tagline}</span>
+                      <span className="min-w-0 break-words">Adaptive AI Studio · {currentBrand.tagline}</span>
                     </span>
                   </div>
 
@@ -505,14 +505,14 @@ export default function LearnFlowApp() {
                     initial={{ scale: 0.96, opacity: 0, y: 8 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     transition={SPRING_BOUNCY}
-                    className="relative z-10 font-display font-extrabold select-none pointer-events-none my-4"
+                    className="relative z-10 my-4 min-w-0 py-1 font-display font-extrabold select-none pointer-events-none"
                     style={{
                       fontSize: "clamp(38px, 14vw, 195px)",
                       maxWidth: "100%",
                       overflowWrap: "anywhere",
                       color: "#FFFCF5",
                       letterSpacing: "-0.06em",
-                      lineHeight: 0.86,
+                      lineHeight: 0.98,
                     }}
                   >
                     {currentBrand.name}
@@ -635,9 +635,9 @@ export default function LearnFlowApp() {
                       backgroundColor: "var(--card)",
                       border: "1px solid var(--line)",
                     }}
-                    className="rounded-3xl p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer"
+                    className="flex min-w-0 flex-col items-start gap-4 rounded-3xl p-4 cursor-pointer sm:flex-row sm:items-center sm:justify-between sm:p-5"
                   >
-                    <div className="flex items-center gap-3.5">
+                    <div className="flex min-w-0 items-center gap-3.5">
                       <BrandSquircleLogo variant={brandVariant} size="md" />
                       <div>
                         <div className="font-bold text-base sm:text-lg">
@@ -649,7 +649,7 @@ export default function LearnFlowApp() {
                       </div>
                     </div>
 
-                    <div className="text-right shrink-0">
+                    <div className="shrink-0 text-left sm:text-right">
                       <div className="font-bold text-sm sm:text-base flex items-center justify-end gap-1.5 tabular-nums">
                         <Clock className="w-4 h-4" />
                         <span>Today 18:00</span>
@@ -898,7 +898,7 @@ export default function LearnFlowApp() {
       {/* Compact 4-Item Floating Bottom Navigation Dock with Safe-Area Inset */}
       <nav
         aria-label="Bottom Dock Navigation"
-        className="fixed left-1/2 -translate-x-1/2 z-40 flex items-center gap-0.5 sm:gap-1 p-1.5 rounded-full shadow-xl max-w-fit"
+        className="fixed left-1/2 z-40 flex w-[92vw] max-w-[360px] -translate-x-1/2 items-center justify-evenly gap-0.5 rounded-full p-1.5 shadow-xl sm:w-auto sm:gap-1"
         style={{
           bottom: "calc(14px + env(safe-area-inset-bottom, 0px))",
           backgroundColor: "var(--card)",
@@ -923,7 +923,7 @@ export default function LearnFlowApp() {
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.92 }}
               transition={SPRING_SNAPPY}
-              className="relative px-3.5 sm:px-4 py-1.5 rounded-full flex flex-col items-center gap-0.5 text-[11px] font-semibold cursor-pointer whitespace-nowrap"
+              className="relative flex min-w-0 flex-1 flex-col items-center gap-0.5 whitespace-nowrap rounded-full px-1.5 py-1.5 text-[10px] font-semibold cursor-pointer sm:flex-none sm:px-4 sm:text-[11px]"
               style={{
                 color: active ? "#2D2D2B" : "var(--mute)",
               }}
