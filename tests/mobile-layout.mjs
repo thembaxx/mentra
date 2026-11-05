@@ -58,6 +58,11 @@ try {
         };
       });
 
+      await page.screenshot({
+        path: `test-results/mobile-layout/mentra-${width}.png`,
+        animations: "disabled",
+      });
+
       console.log(JSON.stringify({ requestedWidth: width, ...result }, null, 2));
 
       assert.ok(
@@ -72,10 +77,6 @@ try {
         );
       }
 
-      await page.screenshot({
-        path: `test-results/mobile-layout/mentra-${width}.png`,
-        animations: "disabled",
-      });
     } finally {
       await page.close();
     }
