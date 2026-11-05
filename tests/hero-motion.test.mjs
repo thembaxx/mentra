@@ -28,7 +28,9 @@ test("WebGL fallback keeps brand artwork visible without allocating another rend
     new URL("../components/HeroFallbackArt.tsx", import.meta.url),
     "utf8",
   );
-  assert.ok(hero.includes("return <HeroFallbackArt />;"));
+  assert.ok(hero.includes("!webglReady && <HeroFallbackArt />"));
+  assert.ok(hero.includes("setWebglReady(true);"));
+  assert.ok(hero.includes("setWebglReady(false);"));
   for (const element of ["<svg", "viewBox=", "#FFB2DD", "#F7D66E", "#9AAB65"]) {
     assert.ok(fallback.includes(element), element);
   }
