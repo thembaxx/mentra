@@ -14,9 +14,13 @@ try {
   ]) {
     const context = await browser.newContext({ viewport: { width, height } });
     await context.addInitScript(() => {
+      window.__blockedWebGL = 0;
       const nativeGetContext = HTMLCanvasElement.prototype.getContext;
       HTMLCanvasElement.prototype.getContext = function (type, ...args) {
-        if (typeof type === "string" && /^(webgl|experimental-webgl)/i.test(type)) return null;
+        if (typeof type === "string" && /^(webgl|experimental-webgl)/i.test(type)) {
+          window.__blockedWebGL++;
+          return null;
+        }
         return nativeGetContext.call(this, type, ...args);
       };
     });
@@ -26,7 +30,10 @@ try {
     await artwork.waitFor({ state: "visible", timeout: 25000 });
     const box = await artwork.boundingBox();
     assert.ok(box && box.width > 120 && box.height > 80, name + " fallback must be visible");
-    assert.equal(await page.locator('.hero-intro canvas').count(), 0, "WebGL is forced off");
+    assert.ok(
+      (await page.evaluate(() => window.__blockedWebGL)) > 0,
+      name + " must actually exercise the unavailable-WebGL path",
+    );
     await artwork.screenshot({ path: output + "/" + name + ".png", animations: "disabled" });
     console.log("PASS", name, "fallback", Math.round(box.width) + "x" + Math.round(box.height));
     await context.close();
