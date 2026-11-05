@@ -21,3 +21,20 @@ test("decorative 3D hero pauses on reduced motion, inactive tabs and offscreen l
     "no endless render loop before animation conditions",
   );
 });
+
+test("WebGL fallback keeps brand artwork visible without allocating another renderer", () => {
+  const hero = readFileSync(new URL("../components/HeroThreeScene.tsx", import.meta.url), "utf8");
+  const fallback = readFileSync(
+    new URL("../components/HeroFallbackArt.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.ok(hero.includes("!webglReady && <HeroFallbackArt />"));
+  assert.ok(hero.includes("setWebglReady(true);"));
+  assert.ok(hero.includes("setWebglReady(false);"));
+  for (const element of ["<svg", "viewBox=", "#FFB2DD", "#F7D66E", "#9AAB65"]) {
+    assert.ok(fallback.includes(element), element);
+  }
+  assert.ok(!fallback.includes("WebGLRenderer"));
+  assert.ok(!fallback.includes("requestAnimationFrame"));
+  assert.ok(fallback.includes('aria-hidden="true"'));
+});

@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { HeroFallbackArt } from "./HeroFallbackArt";
 
 const _tempVec = new THREE.Vector3();
 const _dummyObj = new THREE.Object3D();
@@ -69,6 +70,7 @@ export function HeroThreeScene({
     renderer.setSize(width, height);
     container.innerHTML = "";
     container.appendChild(renderer.domElement);
+    setWebglReady(true);
 
     const scene = new THREE.Scene();
 
@@ -261,11 +263,13 @@ export function HeroThreeScene({
     const handleCanvasLoss = (e: Event) => {
       e.preventDefault();
       contextLost = true;
+      setWebglReady(false);
       cancelAnimationFrame(frameId);
       frameId = 0;
     };
     const handleCanvasRestore = () => {
       contextLost = false;
+      setWebglReady(true);
       updateLoop();
     };
     renderer.domElement.addEventListener("webglcontextlost", handleCanvasLoss);
@@ -416,19 +420,18 @@ export function HeroThreeScene({
     impulseRef.current = Math.min(impulseRef.current + 1.25, 2.5);
   };
 
-  if (!webglReady) {
-    return null;
-  }
-
   return (
-    <div
-      ref={mountRef}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      onClick={handleClickBounce}
-      title="Decorative 3D study sculpture. Move pointer to gently interact."
-      aria-hidden="true"
-      className="absolute inset-0 z-[1] cursor-grab active:cursor-grabbing"
-    />
+    <>
+      <div
+        ref={mountRef}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
+        onClick={handleClickBounce}
+        title="Decorative 3D study sculpture. Move pointer to gently interact."
+        aria-hidden="true"
+        className="absolute inset-0 z-[1] cursor-grab active:cursor-grabbing"
+      />
+      {!webglReady && <HeroFallbackArt />}
+    </>
   );
 }

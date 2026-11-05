@@ -1,0 +1,49 @@
+name: WebGL fallback browser QA
+on:
+  pull_request:
+    paths:
+      - "components/HeroFallbackArt.tsx"
+      - "components/HeroThreeScene.tsx"
+      - "scripts/verify-hero-fallback.mjs"
+      - ".github/workflows/hero-fallback-browser.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fallback:
+    name: Real Chromium fallback screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+    env:
+      CI: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
+      BROWSER_BASE_URL: http://127.0.0.1:3000
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - run: npm ci
+      - name: Install browser runner matching the container
+        run: npm install --no-save --package-lock=false playwright@1.64.1
+      - run: npm run build
+      - name: Verify real fallback rendering in mobile and desktop Chromium
+        run: |
+          npm run start -- --hostname 0.0.0.0 > /tmp/mentra-fallback.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 50); do
+            if curl -fsS http://127.0.0.1:3000/ > /dev/null; then break; fi
+            sleep 2
+          done
+          curl -fS http://127.0.0.1:3000/ > /dev/null
+          node scripts/verify-hero-fallback.mjs
+      - name: Preserve genuine fallback screenshots
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: mentra-fallback-browser-evidence
+          path: test-artifacts/mentra-hero/
+          if-no-files-found: ignore
+          retention-days: 7
