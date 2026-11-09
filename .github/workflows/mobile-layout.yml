@@ -42,7 +42,7 @@ jobs:
         run: node tests/mobile-layout.mjs
       - name: Preserve actual Chromium viewport screenshots
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mentra-compact-mobile-evidence
           path: test-results/mobile-layout/
